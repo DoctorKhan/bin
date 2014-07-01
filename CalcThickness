@@ -1,0 +1,190 @@
+#!/bin/bash
+
+######################################################
+### Created by khan Oct 2010                       ###
+######################################################
+
+##################### Help Text ######################
+# Usage: CalcThickness <InnerMeshRaw> <OuterMeshRaw>
+# <Grid Size> <# Surfs> <Steps 1-4> <5: Plot> <6: Recap>
+######################################################
+if (( $# < 1 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+echo Input arguments:
+
+# Defaults
+pInner=${1:-`latest White.[or][ba][jw]`} 	# Inner mesh raw file
+pInner="`fileparts 6 $pInner`"
+pOuter=${2:-`latest Pia.[or][ba][jw]`} 		# Outer raw
+pOuter="`fileparts 6 $pOuter`"
+
+#pdOutput=$sInner-$sOuter	# Output subdirectory name
+
+#if [[ $pdOutput == `fileparts 6 $(pwd)` ]]; then
+#	cd ..
+#fi
+
+iGridSize=${3:-350}		# Grid size
+nSurfaces=${4:-16}		# Total number of surfaces to be produced
+shift 4
+sCom=${iGridSize}s
+
+viSteps=${@:-1234}		# Steps 1-5
+
+# Go to data directory
+#cd "`fileparts 1 $pInner`"
+#echo "Main directory: `pwd`"
+
+
+# Initialization
+vGridDims="$iGridSize $iGridSize $iGridSize"
+
+pInnerSDF=${pInner%%.*}${iGridSize}.rawiv 		# Inner mesh signed distance function filename
+pOuterSDF=${pOuter%%.*}${iGridSize}.rawiv 		# Outer
+
+nLayers=$((nSurfaces - 1))
+
+# Create output directory
+#sInner=`fileparts 2 $pInner`	# Strip extension
+#sOuter=`fileparts 2 $pOuter`
+
+#mkdir -p "$pdOutput"
+#echo Output directory: `fileparts 7 $pdOutput`
+
+# Link both raw mesh files to subdir
+#cd $pdOutput
+#ln -f ../$pInner
+#ln -f ../$pOuter
+
+echo "Inner mesh: $pInner"
+echo "Outer mesh: $pOuter"
+echo "Number of layers: $nLayers"
+
+pLog=CalcThickness.log
+echo $0 $@ > "$pLog"
+
+for iStep in `echo $viSteps | grep -o '[[:digit:]]' | tr '\n' ' '`; do
+	echo
+	echo "Step #${iStep}"
+	
+	case $iStep in
+		1)	# Compute signed-distance func for outer
+			echo "Computing signed distance function of outer surface"
+			echo "FastSignDistance $pOuter $vGridDims $pOuterSDF"
+			FastSignDistance $pOuter $vGridDims $pOuterSDF
+			
+			# Extract info to be used for computing SDF of inner
+			volinfo $pOuterSDF ; echo
+			dims=`volinfo $pOuterSDF | grep Dimension | cut -d : -f 2 | tr x ' '`
+			bbox=`volinfo $pOuterSDF | grep Bounding  | tr -s '[a-zA-Z]:[,)(] ' ' '`
+			
+			# Computing signed distance function of inner surface
+			echo "Computing signed distance function of inner surface"
+			echo "FastSignDistance $pInner$dims $pInnerSDF$bbox"
+			FastSignDistance $pInner$dims $pInnerSDF$bbox
+			
+			# Makes White.rawiv and Pia.rawiv
+		;;
+		2)	# Interpolating surfaces...
+			echo "Interpolating intermediate surfaces..."
+			rm -f Inter$sCom[0-9]*.rawiv
+			
+			echo "volInterpolate $pInnerSDF $pOuterSDF Inter$sCom $nSurfaces"
+			volInterpolate $pInnerSDF $pOuterSDF Inter$sCom $nSurfaces
+			
+			#			if ((nLayers == 0)); then exit 0; fi
+			
+			#			until ((iLayer == nLayers)); do
+			#				pSDF=`latest Inter$sCom*.rawiv 2>/dev/null`
+			#				iLayer=`echo $pSDF | grep -o [0-9]*`
+			#				iLayer=${iLayer:-0}
+			#				sleep 5
+			#				Progress $iLayer $nLayers volInterp $pSDF
+			#			done
+			ln -fs $pInnerSDF "Inter${sCom}0.rawiv"
+			ln -fs $pOuterSDF "Inter${sCom}${nLayers}.rawiv"
+			
+		;;
+		3)	# Extract surfaces
+			echo Extract surfaces...
+			for ((iSurf=1; iSurf<nSurfaces; iSurf++)); do
+				rawiv2raw Inter$sCom$iSurf.rawiv
+			done
+		;;
+		4)	# Computing BSpline coefficients of data.
+			pTemp=`TempFile ToSplineCoeff`
+			nGuess=$((`ls -1t *Spline[0-9]*.rawiv 2>/dev/null | head -n 1 | grep -o [0-9]*` + 1))
+			nSurfaces=${nSurfaces:-$nGuess}
+			nLayers=$((nSurfaces-1))
+			
+			echo "Computing SDF BSpline Coefficients for $nSurfaces surfaces..."
+			
+			for ((iSurface=0; iSurface < nSurfaces; iSurface++)); do
+				BrainThickness transferToBSpline Inter$SCom$iSurface.rawiv InterBSplineCoeff$iSurface.rawiv >/dev/null
+				Progress $((iSurface+1)) $nSurfaces $pTemp 2>/dev/null
+			done
+		;;
+		
+		5)
+			# Computing trajectories.
+			echo "Computing trajectories..."
+			echo "BrainThickness trajectSpline $pInner InterBSplineCoeff $nSurfaces InterThick"
+			rm -f InterBSplineCoeff[0-9]*.pcd
+			
+			BrainThickness trajectSpline $pInner InterBSplineCoeff $nSurfaces InterThick &
+			
+			#			until ((iLayer == nLayers)); do
+			#				iLayer=`ls -1t *[0-9]*.pcd 2>/dev/null | head -n 1 | grep -o [0-9]*`
+			#				iLayer=${iLayer:-0}
+			#				Progress $((iLayer+1)) $nSurfaces BrainThickness
+			#			done
+		;;
+		
+		6)
+			# Creating thickness surface plot.
+			echo "Creating thickness surface plot."
+			echo "BrainThickness plot $pInner InterThick$nLayers.pcd InterThick.rawc"
+			BrainThickness plot $pInner InterThick${nLayers}.pcd InterThick.rawc
+		;;
+		
+		7)	# Recap
+			echo Recap
+			echo "Computing signed distance function of outer surface"
+			echo "FastSignDistance $pOuter $vGridDims $pOuterSDF"
+			echo FastSignDistance $pOuter $vGridDims $pOuterSDF
+			
+			volinfo $pOuterSDF ; echo
+			dims=`volinfo $pOuterSDF | grep Dimension | cut -d : -f 2 | tr x ' '`
+			bbox=`volinfo $pOuterSDF | grep Bounding  | tr -s '[a-zA-Z]:[,)(] ' ' '`
+			
+			echo "Computing signed distance function of inner surface"
+			echo "FastSignDistance $pInner$dims $pInnerSDF$bbox"
+			echo FastSignDistance $pInner$dims $pInnerSDF$bbox
+			
+			echo "Interpolating BSplines."
+			echo rm -f InterBSpline[0-9]*.rawiv
+			
+			echo "volInterpolate $pInnerSDF $pOuterSDF InterBSpline $nSurfaces"
+			echo volInterpolate $pInnerSDF $pOuterSDF InterBSpline $nSurfaces &
+			
+			echo "Transfering BSpline Coefficients..."
+			echo "ToSplineCoeff $nSurfaces"
+			echo ToSplineCoeff $nSurfaces
+			
+			echo "Computing trajectories..."
+			echo "BrainThickness trajectSpline $pInner InterBSplineCoeff $nLayers InterThick"
+			echo rm -f InterBSplineCoeff[0-9]*.pcd
+			
+			echo BrainThickness trajectSpline $pInner InterBSplineCoeff $nLayers InterThick
+			echo "Creating thickness surface plot."
+			echo "BrainThickness plot $pInner InterThick$nLayers.pcd InterThick.rawc"
+			echo BrainThickness plot $pInner InterThick${nLayers}.pcd InterThick.rawc
+		;;
+	esac
+done \
+| tee -a "$pLog"
+
+echo CalcThickness Complete.
+

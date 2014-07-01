@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 17 22:44:49 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SaveGeo
+#######################################################
+
+if [ $# == 0 ]; then
+	sWin=`ActiveWindowID`
+else
+	sWin="$@"
+fi
+
+sDir=$HOME/.xdotool/windows
+mkdir -p $sDir
+
+sGeo=`WinGeo`
+#echo Saving: $sGeo
+echo $sGeo > $sDir/`WindowID "$sWin"`

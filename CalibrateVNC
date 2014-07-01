@@ -1,0 +1,76 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Aug 11 19:10:49 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: CalibrateVNC
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+## Initialize
+pLast=$HOME/.vnc/last
+pN=`TempFile n`
+n=`cat $pN`
+n=$((${n:-0} % 50))
+
+if [[ $1 == dry ]]; then dry=true; shift; else dry=false; fi
+
+pCal=`create $HOME/.vnc/calibration`
+w=0; l=1; x=2; y=3
+for ii in {0..3}; do ((c[ii]=0)); done
+for ii in {0..3}; do ((r[ii]=0)); done
+d[w]=500; d[l]=500; d[x]=50; d[y]=50
+
+sWinID=${@:-`WindowID "TigerVNC:"`}
+sWinName=${sWinName:-"TigerVNC:"}
+
+function Calibrate()
+{
+	
+	sDesk=$((d[w]-c[w]))x$((d[l]-c[l]))
+	sGeo=2000x2000+$((d[y]-c[y]))x$((d[y]-c[y]))
+	
+	#	sWinName="TigerVNC$((++n))"
+	sed -i 's/\(name[ =][^ ]*\)/'"$sWinName"'/g' $pLast
+	sed -i 's/\(DesktopSize\)[ =][^ ]*/\1 '"$sDesk"'/g' $pLast
+	sed -i 's/\(geometry\)[ =][^ ]*/\1 '"$sGeo"'/g' $pLast
+	
+	cat $pLast
+	exit 0
+	winid=`WindowID TigerVNC:`	
+	source "$pLast" &
+
+	while [[ $winid == `WindowID TigerVNC:` ]]; do sleep .3;	done
+
+#	WaitForWindow -t 5 -w "$sWinName"
+	for ii in `WinGeo $(dquote "TigerVNC")`; do ((r[jj++]=ii)); done
+}
+
+
+#if [ -z "$sWinName" ]; then
+	sed -i 's/-name [^ ]*/'"$sWinName"'/' "$pLast"
+	# Open tiger window
+	#	source "$pLast"
+#fi
+
+#WaitForWindow -t 5 -w "$sWinName" -x WinGeo $(dquote "$sWinName")
+
+Calibrate
+
+#if ((d != r)); then
+for ii in {0..3}; do
+	((c[ii]=r[ii] - d[ii]))
+done
+
+#Calibrate
+#fi
+
+if [[ $dry != true ]]; then
+	echo $viCal | tee $pCal
+fi

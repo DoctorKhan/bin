@@ -1,0 +1,4 @@
+#!/bin/bash
+click $@
+pressAlt F4
+

@@ -1,0 +1,163 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Nov 1 11:14:22 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: list, current, local, prev, next,
+# kill, new, request, pid
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialization
+#pCurrent=`create $HOME/.vnc/current`
+
+## Functions
+# List vnc port and user connected to this machine.
+function List()
+{
+	case "$1" in
+		[Pp]ort) sReturn="\1";;
+		[Uu]ser) sReturn="\2";;
+		*)	 sReturn="\1 \2";;
+	esac
+	
+	ps aux | sed -n "s/.*vnc.*desktop sandstone:\([0-9]*\) .\([a-z0-9]*\).*/$sReturn/p" | sort
+}
+# Local outgoing ports being used.
+function Local()  { netstat -l | grep -v '^unix' | word 4 | egrep -o '[0-9]*' | awk '{print $1 -5000}' | sort -n | uniq; }
+
+function Select()
+{
+	if (($#==0)); then return 1; fi
+	
+	iPort=$@
+	# Set current port
+	echo $iPort #| tee "$pCurrent"
+	
+	if IsFree $iPort; then
+		New $iPort;
+	fi
+}
+
+function AllUsedPorts()
+{
+	List port
+	Local
+}
+
+function IsUsed() { if ! AllUsedPorts | grep -q $1; then return 1; fi; }
+
+function IsFree() { if IsUsed $1; then return 1; fi; }
+
+# Show currently selected port
+function Current()
+{
+	# Read current port in file
+	ls -1t $HOME/.vnc/*.pid 2>/dev/null | head -n 1 | word 2 : | word 1 .
+	
+	# If empty, set as new port
+	#	iCurrent=${iCurrent:-`New`}
+	
+	# If there is no session there, start one.
+	#	Select $iCurrent
+}
+
+function Last()  {
+	iLast=`List port | tail -n 1`;
+	echo ${iLast:-100}
+}
+
+function First()
+{
+	iFirst=`List port | head -n 1`;
+	echo ${iFirst:-1}
+}
+
+function Num()   { List | wc -l; }
+
+function AnyUsed()
+{
+	return $((`Num`==0));
+}
+
+function Prev()
+{
+	if ((`Num` == 0)); then
+		Current
+	else
+		if ((`Current` == `First`)); then
+			Last
+		else
+			(List port; Current) | sort -n | uniq | grep -B 1 `Current` | head -n 1
+		fi
+	fi
+}
+
+function Next()
+{
+	if AnyUsed; then
+		if ((`Current` == `Last`)); then
+			First
+		else
+			(List port; Current) | sort -n | uniq | grep -B 1 `Current` | tail -n 1
+		fi
+	else
+		Current
+	fi
+}
+
+function Kill()
+{
+	if AnyUsed; then
+		viPorts=${@:-`Current`}
+		for iPort in $viPorts; do
+			# if the port is not being used, then abort
+			if ( IsUsed $iPort ) && ( vncserver -kill :$iPort 1>&2 ); then
+				echo Killed port $iPort. > /dev/stderr
+				Select `Prev`
+			fi
+		done
+	fi
+}
+
+
+function New()
+{
+	viList=`List port`;
+	
+	iFirst=`First`
+	iPortNew=$iFirst
+	
+	while echo "$viList" | grep -q $iPortNew; do
+		((++iPortNew))
+	done
+	
+	# Try to find unused port
+	for ((iPortNew=iPort; iPortNew<iFirst+100; iPortNew++)); do
+		if vncserver :$iPortNew &>/dev/null; then
+			echo $iPortNew
+			#			echo $iPortNew > $pCurrent
+			break
+		fi
+	done
+}
+
+function Request()
+{
+	sHost=sandstone.irc.utexas.edu
+	ssh $sHost vncport $@
+}
+
+function Pid() { ps aux | grep "Xvnc :`Current`" | grep -v grep | word 2; }
+
+function Suspend() { kill -SIGSTOP `Pid`; }
+
+function Continue() { kill -SIGCONT `Pid`; }
+
+sArgs=`titleCase ${1:-"Current"}`; shift
+eval $sArgs $@
+exit $?

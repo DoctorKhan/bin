@@ -1,0 +1,6 @@
+#!/bin/bash
+for file in `ls P*.7`; do
+#	echo "3dcodeFile $file"
+	3dcodeFile $file
+done
+

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 14 14:01:19 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Connections
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+if isMac; then
+	netstat -anfinet | grep -v 127.0.0.1 | awk '{ print $5 }' | \
+	grep -E '.*([0-9]{1,4}\.)+.*' | sed 's/\(.*\)\..*/\1/'
+else
+	netstat -anW --tcp --udp | grep -v 127.0.0.1 | awk '{ print $5 }' | \
+	grep --color=never -E '.*[0-9]{1,4}(\.|\:).*' | sed 's/\(.*\)\:.*/\1/'
+fi |\
+\
+xargs -Iip host ip | sed 's/.* \(.*\)\./\1/' |\
+sort -g -k 1 | uniq -c | sort -n -k 1 | more

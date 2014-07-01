@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#######################################################
+### Created $pLocalListy khan on Sat Aug 25 19:59:28 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-list
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sCom="mktemp -t"
+#sCom="mkfifo"
+pServerList=`$sCom serverList.XXX`
+pLocalList=`$sCom localList.XXX`
+pLocalTemp=`$sCom localTemp.XXX`
+
+## Main
+vnc-list-remote > $pServerList
+vnc-list-local  > $pLocalList
+(cat $pServerList |\
+	while read sSession; do
+		iPort=`echo $sSession | awk '{print $1}'`
+		sStat=`echo $sSession | awk '{print $6}'`
+		
+		# if same port also on local list...
+		if grep -q "^$iPort " $pLocalList; then
+			iLocalResX=`grep "^$iPort " $pLocalList | awk '{print $4}'`
+			iLocalResY=`grep "^$iPort " $pLocalList | awk '{print $5}'`
+			
+			# Remove duplicate session on local
+			grep -v "^$iPort " $pLocalList > $pLocalTemp
+			cat $pLocalTemp > $pLocalList
+			
+			# Fix remote resolution
+			echo $sSession | awk '{print $1,$2,$3,'"$iLocalResX"','"$iLocalResY"',$6}'
+		else
+			echo $sSession
+		fi
+done; cat $pLocalList) |\
+sort | column -c 6

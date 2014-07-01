@@ -1,0 +1,95 @@
+#!/bin/bash
+
+########################################################
+### Created by khan on Tue Feb 21 01:14:38 CST 2012  ###
+########################################################
+
+###################### Help Text #######################
+# Usage: rawiv2raw <max threads> <% ram limit> <files>
+########################################################
+if (($#<1)) && ! pipe || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+########################################################
+
+## Initialize
+nMaxThreads=4
+iRamLim=80
+
+if isInt $1; then nMaxThreads=$1; shift; fi
+if isInt $1; then iRamLim=$1; shift; fi
+
+echo Max threads: $nMaxThreads
+echo Max RAM Use: ${iRamLim}%
+
+nFiles=0
+
+## Functions
+function Enqueue()
+{
+	for p2que; do
+		if [ -e "$p2que" ]; then
+			que[nFiles++]="$p2que"
+			echo Added $p2que to queue.
+			echo $nFiles files in queue.
+		fi
+	done
+}
+
+function Dequeue()
+{
+	n2Dequeue=${1:-1};
+	sFile=${que[--nFiles]}
+	echo "$sFile"
+	echo Removed $sFile from the queue. > /dev/stderr
+	echo $nFiles remaining in queue. > /dev/stderr
+}
+
+function NumThreads() { ps | grep Mesher | wc -l; }
+function MemUsage() { ps -eo pmem | colsum | Round | StrTrim; }
+
+function CheckMemUsage()
+{
+	nThreads=`NumThreads`
+	iRam=`MemUsage`
+	
+	if ((iRam > iRamLim)); then
+		echo Maximum RAM limit $iRamLim reached. > /dev/stderr
+		
+		if ((nThreads > 0)); then
+			iPid=`ps | grep Mesher | awk '{print $3,$1}' | sort | word 2 | head -n 1`
+			
+			Enqueue `ps fhp $iPid | word 7`
+			kill $iPid
+			nMaxThreads=$nThreads
+			
+			echo Maximum thread number reduced to $nMaxThreads.
+			sleep 10
+		fi
+	else
+		echo -en "\r$nThreads threads. ${iRam}% RAM usage.\r"
+		if ((nThreads < nMaxThreads)) && ((nThreads < nFiles)); then
+			return 1
+		fi
+	fi
+}
+
+## Main
+if (($# == 0)); then
+	while read file; do Enqueue "$file"; done
+fi
+
+Enqueue $@
+
+while ((nFiles > 0)) && ((nMaxThreads>0)); do
+	pVol=`Dequeue`;
+	pRaw=`ChExt $pVol .raw`
+	if [ -e $pVol ]; then
+		Mesher mesh "$pVol" "$pRaw" --extraction_method fastcontouring --isovalue 0 --iterations 5
+		#		sleep 40
+		
+		#		while CheckMemUsage; do
+		#			sleep 5
+		#		done
+	fi
+done
+

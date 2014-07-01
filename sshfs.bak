@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 21 22:04:22 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then echo "Usage: $0"; exit 0; fi
+
+sshfs=`other sshfs`
+
+eval `ParseHost $1`
+
+rlogin=`ssh-host-trans $rlogin`
+
+if (( $# == 1 )); then
+	ldir=$HOME/$rname
+else
+	ldir=$2
+fi
+
+if [ ! -d $ldir ]; then mkdir $ldir; fi
+
+ldir=`cd $ldir; pwd`
+
+if [ `mount | grep -ic "$rhost.*on.*$ldir"` -eq 0 ]; then
+	shift 2
+	$sshfs $rlogin:$rdir $ldir $@
+fi
+
+# Dependencies: c, ec, other, ParseHost, rep, sshfs, ssh-host-trans, ted

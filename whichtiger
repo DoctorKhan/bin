@@ -1,0 +1,11 @@
+#!/bin/bash
+
+for file in /opt/TigerVNC/bin/vncviewer /usr/bin/vncviewer; do
+	if [ -f $file ]; then
+		if [ "$1" == "-v" ]; then echo $file; fi
+		exit 0
+	fi
+done
+
+exit 1
+

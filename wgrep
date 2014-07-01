@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri Apr  8 08:37:43 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then
+	 echo "Usage: wgrep"
+	 exit 0
+fi
+
+args=`echo $@ | sed 's/ -[a-zA-Z0-9]*//g'`
+opts=`echo $@ 
+#echo " -vg -gg \"-v this that\"" | sed 's/\".*\"//g'
+

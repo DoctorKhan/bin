@@ -1,0 +1,96 @@
+#!/bin/bash
+
+###########################################################
+###  Created by khan on Fri Aug 12 9:59:28 CDT 2011     ###
+###########################################################
+
+###################### Help Text ##########################
+# Usage: fileparts <number|type> [new ext] <pathname>
+# [1|path     ] 		   full path
+# [2|basename ] 		   filename - extension
+# [3|basepath ] 		   pathname - extension
+# [4|extension] 		   extension
+# [5|newext   ]   <new ext> 	   pathname + new extension
+# [6|filename ] 		   full filename
+# [7|pathname ] 		   full pathname
+# [8|newfull  ]   <new ext>	   filename - extension
+# [9|newname  ]   <file1> <file2>  second name + first path
+###########################################################
+if (( $# < 2 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0; fi
+###########################################################
+
+iType=$1; shift
+
+if [ "$iType" == "5" ] || [ "$iType" == "8" ]; then
+	sNewExt=`echo $1 | tr -d '.'`
+	shift
+fi
+
+pFile="$1"; shift
+pSubst="$@"
+
+## Functions
+function trycd()
+{   # Converts backslash (windows-type) paths into forward-slash paths.
+	pFile=`echo "$@" | tr '\\\' '\/'`
+	if [ -d "$pFile" ]; then
+		cd "$pFile"; pwd -P
+	else
+		pDir=`pwd -P $(dirname "$pFile")`
+		pName=`basename "$pFile"`
+		pFile="${pDir}/${pName}"
+		echo "$pFile"
+	fi
+}
+
+function ContDir() { trycd `dirname "$@"`; }
+function SameDir() { trycd "$@"; }
+function FullPathOnly() { if [ -d "$@" ]; then SameDir "$@"; else ContDir "$@"; fi; }
+function FilenameOnly() { echo "$@" | tr '/' '\n' | grep -v ^$ | tail -n 1; }
+function FullPathname() { ContDir "$@" | tr '\n' '/'; FilenameOnly "$@"; }
+function Pathname() { if [ -d "$@" ]; then SameDir "$@"; else FullPathname "$@"; fi; }
+function NoExt()   { echo "$@" | sed 's/\.[^\.]*$//'; }
+function ExtOnly() { echo "$@" | grep -o '.[^.]*$';   }
+
+## Main
+sPath=`FullPathOnly "$pFile"`
+sFilename=`FilenameOnly "$pFile"`
+sName=`NoExt "$sFilename"`
+sExt=`ExtOnly "$pFile"`
+
+sPathname=`Pathname "$pFile"`
+sFolder=`ContDir "$pFile"`
+sSubst=`FilenameOnly "$pSubst"`
+
+case `lower $iType` in
+	1|path)	# Full path only
+		echo "$sPath"
+	;;
+	2|basename) # Filename - extension
+		echo "$sName"
+	;;
+	3|basepath) # Pathname - extension
+		echo "$sFolder/$sName"
+	;;
+	4|extension)  # Extension only
+		echo "$sExt"
+	;;
+	5|newext) # Filename + new extension
+		echo "$sName.$sNewExt"
+	;;
+	6|filename) # Full filename
+		echo "$sFilename"
+	;;
+	7|pathname) # Full pathname of file
+		echo "$sPathname"
+	;;
+	8|newfull) # Pathname + new extension
+		echo "$sPath/$sName.$sNewExt"
+	;;
+	9|newname) # Path + new filename
+		echo "$sPath/$sSubst"
+	;;
+esac
+

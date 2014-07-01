@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jun 14 16:47:20 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ScreenRes
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+function AllScreens() {
+	# Resolutions
+	system_profiler SPDisplaysDataType | grep Resolution | awk '{print $2$3$4}' | tr '\n' ' '
+	
+	winfile=/Library/Preferences/com.apple.windowserver
+	
+	# Origins for each monitor:
+	defaults read $winfile | egrep ' Origin(X|Y)' | tr -sc '[:digit:]' ' ' | awk '{print $1,$2,$3,$4}'
+}
+
+AllScreens | awk '{print $1,$3,$4"\n"$2,$5,$6}' c, def, es, isHelp, nf, rep, ScreenRes, ted

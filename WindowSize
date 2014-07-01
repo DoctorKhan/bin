@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri May 27 13:21:22 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+echo `xSize`x`ySize`
+
+# Dependencies: c, ec, regmatch, ted, xSize, ySize

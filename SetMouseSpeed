@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jul 22 11:50:07 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SetMouseSpeed <speed> <deceleration> <dejerk>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+#	Device Accel Constant Deceleration (262):	1.000000
+#	Device Accel Adaptive Deceleration (263):	20.000000
+#	Device Accel Velocity Scaling (264):	19.000000
+
+## Initialize
+#iDev=${4:-`xinput | sed -n 's/.*TouchPad.*id=\([0-9][0-9]*\).*/\1/p'`}
+iDev=`xinput | grep Touchpad | cut -d= -f2 | awk '{print $1}'`
+
+## Main
+SetMouseProp "Velocity Scaling"      $iDev ${1:-35}		# Velocity scaling
+SetMouseProp "Constant Deceleration" $iDev ${2:-1}		# Constant deceleration
+SetMouseProp "Adaptive Deceleration" $iDev ${3:-2.5}		# Adaptive deceleration

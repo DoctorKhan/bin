@@ -1,0 +1,27 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Feb 5 10:55:58 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: Derivative
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+## Functions
+## Main
+read line0
+while read line1; do
+	t0=`echo $line0 | awk '{print $1}'`
+	t1=`echo $line1 | awk '{print $1}'`
+	line0="$line1"
+
+	if [[ $t0 != $t1 ]]; then
+		echo $line1
+	fi
+done | Delta | awk '{print $2/$1}'

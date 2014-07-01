@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Nov 13 11:37:05 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-resize-local
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sHost=$1
+sScreen=$2
+
+## Functions
+
+## Main
+case $sHost in
+	gabbro)
+		case $sScreen in
+			left)  XResize 1680 1006 ;;
+			right) XResize 1845 1055 ;;
+	esac ;;
+esac
+

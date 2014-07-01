@@ -1,0 +1,31 @@
+#!/bin/bash
+
+###################### Help Text ######################
+# Usage: TigerInstall [reinstall
+# <user>@sandstone.irc.utexas.edu
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialization
+executable=tiger
+pServer="sandstone.irc.utexas.edu"
+pSupport=/export/data/software/TigerVNC/support
+
+# Identify source hostname
+sUser=${1:-$USER}
+sHostname="${sUser%@*}@$pServer"
+sH=${1:-`ls -1dt *@sandstone* | head -n 1`}
+sHostname=${sH%@*}@$pServer
+
+## Main - Download updates
+echo "Downloading TigerVNC. May require password for $sHost."
+ssh-fix-hosts ${sHost} rsync -auLvz --delete --exclude *~ ${sHost}:$pSupport $HOME/.vnc/ 2>&1 | tee tiger.log
+
+# Create vncviewer link
+ln -s /opt/TigerVNC/bin/vncviewer $HOME/.vnc/support/vncviewer
+
+# Indicate time of update
+touch $HOME/.vnc/update
+

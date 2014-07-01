@@ -1,0 +1,33 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Wed Jan 1 13:12:01 PST 2014 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: autoFix
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+cat r1.mac | xmacroplay -d 500:0
+xtype '"><script type="text/javascript" src="Fix.js"></script s="'
+pressTab
+sleep 0.3
+pressTab
+sleep 0.3
+xtype 'Please enable Javascript'
+pressAlt o
+pressAlt o
+pressAlt o
+#cat r2.mac | xmacroplay -d 500:0
+#xtype "Please enable Javascript"
+#cat r3.mac | xmacroplay -d 500:0
+

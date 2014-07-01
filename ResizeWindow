@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri May 27 14:06:17 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+x=`xSize`
+y=`ySize`
+
+function ModDim() 
+{
+	case $2 in
+		x*) echo $1 \* ${2:1} | bc ;;
+		+*) echo $1 \+ ${2:1} | bc ;;
+		-*) echo $1 -  ${2:1} | bc ;;
+		*)  echo $2 ;;
+	esac
+}
+
+x=`ModDim $x $1`
+y=`ModDim $y $2`
+
+echo xdotool getactivewindow windowsize $x $y
+
+# Dependencies: c, ec, es, regmatch, ted, windowsize, xSize, ySize

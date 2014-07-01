@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jun 14 13:03:36 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: AllLinks
+#######################################################
+
+function GetPage()
+{
+	lynx -dump -accept_all_cookies "$@"
+}
+
+if [[ $1 == "-v" ]]; then
+	shift
+	GetPage "$@" | sed -n '/References/,$s,^ *\([0-9]*\. http[s]*://.*\),\1,p'
+else
+	GetPage "$@" | sed -n '/References/,$s,^ *[0-9]*\. \(http[s]*://.*\),\1,p'
+fi

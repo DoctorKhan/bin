@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#################
+## Created by khan on Wed Apr  6 10:17:10 CDT 2011 ##
+#################
+#local
+
+if [[ $1 == "local" ]]; then
+	ifconfig | grep 'inet .*cast' | grep -o '[0-9.]*' | head -n 1
+else
+	t=/tmp/`UniqueName`
+	touch $t
+curl -s http://checkip.dyndns.org > $t
+
+	grep -o '[0-9\.]*' $t
+fi

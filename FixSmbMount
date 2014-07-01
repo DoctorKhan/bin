@@ -1,0 +1,25 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Mon Nov 7 22:14:09 CST 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: FixSmbMount
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Arguments
+
+## Defaults
+
+## Initialize
+
+## Validation
+
+## Functions
+
+## Main
+sudo chmod ug+s /sbin/mount.cifs /sbin/umount.cifs

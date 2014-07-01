@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Aug 25 19:59:28 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-connector
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sLogin="ssh sandstone"
+pSessions=$HOME/.vnc/sessions
+set alias save=". WriteConf"
+
+## Functions
+function Pid()
+{
+	iPort=$1
+	vncserver -list | grep "^:$iPort[^0-9]" | grep -v grep | word 2 '	 ';
+}
+
+echo "Port User Host Width Height Status"
+vnc-list
+read -t 3 -p "Select port: " iPort
+read -t 3 -n 1 -p "t)erminate p)ause u)npause c)onnect : " iAction
+
+case $iAction in
+	t) vncserver -kill :$iPort ;;
+	p) kill -SIGSTOP `Pid $iPort` ;;
+	u) kill -SIGCONT `Pid $iPort` ;;
+	c) vncviewer;; #vnc-open $iPort ;;
+esac
+
+## Main
+# Define columns
+
+# Construct GUI
+DialogResponder	`SessionChooser`
+#DialogRespond $sOut $?

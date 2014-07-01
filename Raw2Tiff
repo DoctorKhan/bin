@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Dec 13 17:52:31 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: RawToTiff
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+for file in ${@:-`find SD16GB -name '*.CR2'`}; do
+	sTiff=${file/CR2/tiff}
+	if [ ! -f $sTiff ]; then
+		echo convert -compress LossLess $file $sTiff
+		convert -compress LossLess $file $sTiff
+	fi
+done

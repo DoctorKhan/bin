@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Nov 17 08:10:14 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SearchLinks <URL>
+# Returns google search results properly formatted
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pDir=/tmp/torrents
+pLinks=$pDir/links.txt
+pResults=$pDir/results.txt
+
+# Input
+sSearch=$@
+
+## Main
+echo -n "Searching $sSearch... " 1>&2
+FullLinks "$sSearch" > "$pLinks"
+
+# Parse URLs from links file and put into results
+sed -n 's/.*|.*q=\(http.*\)&sa=.*/\1/p' $pLinks > $pResults
+
+# Output
+nResults=`cat $pResults | wc -l`
+echo "Found $nResults results." 1>&2
+
+#AllLinks -v "http://www.google.com/search?q=Supernatural+S07E14+torrent"
+
+cat "$pLinks" | grep '^Next|' | word 2 '|'

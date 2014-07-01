@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 28 11:38:29 CDT 2011 ##
+#####################################################
+
+cd
+
+if [ ! -e .gnomerc ]; then
+	MyInstall gnomerc
+fi
+
+Edit .gnomerc &
+

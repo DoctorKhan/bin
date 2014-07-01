@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#option domain-search domain-list;
+pFile="${1:-/etc/resolv.conf}"
+STATUS=${2:-up}
+
+domains="irc.utexas.edu biosci.utexas.edu ccbb.utexas.edu bme.utexas.edu"
+
+if [ "$STATUS" == "up" ]; then
+	if [ `grep -ic search $pFile` == 0 ]; then
+		sudo bash -c "echo search $domains >> /etc/resolv.conf"
+	else
+		domains="$domains `grep search $pFile | sed -e 's/search //g' | cut -d '#' -f 1`" # combine existing with new domain names
+		cleaned="`echo $domains | tr ' ' '\n' | grep -v '\.edu[a-z]' | tr '\n' ' '`" # Remove bad domain names
+		final="`echo $cleaned | tr ' ' '\n' | sort | uniq | tr '\n' ' '` # Set by setdomains script."
+		sudo sed -i -e "s/^search .*/search $final/g" $pFile
+	fi
+fi

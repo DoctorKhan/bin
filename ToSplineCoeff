@@ -1,0 +1,18 @@
+#!/bin/bash
+
+nGuess=$((`ls *Spline[0-9]*.rawiv 2>/dev/null | wc -l` + 1))
+nSurfaces=${1:-$nGuess}
+nLayers=$((nSurfaces-1))
+pTemp=`TempFile ToSplineCoeff`
+
+#Progress 0 $nLayers
+#for ((iLayer=1; iLayer < nSurfaces; iLayer++)); do
+#	BrainThickness transferToBSpline InterBSpline$iLayer.rawiv InterBSplineCoeff$iLayer.rawiv >/dev/null
+#	Progress $iLayer $nLayers $pTemp 2>/dev/null
+#done
+
+Progress 0 $nSurfaces
+for ((iSurface=0; iSurface < nSurfaces; iSurface++)); do
+	BrainThickness transferToBSpline InterBSpline$iSurface.rawiv InterBSplineCoeff$iSurface.rawiv >/dev/null
+	Progress $((iSurface+1)) $nSurfaces $pTemp 2>/dev/null
+done

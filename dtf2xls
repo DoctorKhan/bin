@@ -1,0 +1,145 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 25 13:35:08 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: csv2xls [dir]
+#######################################################
+
+# Declaration
+nFiles=
+xId=
+
+# CSV file location
+if [ -d "$1" ]; then
+	pDataDir="$1"
+else
+	pDataDir=`zenity --file-selection --directory | tail -n 1`
+fi
+
+# Go to directory
+cd $pDataDir
+
+# Set CSV delimiter
+sDelim="${2:- }"
+
+# Create temporary directory
+sTemp=/tmp/uno
+rm -rf $sTemp 2>/dev/null
+mkdir -p $sTemp
+
+### FUNCTIONS ###
+
+function UniqueName()
+{
+	date --rfc-3339=ns | sed 's/[^0-9]//g'
+}
+
+function MakeLinks()
+{
+	## Make temporary links of all csv files
+	echo "Making temporary links..."
+	filelist=$sTemp/csvfiles
+	
+	find "`pwd`" -iname '*.csv' > $filelist
+	nFiles=`cat $filelist | wc -l`
+	
+	cat $filelist | \
+	for (( iFile=1; iFile <= nFiles; iFile++ )); do
+		pDataFile="`line`"
+		pLink=$sTemp/`UniqueName`.csv
+		ln -s  "$pDataFile" "$pLink"	# Link file
+		
+		# Progress
+		echo -en "\r $iFile / $nFiles = $((iFile*100/nFiles)) %"
+	done
+	
+	echo
+	rm $filelist
+	## Go to directory with all the links
+	cd $sTemp
+}
+
+function ConvertDelim()
+{
+	## Convert delimiter to ","
+	echo Converting delimiters...
+	if [ "$sDelim" != "," ]; then
+		sed -i --follow-symlinks "s/$sDelim/,/g" [0-9]*.csv
+	fi
+}
+
+function OpenOffice()
+{
+	## Start open office, if it is closed
+	if ! ps aux | grep -v grep | grep -q office; then
+		#		xCurId=`xdotool getwindowfocus`
+		soffice
+		#		WaitForNewWindow
+		#		xdotool windowfocus $xCurId
+		#		WaitForNewWindow -t 3
+		#		xdotool windowfocus $xCurId
+	fi
+	
+}
+
+function ConvertLinks()
+{
+	## Convert (the links)
+	echo Converting files...
+	unoconv -f xls *.csv &
+}
+
+pProg=`UniqueName csv2xls.txt`
+function ShowProgress()
+{
+	## Show Progress
+	nCom=0
+	
+	until (( nCom == nFiles )); do
+		nCom=`ls *.xls 2>/dev/null | wc -l`
+		Progress $nCom $nFiles $pProg
+		#	echo -en "\r $nCom / $nFiles = $((nCom*100/nFiles)) %"
+		sleep 1
+	done
+	
+	echo
+}
+
+function MoveFiles()
+{
+	iFile=0
+	
+	## If there are output files, move them to their original directories
+	echo Moving files...
+	while ( ls | grep -q .csv ); do
+		for file in `ls [0-9]*.xls 2>/dev/null`; do
+			# CSV file corresponding to XLS
+			csv=`echo "$file" | sed 's/.xls$/.csv/g'`
+			target=`readlink $csv | sed 's/.csv$/.xls/g'`
+			mv "$file" "$target"
+			rm -f $csv
+			nCom=$((++iFile))
+			echo -en "\r $nCom / $nFiles = $((nCom*100/nFiles)) %"
+		done
+	done
+	
+	echo
+}
+
+function CleanUp()
+{
+	xdotool windowkill $xId
+	echo Complete.
+}
+
+# Main
+OpenOffice
+MakeLinks
+ConvertDelim
+ConvertLinks
+ShowProgress
+MoveFiles
+CleanUp

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Apr 18 17:00:24 EDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: follow <link>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-help* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+if ParseOpt a $@ || ParseOpt v $@; then
+	bVerbose=true;	shift
+else
+	bVerbose=false
+fi
+
+## Functions
+function isLink() { test -L "$@"; return $?; }
+
+function FindLink()
+{
+	if [[ -e "$pFile" || -L "$pFile" ]]; then
+		echo "$pFile"
+	else
+		which "$@" || locate -eir "/$@$" -l 1 || \
+		find `pwd` -maxdepth 1 -type l -name "$@" -print -quit
+	fi
+}
+
+## Main
+for pArg in "${@:-`cat /dev/stdin`}"; do
+	pFile=`FindLink "$pArg"`
+	fullpathname `readlink -f "$pFile"`
+done

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for host in `otherhosts`; do
+	pSource=`fullpathname $1`
+	pTarget=`fileparts newname "$1" "$2"`
+	ssh $host "mv $pSource $pTarget"
+done
+
+cp "$pSource" "$pTarget"
+nf "$pSource"

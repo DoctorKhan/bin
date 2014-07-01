@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Jun  2 12:03:32 CDT 2011 ##
+#####################################################
+script=`basename $0` 
+minargs=0; usage="Usage: $script _command"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+file="$1"
+if [ ! -e $file ]; then
+	file=`which "$file"`
+fi
+
+shift
+bashdb "$file" $@
+

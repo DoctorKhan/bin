@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Oct 20 21:01:01 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: sys-ids
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+echo 'avahi
+avahi-autoipd
+backup
+bin
+couchdb
+daemon
+dcmtk
+festival
+games
+gdm
+gnats
+haldaemon
+hplip
+irc
+itsadmin
+kernoops
+landscape
+libuuid
+list
+lp
+mail
+man
+messagebus
+news
+nobody
+ntp
+nx
+postfix
+proxy
+pulse
+root
+rtkit
+saned
+speech-dispatcher
+sshd
+statd
+sync
+sys
+syslog
+usbmux
+uucp
+www-data'

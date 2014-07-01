@@ -1,0 +1,45 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Jan 1 10:34:50 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: BackDir
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+if isInt $1; then nDaysAgo=$1; shift; fi
+sFile=${1:-.}
+. cdm $sFile
+pBackBase='/export/backup'
+iBackup=$(pwd | grep -c $pBackBase);
+
+## FUNCTIONS
+function AllDirs()
+{
+	cd $pBackBase
+	ls -1t | grep -v lost |\
+	while read line; do
+		ls -1rt $line | grep -v lost |\
+		while read line2; do
+			echo $pBackBase/$line/$line2;
+		done
+	done
+}
+
+function InBackup()  { pwd | grep -q $pBackBase; }
+function NonBackup() { if InBackup; then pwd | awk -F"/" '{$3=""; $4="";$5=""; print}'; fi; }
+function iCurrBack() { AllDirs | grep -n `pwd` | cut -d : -f 1 | head -n 1; }
+
+## MAIN
+if ! isInt ${nDaysAgo:0:1}; then
+	# Signed int given, so go back n days from current backup.
+	iBackFromNow=$((`iCurrBack` - nDaysAgo))
+	cd `NonBackup`
+fi
+
+AllDirs | head -n $iBackFromNow | tail -n 1

@@ -1,0 +1,95 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Mar 30 08:42:30 CDT 2012 ###
+#######################################################
+
+##################### Help Text #####################
+# Usage: vnc-select
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+###################### Help Text ######################
+# Usage: vnc [command]
+# COMMAND	RESULT
+# <none>	connect
+# gui		open gui
+# list		open sessions
+# new		new session
+# kill [n]	kill session n. Defaults to current.
+# current 	current session id
+# Advanced: local, pid, shared, prev, next
+#
+# Usage: tiger <user>@<Host>
+# -s [Width x Height | Full] (Screen Size)
+# -q [0-29] Quality
+# -p [integer] Port
+# -h Host
+# -u User
+# -e (to edit config)
+#######################################################
+if [[ "$1" == *help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+
+## Initialize
+pDir="$HOME/.vnc"
+pList=`mktemp pList.XXXXXX`
+
+function EditSession()
+{
+	pConfTemp=`mktemp abc.XXXXXX`
+	sConf="$3:$1.cfg"
+	
+	(echo $sHead; echo $@) | column -t > $pConfTemp
+	nano $pConf
+	tail -n 1 $pConf | tr -s '\t ' ' ' > /tmp/$sConf
+	ssh $server "touch .vnc/$sConf"
+	scp /tmp/$sConf $server:.vnc/$sConf
+}
+
+function Execute()
+{
+	shift
+	sCom=`vnc-command $@`
+	echo; echo $sCom; eval $sCom
+}
+
+### Main
+
+# Show list
+vnc-list > $pList;
+
+sAction="C)onnect	R)estore	S)uspend	T)erminate
+N)ew		E)dit		D)elete		Q)uit"
+
+nSessions=`cat $pList | wc -l`
+case $nSessions in
+	0)
+		sAction='N)ew		Q)uit'
+	;;
+	1) sLine=`cat $pList`; echo $sLine;;
+	*)
+		PS3='Choose one:'; select sLine in `cat $pList`; do break; done
+	;;
+esac
+
+
+# Select action
+echo
+read -n 1 -p "$sAction" iAction
+echo
+
+case ${iAction:-c} in
+	e) EditSession $sLine ;;
+	t) vnc-kill $sLine ;;
+	d) vnc-delete $sLine ;;
+	p) vnc-stop $sLine ;;
+	u) vnc-cont $sLine ;;
+	c) Execute $sLine ;;
+	q) exit 0 ;;
+esac
+

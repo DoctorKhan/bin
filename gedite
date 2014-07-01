@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+	proj=ssfp_rez
+else
+	proj=$@
+fi
+brterm tr ssfp_rez ./e
+blterm tr wtscripts 
+waitUntilWindowOpens "/export/home/epic/khan/$proj/$proj"
+sleep 0.25
+if [ `yMax` == 800 ]; then
+	gHeight=446
+	if isHost gauss via nx; then
+		gHeight=464
+	fi
+fi
+if [ `yMax` == 1200 ]; then
+	gHeight=669
+fi
+
+wmctrl -r "/export/home/epic/khan/$proj/$proj" -e 0,0,0,`xMax`,$gHeight

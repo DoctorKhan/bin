@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jun 13 11:21:41 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Round
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+function RoundLine() {
+	for num in "$@"; do
+		if isNumeric $num; then
+			printf "%.0f\n" "$num"
+		fi
+	done | tr '\n' ' '
+	echo
+}
+
+if (( $# > 0 )); then RoundLine "$@"; fi
+
+if pipe; then
+	while read line; do
+		RoundLine "$line"
+	done
+fi

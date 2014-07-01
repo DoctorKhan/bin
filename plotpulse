@@ -1,0 +1,22 @@
+#!/bin/bash
+closeWin "/ESE_12M5A/psd/bin/PlotPulseMgd"
+
+
+if [ $# == 0 ]; then
+	proj=`cat $HOME/wtscripts/project`
+else
+	proj="$@"
+fi
+
+if [ `windowViewable "EvalToolMgd"` == "0" ]; then
+	loadcv $proj
+fi
+
+savecv
+
+wmctrl -a "WToolsMgd"
+drag 250 60 250 168
+
+#pressAlt a; xtype p
+waitUntilWindowViewable "/ESE_12M5A/psd/bin/PlotPulseMgd"
+wmctrl -a "blterm tc"

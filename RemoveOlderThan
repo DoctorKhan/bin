@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Nov 19 20:10:20 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: RemoveOlderThan <thresh file> <filter>
+# Delete files older than thresh file in filter spec.
+#######################################################
+if (( $# < 1 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sDel=
+
+if ParseOpt dry $@; then
+	shift
+else
+	sDel="-delete"
+fi
+
+pThreshFile=${1:-"lam.log"}
+sFilter=${2:-"BootHRFAnalysis"}
+
+## Main
+find `pwd` -maxdepth 1 -name "$sFilter"'*' ! -newer "$pThreshFile" -a ! -name "$pThreshFile"
+echo -n "Delete [Y/n]? "; read input k
+k=${k:-y}
+if [[ "$k" != n ]]; 	then
+	find `pwd` -maxdepth 1 -name "$sFilter"'*' ! -newer "$pThreshFile" -a ! -name "$pThreshFile" "$sDel"
+fi

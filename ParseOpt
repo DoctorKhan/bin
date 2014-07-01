@@ -1,0 +1,83 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Sep 17 21:44:50 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage:   ParseOpt [<var>=]<opt>
+#
+# Example: ParseOpt -s Size -p Port :: -s 1024x768 -p 82
+# Output:  Size="1024x768"; Port="82"
+#
+# Example: ParseOpt -s -p :: -s 1024x768 -p 82
+# Output:  s="1024x768" p="82"
+#
+# Example: ParseOpt [Opts|Args]
+# Output:  All [Options|Other Args]
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+#if pipe; then
+#	while read line; do
+#		ParseOpt $@ :: $line
+#	done
+#fi
+vsRemain=
+
+## Functions
+function PairsOnly() { sed -e 's/^\([^ ]*\)$/\1 \1/'; } # force single opts to be pair, i.e. -s becomes -s s
+
+# Split Options over lines
+function SplitLine() { sed 's/[^^ ]-/___/g' | tr '-' '\n' | sed 's/___/-/g' | sed 's/ *= */ /g' | StrTrim; }
+function JoinLines() { tee | sed 's/^/-/' | tr '\n' ' ' | StrTrim; echo; }
+
+function LongFormat()
+{
+	line="$@"
+	vsOpts=`disp "$line" | sed 's/::.*//g'  | SplitLine | PairsOnly | sort`
+	vsArgs=`disp "$line" | sed 's/.*:://g'  | SplitLine | PairsOnly | sort`
+	
+	vsJoined=`join <(disp "$vsOpts") <(disp "$vsArgs") | word 2-`
+	
+	vsVars=`disp "$vsJoined" | word 1`
+	
+	# quote everything
+	vsVals=`disp "$vsJoined" | word 2-`
+	vsVals=`disp "$vsVals" | dquote`
+	if [ ! -z "$vsVars" ]; then
+		paste -d = <(disp "$vsVars") <(disp "$vsVals")
+	fi
+	
+	vsRemain=`echo "$vsArgs" | grep -vf <(echo "$vsOpts" | awk '{print $1}')`
+}
+
+function ShortFormat()
+{
+	# Convert to long format
+	s1=$1; shift;
+	sLongInput="-$s1 :: $@"
+	
+	# Run long format code
+	sLongOutput=`LongFormat "$sLongInput" | word 2- '=' | unquote`
+	
+	if test -z "$sLongOutput"; then
+		exit 1
+	elif [[ "$sLongOutput" != "$s1" ]]; then
+		disp "$sLongOutput"
+	fi
+}
+
+## Main
+case $1 in
+	[Aa]rgs) shift; echo $@ | sed 's/.*:://g' | sed 's/-[^= ]*.[^- ][^ ]* //g' | StrTrim ;;
+	[Oo]pts) shift; echo $@ | sed 's/.*:://g' | SplitLine | awk '{print $1,$2}' | sort | JoinLines ;;
+	*) if disp "$@" | grep -q '::'; then
+			LongFormat "$@"
+			#	echo Remainder=`$vsRemain`
+		else
+			ShortFormat "$@"
+	fi ;;
+esac

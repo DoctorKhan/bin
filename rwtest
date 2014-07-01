@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Sep 12 16:53:42 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: rwtest
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sRAMSpeed=`which ramsmp`
+if [ -z $sRAMSpeed ]; then
+	for sRAMSpeed in /usr/local/bin/ramsmp $HOME/bin/ramsmp ./ramsmp; do
+		if [ -e $sRAMSpeed ]; then break; fi
+	done
+fi
+
+## Main
+pFile=$(mktemp --tmpdir=`pwd` rw.XXXXX)
+sudo -v
+sudo hdparm -tT /dev/sda | tee $pFile
+$sRAMSpeed -b 1 2 | tee -a $pFile
+mv $pFile $pFile.txt

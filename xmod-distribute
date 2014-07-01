@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Nov 15 17:11:51 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: xmod-distribute
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pPath=/usr/local/bin
+sFile1=xmod-load.desktop
+sFile2=xmod-save.desktop
+
+pFile1=$pPath/$sFile1
+pFile2=$pPath/$sFile2
+
+pSource=$HOME/bin
+
+## Main
+if [ ! -e $pFile1 ]; then
+	ln -vs $pSource/$sFile1 $pFile1
+fi
+
+if [ ! -e $pFile2 ]; then
+	ln -vs $pSource/$sFile2 $pFile2
+fi
+
+for pDesk in `sudo ls -1d  /home/*/Desktop /Users/*/Desktop 2>/dev/null`; do
+	sudo ln -vs $pFile1 $pDesk/$sFile1
+	sudo ln -vs $pFile2 $pDesk/$sFile2
+done 2>/dev/null
+

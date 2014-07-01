@@ -1,0 +1,14 @@
+#!/bin/bash
+echo "Waiting for window '$@' to become viewable"
+#sleep 0.5
+if [ $# == 2 ]; then
+	until [[ ( `windowViewable "$1"` == 1  ) || ( `windowViewable "$2"` == 1 ) ]]; do
+		sleep 0.1
+	done
+else
+	until [ `windowViewable "$1"` == 1 ]; do
+		sleep 0.1
+	done
+fi
+echo "$@ window is viewable."
+

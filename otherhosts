@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#function allhosts()
+#{
+	#echo reswanul.dyndns.org
+	#echo gauss.irc.utexas.edu
+	#echo sandstone.irc.utexas.edu
+	#echo obsidian.biosci.utexas.edu
+	#echo quartzite.biosci.utexas.edu
+#}
+
+host=`hostname | sed 's/albert/reswanul/g'`
+
+allhosts | grep -v $host
+

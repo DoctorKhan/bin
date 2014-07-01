@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#
+## Created by khan on Tue May 17 11:53:43 CDT 2011 ##
+#
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+function SetKey() {
+	for file in `find $HOME/.mozilla/firefox -maxdepth 2 -name 'prefs.js'`; do
+		key=$1; value=$2
+		sed -i "/$key/d" $file
+		echo 'user_pref("'$key'", '$value');' >> $file
+	done
+}
+
+SetKey security.dialog_enable_delay 0
+

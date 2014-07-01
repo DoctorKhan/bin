@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Sep 10 04:33:26 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: fsinfo
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+tr -s " " " " | sed -e 's/determinant/determinant:/' -e 's/^ *://' -e '/xform present/d' -e 's/, \([^0-9]\)/\n\1/g' -e 's/^ *//' -e 's/  *:/:/g' -e 's/xform info: /\nxform info:\n/' -e '/^$/d' -e 's/^\([^:]*\)$/; \1/g' | tr '\n' '~' | sed 's/~;/ ;/g' | tr '~' '\n' | sed 's/: *;\(.*\)/: [\1 ]/g' | sed 's/: *\(.*\), \(.*\), \(.*\)/: [ \1 \2 \3 ]/' ; echo
+
+#| while read line; do
+#if ! echo $line | grep -q :; then
+#	echo -n '[ '
+#	while read line; do
+#		if ! echo $line
+#
+#	lastline=$line

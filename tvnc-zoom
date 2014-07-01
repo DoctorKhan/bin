@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#
+## Created by khan on Thu May 19 16:31:35 CDT 2011 ##
+#
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+if [ $# -gt 0 ]; then
+	fac="1.$1"
+else
+	fac=1.3
+fi
+
+newX=`windowsize | sed "s/x.*/ * $fac/g" | bc | cut -d '.' -f 1`
+newY=`windowsize | sed "s/.*x/$fac * /g" | bc | cut -d '.' -f 1`
+resizevnc "${newX}x${newY}"
+

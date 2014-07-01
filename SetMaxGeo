@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue May 31 18:19:50 CDT 2011 ##
+#####################################################
+
+iScr=${@:-`WhichScreen`}
+pGeo=$HOME/.vnc/maxgeo.$iScr
+pSize=$HOME/.vnc/maxsize.$iScr
+pZero=$HOME/.vnc/zeropos.$iScr
+
+gnome-terminal --maximize -x bash -c "WinGeo > $pGeo"
+awk '{print $1"x"$2}' $pGeo > $pSize
+awk '{print "+"$3"+"$4}' $pGeo > $pZero
+

@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Jun 15 22:44:18 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: xdotool-calibrate
+#######################################################
+
+# Initialize
+
+# Open window
+if windowopen xterm; then
+		xterm &
+fi
+
+eval `ParseOpt -w -c :: $@`
+xId=`WindowID $w`
+
+`screensize w`
+x0=$((/4))
+y0=$((`screensize w`/4))
+w0=`xLoc`; y0=`yLoc`;
+dx=0; dy=0;
+xc=0; yc=0;
+
+until (( $dx == 0 )) && (( $dy == 0 )); do
+	x1=`xLoc`; y1=`yLoc`
+	
+	x=$(( xc + x1 )); y=$(( yc + y1 ))
+	
+	xdotool windowmove $xId $x $y
+	
+	x2=`xLoc`; y2=`yLoc`
+	
+	dx=$(( x2 - x1 ))
+	dy=$(( y2 - y1 ))
+	
+	xc=$(( xc - dx )); yc=$((yc - dy))
+	
+done
+
+xdotool windowmove $xId $x1 $y1
+
+# Output
+mkdir -p $HOME/.xdotool
+echo $dx $dy > $HOME/.xdotool/calibration
+

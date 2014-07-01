@@ -1,0 +1,37 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Jul 1 10:11:54 CDT 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: PromptEdit <filename>
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+pFile="$@"
+
+## Main
+while ((0<1)); do
+	echo "________________________________________________________"
+	cat -n $pFile | tr -d '^ ' | sort | column -s = -t | tr ' ' '.' \
+	| awk '{FS=" ";OFS=") "; $1=$1; print}' | sed 's/\([.][.]*\)/ \1 /'
+	echo "________________________________________________________"
+	echo ""
+	
+	# Accept or edit changes?
+	echo -n "[A]ccept or [E]dit? "
+	read -n 1 -t 3 opt
+	
+	if [[ "$opt" == [EeNn] ]]; then
+		nano "$pFile"
+	else
+		break
+	fi
+done
+
+echo -e "\rAccepted configuration."
+echo

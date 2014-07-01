@@ -1,0 +1,166 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jun 14 12:43:29 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GoGet
+#######################################################
+
+if (( $# == 0 )); then
+	echo "Usage: `basename $0` <Program>"
+	echo -e "\nPrograms:\n"
+	sed -n 's/^[ \t]*\([^ *]*\))/\1/p' $0 | cat -b | sed 's/\t/. /g'
+	echo
+	exit 0
+fi
+
+cd /tmp
+
+if which apt-get > /dev/null; then
+	for prog in lynx tucan aptitude; do
+		if ! isInstalled $prog; then
+			sudo apt-get -y install $prog
+		fi
+	done
+fi
+software=/export/data/software
+
+while [ $# -gt 0 ]; do
+	case $1 in
+		fail2ban)
+			if which apt-get > /dev/null; then
+				sudo apt-get -y install fail2ban
+			elif which port > /dev/null; then
+				sudo port install fail2ban
+			elif isMac; then
+				#For Macs :
+				#http://sourceforge.net/projects/fail2ban/
+				#http://sourceforge.net/projects/fail2ban/files/fail2ban-stable/fail2ban-0.8.4/fail2ban-0.8.4.tar.bz2/download
+				cd ~/Downloads
+				#tar xvfj fail2ban-0.8.4.tar.bz2
+				#cd ~/Downloads/fail2ban*
+				#sudo python setup.py install
+			fi
+		;;
+		
+		gnomerc)
+			cd $HOME
+			file=.config/autostart/gnomerc.desktop
+			echo -e '[Desktop Entry]\nType=Application' > $file
+			echo -e	'Exec=$HOME/.gnomerc & \nX-GNOME-Autostart-enabled=true' >> $file
+			echo -e	'Name[en_US]=.gnomerc\nComment[en_US]=Startup script for gnome' >> $file
+			echo -e	'Name=.gnomerc\nComment=Startup script for gnome' >> $file
+			
+			if [ ! -e .gnomerc ]; then
+				if which escript; then
+					escript .gnomerc . echo
+				else
+					echo -n
+				fi
+			fi
+			chmod u+x .gnomerc
+		;;
+		
+		mrGray)
+			scp sandstone:$software/VISTASOFT/Anatomy/MrGray/mrGray.exe .
+			sudo mv mrGray.exe /usr/local/bin/
+		;;
+		
+		nxclient)
+			if isLinux; then
+				wget `getlinks http://www.nomachine.com/download-package.php?Prod_Id=2573 .*.deb`
+				sudo gdebi --n `latest *.deb`
+			fi
+			if isMac; then
+				wget `getlinks http://www.nomachine.com/download-package.php?Prod_Id=3024 .pkg.zip`
+				tar -xzvf nxclient*.zip
+				sudo installer -pkg nxclient*.pkg -target "/"
+			fi
+		;;
+		
+		Office2007)
+			sandstone=sandstone.irc.utexas.edu
+			#scp $sandstone:$software/MSOffice/Office2007.iso .
+			#scp $sandstone:$software/licenses/MSOffice2007key.txt .
+			mountdir=/media/Office2007
+			sudo mkdir $mountdir
+			sudo mount -t iso9660 Office2007.iso $mountdir -o loop
+			wine /media/Office2007/setup.exe &
+			
+			waituntilwindowopen "Microsoft Office Enterprise 2007"
+			xdotool type `cat MSOffice2007key.txt`
+			xdotool key alt+c
+			sudo umount
+			#			xdotool windowactivate `windowID Microsoft`; xdotool key alt+c
+		;;
+		
+		Office2011)
+			scp sandstone:software/MSOffice/Office2011.* .
+			hdiutil attach Office2011.iso
+		;;
+		
+		SpiderOak)
+			wget `getlinks https://spideroak.com/download/ .*directdownload?platform=ubuntu.*arch=x86_64.*`
+			sudo gdebi --n `latest *.deb`
+		;;
+		
+		synapse)
+			sudo add-apt-repository ppa:synapse-core
+			sudo apt-get update
+			sudo apt-get -y install synapse
+		;;
+		
+		ubuntu-tweak)
+			search=${2:-`Version code`}
+			wget $(getlinks https://launchpad.net/ubuntu-tweak/+download "$search.*.deb$")
+			sudo gdebi --n `latest *.deb`
+		;;
+		
+		VirtualBox)
+			oscode=`Version code`
+			wget `getlinks http://www.virtualbox.org/wiki/Linux_Downloads ".*$oscode.*amd64.*\.deb"`
+			sudo gdebi --n `latest *.deb`
+		;;
+		
+		winetricks)
+			wget http://winetricks.org/winetricks
+			sudo mv winetricks /usr/bin/
+			chmod a+x /usr/bin/winetricks
+		;;
+		
+		Win27)
+			# Find link
+			glink="http://www.google.com/search?q=Win2-7&btnI=I%27m+Feeling+Lucky"
+			wget "`getlinks $glink .*download.php?.*`" -O w.html
+			sed -n 's/.*3 seconds.*href="\(.*\)">Click here.*/\1/p' w.html > link.txt
+			
+			# Download location
+			pDown=`sed -n 's/downloads_folder = \(.*\)/\1/p' $HOME/.tucan/tucan.conf`
+			
+			# Download archive
+			sArchive=`tucan -di link.txt | sed -n 's/.*: \(.*\) correct.*/\1/p'`
+			pArchive=`find "$pDown" -type f -name "$sArchive" | head -n 1`
+			
+			# Make temp dir
+			pTemp=/tmp/Win27
+			mkdir -p $pTemp
+			rm -rf $pTemp/*
+			
+			# Extract
+			file-roller -e $pTemp $pArchive
+			
+			# Install
+			find $pTemp -type f -name GUIInstall.sh -exec bash {} \;
+		;;
+		
+		*)
+			if ! which $1 2>&1 >/dev/null
+			then sudo aptitude -y install $1
+			fi
+		;;
+	esac
+	shift
+done
+

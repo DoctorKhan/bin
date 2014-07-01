@@ -1,0 +1,36 @@
+#!/bin/bash
+
+## Created by khan on Tue May  3 15:33:21 CDT 2011 ##
+
+minargs=0
+if [ "$1" == "--help" ] || [ "$1" == "-h" ] || [ "$#" -lt "$minargs" ]; then echo "Usage: $0"; exit 0; fi
+
+# integer test
+function is_int() { return $(test "$@" -eq "$@" >/dev/null 2>&1); }
+
+#function seq() {
+   declare incr n1 n2 num1 num2
+   if [[ $# -eq 1 ]]; then
+      if ! $(is_int "$1"); then echo 'No integer!'; return 1; fi
+      for ((i=1; i<=${1}; i++)) { printf "%d\n" ${i}; }
+   elif [[ $# -eq 2 ]]; then
+      if ! $(is_int "$1") || ! $(is_int "$2"); then echo 'Not all arguments are integers!'; return 1; fi
+
+      if [[ $1 -eq $2 ]]; then
+         echo $1
+      elif [[ $2 -gt $1 ]]; then
+         for ((i=${1}; i<=${2}; i++)) { printf "%d\n" ${i}; }
+      elif [[ $1 -gt $2 ]]; then
+         for ((i=${1}; i>=${2}; i--)) { printf "%d\n" ${i}; }
+      fi
+
+   elif [[ $# -eq 3 ]]; then
+      num1=${1}
+      incr=${2}
+      num2=${3}
+      #/usr/bin/awk -v n1=${num1} -v n2=${num2} -v add=${incr} 'BEGIN{ for(i=n1; i<=n2; i+=add) print i;}' | /usr/bin/sed 's/.+e.+/0/'
+      /usr/bin/awk -v n1=${num1} -v n2=${num2} -v add=${incr} 'BEGIN{ for(i=n1; i<=n2; i+=add) print i;}' | /usr/bin/sed -E '/e/s/^.+e.+$/0/'
+   fi
+exit 0
+#   return 0
+#}

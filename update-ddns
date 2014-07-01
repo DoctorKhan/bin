@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon Jun  6 19:44:06 CDT 2011 ##
+#####################################################
+
+### Help Text
+Usage="Usage: `basename $0`"
+if isHelp 0 $0 "$@"; then echo $Usage; exit 0; fi
+
+###
+ddclient -file $HOME/.ddclient.conf
+if ddns-check -q; then
+	if [ "$1" == "-v" ]; then
+		echo Succeeded.
+		whatsmyip
+	fi
+	exit 0
+else
+	if [ "$1" == "-v" ]; then echo Failed.; fi
+	exit 1
+fi
+
+

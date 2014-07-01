@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#
+## Created by khan on Thu May 19 13:13:02 CDT 2011 ##
+#
+
+es vi $@

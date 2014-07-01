@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ "$1" == "id" ]; then
+	printf "0x%08x\n" `xdotool getactivewindow`
+elif [ "$1" == "otherwindows" ]; then
+	wmctrl -l | grep -v `xget id`
+fi
+

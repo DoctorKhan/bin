@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Oct 20 10:35:57 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-host
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pHost="$HOME/.vnc/vnchost.txt"
+if [ ! -e "$pHost" ]; then
+	vnc-hosts | head -n 1 > "$pHost"
+fi
+
+sHost=`cat $pHost`	
+
+## Main
+if (($#==0)); then
+	echo $sHost
+else
+	ssh -X $sHost "$@"
+fi

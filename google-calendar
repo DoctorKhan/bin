@@ -1,0 +1,6 @@
+#!/bin/bash
+prism-google-calendar
+waitUntilWindowOpens "Google Calendar"
+sleep 0.5
+wmctrl -a "Google Calendar"
+

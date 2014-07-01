@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jul 29 01:46:42 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: UniqueOpts
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+pRaw=/tmp/Raw
+pUniq=/tmp/Uniq
+
+while read line; do echo $line; done 
+exit 0
+#| GetOptions  > $pRaw
+
+cat $pRaw | sed 's/.*\-\([^ ]*\)[ =]*.*/\1/g' | Unique > $pUniq
+
+cat $pUniq | while read opt; do
+	grep $opt $pRaw | while read line; do
+		echo `echo $line | wc -w`:$line
+	done | tail -n 1 | cut -d : -f 2
+done

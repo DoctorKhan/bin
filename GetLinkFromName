@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Nov 13 09:43:20 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetLinkFromName -u <URL> -q <Link Name>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Arguments
+
+## Defaults
+
+## Initialize
+sURL=`ParseOpt u $@`
+sQuery=`ParseOpt q $@`
+
+## Validation
+
+## Functions
+
+## Main
+iLine=`GetLinkNames "$sURL" | grep -i "$sQuery" | head -n 1 | word 1 .`
+AllLinks "$sURL" | Line $iLine
+

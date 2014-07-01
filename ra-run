@@ -1,0 +1,67 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Jan 18 09:17:02 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ra-run
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+
+# Uncomment the second RA_HOME if you are using the .readahead stuff from jdong
+# and prefer to have commands cached at login/boot time
+#RA_HOME=$HOME/.readahead-app
+RA_HOME=$HOME/.readahead
+
+if [ "$1" != "" ] ; then
+	APP=`basename $1`
+	APP_NAME=$APP
+else
+	# Called from a symlink.  Resolve it
+	CMD=`basename $0`
+	SCRIPT=`which $CMD`
+	
+	for i in `which -a $CMD` ; do
+		if [ "$i" != "$SCRIPT" ] ; then
+			APP_NAME=`basename $i`;
+			APP=$i;
+			break
+		fi
+	done
+fi
+
+RA_FILE=$RA_HOME/$APP_NAME
+
+if [ -e $RA_FILE ] ; then
+	# We've already made the readahead file.  Load it and exec the app
+	readahead-list $RA_FILE
+	exec $APP
+else
+	if [ "$USER" != "root" ] ; then
+		echo "Error: The first time you run ra-run.sh for an app, you must run it with sudo."
+		exit 1;
+	fi
+	
+	mkdir -p $RA_HOME
+	
+	readahead-watch -o $RA_FILE /
+	
+	# This isn't optimal but, it accounts for apps that immediately go into the
+	# background like oowriter
+	echo "Running ra-run for $APP for the first time.  Please exit the app once it starts and wait up to 30 seconds for data to written."
+	
+	sudo -E -u $SUDO_USER $APP &
+	
+	sleep 30
+	killall readahead-watch
+	chown ${SUDO_USER}:${SUDO_USER} $RA_HOME -R
+fi

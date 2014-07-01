@@ -1,0 +1,21 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Sep 2 17:08:16 CDT 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: vnc-kill
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+sHost=$1; shift
+## Functions
+
+## Main
+for iPort; do sCom="vncserver -kill :$iPort; $sCom"; done
+ssh $sHost $sCom

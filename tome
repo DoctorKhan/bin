@@ -1,0 +1,10 @@
+#!/bin/bash
+echo "Please do not reply to this email." > emailme.info
+echo " " >> emailme.info
+echo "The following files are being displayed:" >> emailme.info
+echo $@ >> emailme.info
+echo "-------------------" >> emailme.info
+echo " " >> emailme.info
+cat emailme.info $@ | mail -s "$1" reswanul@gmail.com
+rm -f emailme.info
+

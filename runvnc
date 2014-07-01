@@ -1,0 +1,110 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jun 26 21:25:20 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: runvnc <windowname> <size> <x-loc> <y-loc>
+#######################################################
+
+source $HOME/.vnc/`cat $HOME/.vnc/session`/session.sh
+
+function ValidateArgs()
+{
+	if ! regmatch $Geometry '^[0-9]*x[0-9]*$'; then
+		exit 1
+	fi
+}
+
+function LoadSession()
+{
+	pConf=$HOME/.vnc/`cat $HOME/.vnc/session`/tiger.conf
+	sed 's/ *= */=/g' $pConf |\
+	while read line; do
+		eval $line
+	done
+}
+
+function RunCommand()
+{
+	# Set command
+	sArgs="$sOpts -geometry +$X+$Y \
+	-DesktopSize $Geometry -passwd $PasswordFile \
+	-via $Username@$Host $Host:$Port"
+	date >> $pLog
+	eval "$pTiger $sArgs" 2>&1 >> $pLog &
+	WaitForWindow -t 5 -w "$sWinName"
+}
+
+function FixConnection()
+{
+	## Fix connection issues
+	for iFix in {1..6}; do
+		if FixVNCLock; then RunCommand; else break; fi
+	done
+	RunCommand
+}
+
+function Recalibrate()
+{
+	if (( $XDes == 0 )) && (( $YDes == 0)); then return; fi
+	
+	xn=`xLoc "$sWinName"`
+	yn=`yLoc "$sWinName"`
+	
+	if (( $xn != $XDes )) || (( $yn != $YDes )) ; then
+		dx=$((xn-XDes))
+		dy=$((yn-YDes))
+		XCor=`GetLoc XCor`
+		YCor=`GetLoc YCor`
+		
+		XCor=$((XCor-dx))
+		YCor=$((YCor-dy))
+		
+		SetLoc XCor $XCor YCor $YCor
+	fi
+}
+
+pVnc=$HOME/.vnc
+pLast=$pVnc/last
+pLog=$pVnc/runvnc.log
+
+sConf=`$pLast`
+pConf=$HOME/.vnc/$sConf.conf
+
+LoadSession
+
+sOpts=`echo $@ | grep -o '\-[^ ]*=[^ ]*'`
+sArgs=`echo $@ | sed 's/-[^ ]*=[^ ]*//g'`
+set $sArgs
+
+XDes=0
+YDes=0
+X=0
+Y=0
+
+XCor=`GetLoc xc`
+YCor=`GetLoc yc`
+
+sWinName=${1:-TigerVNC:}
+
+if WindowIsOpen "$sWinName"; then
+	XDes=${3:-`xLoc "$sWinName"`}
+	YDes=${4:-`yLoc "$sWinName"`}
+	
+	X=$((XDes + XCor)); Y=$((YDes + YCor));
+	Geometry=${2:-`WinSize x "$sWinName"`}
+	#else
+	#	X=${X:-`GetLoc X`}
+	#	Y=${Y:-`GetLoc Y`}
+fi
+
+pTiger=${pTiger:-`whichtiger -v`}
+
+# Main
+ValidateArgs
+RunCommand
+Recalibrate
+FixConnection
+

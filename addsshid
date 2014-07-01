@@ -1,0 +1,21 @@
+#!/bin/bash
+
+host=$1
+
+cd
+
+if [ ! -f .ssh/id_rsa ]; then
+	echo "Press enter when prompted for location. Then enter a password of your choice."
+	ssh-keygen
+fi
+
+if [ `ssh-add -l | grep -ic 'no identities'` -gt 0 ]; then
+	ssh-add
+fi
+
+if [ `ssh -o BatchMode=yes -o StrictHostKeyChecking=no $host echo Accepted | grep -ic Accepted` == 0 ]; then
+	ssh $host addsshkey .ssh/id_*.pub
+fi
+
+if [ `ssh -o BatchMode=yes -o StrictHostKeyChecking=no $host echo Accepted | grep -ic Accepted` == 0 ]; then exit 1; fi
+

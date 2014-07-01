@@ -1,0 +1,7 @@
+#!/bin/bash
+for i in $(seq 1 $@);
+
+do 
+	echo "KeyStrPress BackSpace" | xmacroplay -d 0:0 &> /dev/null
+	echo "KeyStrRelease BackSpace" | xmacroplay -d 0:0 &> /dev/null
+done

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if $HOME/bin/isHost gauss via nx; then
+	/usr/share/screenlets-manager/screenlets-daemon.py
+elif [ `ps aux | grep '/screenlets/' | grep -icv grep` != 0 ]; then
+	ps aux | grep '/screenlets/' | grep -iv grep | awk '{print $2}' | xargs kill -9
+fi
+

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jan 30 00:46:24 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: syncBoth
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+## Main
+syncFile .DeleteMe
+
+pSynced=`create -new /tmp/nSyncs`
+pQueue=`create -new /tmp/SyncQueue`
+
+vsHosts=${@:-`otherhosts`}
+echo $vsHosts | tr ' ' '\n' | sort > $pQueue
+nHosts=`echo $vsHosts | wc -w`
+
+for sHost in  $vsHosts; do
+	SyncHost $@ $sHost &
+done
+
+iHost=0
+while ((iHost < nHosts)); do
+	sHost=`comm -3 $pQueue $pSynced | head -n 1 | word 1 .`
+	iHost=$((`cat $pSynced | wc -l | tr -d '\t '`+1))
+	Progress $iHost $nHosts syncBothBar syncing host
+	echo -en "Syncing $sHost ($iHost/$nHosts)\r" | tr -s '\t' ' '
+	#sleep 1
+done
+echo "Complete.                                                 "
+
+#-a = -rlptgoD
+

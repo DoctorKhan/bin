@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue May 24 17:42:22 CDT 2011 ##
+#####################################################
+
+# x1 y1 x2 y2
+# UpperLeft = (x1, y1), LowerRight = (x2, y2).  y increases downward
+
+case $# in
+	0|1) echo 'tell application "System Events"
+				set frontApp to name of first application process whose frontmost is true
+			end tell
+
+			tell application frontApp
+				bounds of front window
+		end tell'
+	;;
+	2) echo 'tell application "'$1'"
+			bounds of window '${2:-1}'
+			end tell'
+			;;
+esac | osascript | tr -d ','
+
+#			tell application frontApp
+#			if the (count of windows) is not 0 then
+#				set window_name to name of front window
+#			end if
+#			end tell

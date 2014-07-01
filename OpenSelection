@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 11 08:45:28 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: OpenSelection
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+if [[ `ActiveWindow Class` == Vncviewer ]]; then
+	pressCtrl d
+else
+	pFile=`GetSelection`
+	if [ -z $pFile ];   then pFile=`GetSelection Click`; fi
+	if [ ! -z $pFile ]; then es "$pFile"; fi
+fi

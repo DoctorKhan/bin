@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Wine 1.2 has an issue with editing directories/filenames with spaces
+# This solve the problem by copying the files to one with no spaces.
+
+Office POWERPNT.EXE "$@"
+
+exit 0
+Executable=POWERPNT.EXE
+DriveC="$HOME/.wine/drive_c"
+
+SourcePathname="`fullpathname "$@"`"
+SourceFilename="`basename "$SourcePathname"`"
+
+Filename=`echo $SourceFilename | tr ' ' '-'`
+Filename2="`uniqueName`-$Filename"
+
+Pathname="$DriveC/$Filename"
+Pathname2="$DriveC/$Filename2"
+
+# If the target temporary filename exists, then use a timestamped
+# filename instead
+if [ -e "$Pathname" ]; then
+	Filename="`uniqueName`-$Filename"
+	Pathname="$DriveC/$Filename"
+fi
+
+# Copy file to be edited to target directory
+cp -v "$SourcePathname" $Pathname >> /tmp/dbg.txt
+# Reference file
+cp -v $Pathname $Pathname2 >> /tmp/dbg.txt
+
+# Run
+wine "C:\Program Files\Microsoft Office\Office12\\$Executable" "C:/$Filename"
+
+# If a change to the file has been made, then copy it back to the source
+if [ `diff $Pathname $Pathname2 | grep -ic differ` != 0 ]; then
+	cp -v $Pathname "$SourcePathname" >> /tmp/dbg.txt
+fi
+
+# Clean up
+rm $Pathname $Pathname2
+
+# Debugging
+echo $SourcePathname >> /tmp/dbg.txt
+echo $SourceFilename > /tmp/dbg.txt
+echo $Pathname >> /tmp/dbg.txt
+echo $Pathname2 >> /tmp/dbg.txt
+
+# Move any printed PDFs
+if [ `ls -1 $HOME/PDF | wc -l` == "1" ]; then
+	cupsPDFrenamer $SourcePathname
+fi
+

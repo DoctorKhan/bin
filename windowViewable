@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ $# == 1 ]; then
+	if [ `wmctrl -l | grep -c "$1"` == 0 ]; then
+		echo 0
+	else
+		echo 1
+	fi
+else
+	shift; shift; shift
+	v="$@"
+	xwininfo -name "$v" 2>&1 | grep -c 'IsViewable'
+fi
+

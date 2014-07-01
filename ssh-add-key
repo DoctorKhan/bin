@@ -1,0 +1,21 @@
+#!/bin/bash
+cd $HOME
+
+if [ ! -d .ssh ]; then mkdir .ssh ; fi
+
+if [ $# == 0 ]; then
+	cat id_*.pub >> .ssh/authorized_keys
+	rm -f id_*.pub
+else
+	echo -e "$@" >> .ssh/authorized_keys
+fi
+
+chmod go-w $HOME
+chmod go-rwx .ssh
+
+cd .ssh
+
+chmod go-rwx *
+chmod u=rw *
+chmod go=r id_*.pub known_hosts
+

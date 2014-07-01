@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Sep 17 22:29:29 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SortOptions <opt> <opt file>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+sOpt="$1"
+
+if [[ "$2" == "word"]]; then 
+	sType=w;
+else
+	sType=m
+fi
+
+StrTrim | grep "^$sOpt *[= ]" |\
+while read sOptLine; do
+	sOpt=`printf "%s\n" | word 1 ' ' =`
+	sVal=`printf "%s\n" | word 2- ' ' =`
+	nChars=`printf "%s\n" "$sOpt" | word 1 ' ' = | wc -$sType`
+	echo $nChars $sOpt $sVal
+done | sort -n | word 2- | StrTrim

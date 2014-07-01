@@ -1,0 +1,4 @@
+#!/bin/bash
+#echo "3dcode $1 $1.3d"
+3dcode $1 $1.3d
+

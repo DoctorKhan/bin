@@ -1,0 +1,40 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Wed Oct 5 18:48:42 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: FindResourceFiles
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+######################################################
+
+function Classify()
+{
+	while read line; do
+		if [[ "${line:(-1)}" == "~" ]]; then continue; fi
+		#nLine=$((`tput cols` - 10))
+		#line=${line:0:$nLine}
+		#iExcess=$((${#sPrev} - ${#line} + 10))
+		printf "%5s %s %s\n"  "`tester isMacResource $line` : ${line}"
+		#sPrev=$line
+	done
+}
+
+sDb=/export/data/software/databases/MacResources.txt
+
+if [ $# == 0 ]; then
+	exit 0
+fi
+
+if [ "$1" == "-u" ]; then
+	locate -e ._ | grep '/\._'
+	locate -er /__MACOSX$
+else
+	find `fileparts 1 $@` -name '._*'
+	find `fileparts 1 $@` -name '__MACOSX'
+fi | Classify | tee $sDb

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri May 27 12:30:43 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+factor=1.1
+
+y=`ySize`
+y=`echo $y \* $factor | bc`
+echo xdotool getactivewindow windowsize `xSize` $y
+xdotool getactivewindow windowsize `xSize` $y
+

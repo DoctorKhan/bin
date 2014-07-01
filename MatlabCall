@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jul 8 10:53:53 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MatlabCall
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+matlab_exec=matlab
+X="${1}(${2})"
+echo ${X} > matlab_command_${2}.m
+cat matlab_command_${2}.m
+${matlab_exec} -nojvm -nodisplay -nosplash < matlab_command_${2}.m
+rm matlab_command_${2}.m

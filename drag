@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ "$1" == "$3" ]; then
+	dragVert $1 $2 $3 $4
+else
+	moveMouse $1 $2
+	xdotool mousedown 1
+	m=`echo "scale=10; ($4 - $2) / ($3 - $1)" | bc`
+	if [ $3 -gt $1 ]; then 
+		dx=10
+	else 
+		dx=-10
+	fi
+
+#dx=$( echo "scale=5; .2 / ( $3 - $2 )" | bc)
+   for x in `seq $1 $dx $3`;
+        do
+		y=`echo "$m * ($x - $1) + $2" | bc`
+	moveMouse $x $y
+        done  
+
+	moveMouse $3 $4
+	xdotool mouseup 1
+fi

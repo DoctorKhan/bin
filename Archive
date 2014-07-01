@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed Jun 8 10:47:03 CDT 2011 ##
+#####################################################
+
+##################### Help Text #####################
+script=`basename $0`
+Usage="Usage: $script"
+if isHelp 0 $0 "$@"; then echo $Usage; exit 0; fi
+#####################################################
+
+cd `ExportPath software archives`
+
+if [ $# == 0 ]; then
+	fullpathname `latest *.tgz`
+else
+	fullpathname `ls | grep "$@"`
+fi
+

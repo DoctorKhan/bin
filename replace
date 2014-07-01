@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# desc:
+#     Replace text within a file based on a regexp
+#
+# options:
+#     -v: make the ouput more verbose
+#     -h: show basic usage
+#
+# usage:
+#     replace.bash [OPTIONS] <NEEDLE> <HAYSTACK> [FILES]...
+#     $ replace.bash bash zsh /etc/passwd
+#
+# todo:
+#     The whole ISEXE thing really needs fixing so that
+#     the original file props. are the same on finish.
+#
+# author:
+#     Phil Jackson (phil@shellarchive.co.uk)
+
+VERBOSE=0
+CURRENT=0
+usage="${0##*/} [+-vh} [--] <find> <replace> <files..>"
+
+while getopts :vh OPT; do
+	case $OPT in
+		v|+v)
+			VERBOSE=1
+		;;
+		h|+h)
+			echo ${usage} >&2
+		;;
+		*)
+			echo ${usage} >&2
+			exit 2
+		;;
+	esac
+done
+
+shift $[OPTIND - 1]
+
+# check our real args
+if [ ${#} -lt 3 ]; then
+	echo ${usage} >&2
+	exit 2
+fi
+
+FIND="${1}"
+REPLACE="${2}"
+shift; shift
+
+for file in "${@}"; do
+	if [ ${VERBOSE} != 0 ]; then
+		echo "Processing ${file}:"
+		MVOPTS="-v"
+	fi
+	
+	perl -pe "s/${FIND}/${REPLACE}/g" -i "${file}"
+done
+

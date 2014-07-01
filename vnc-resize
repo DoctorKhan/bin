@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 24 13:48:11 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-size
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sTitle=`xwininfo -root -tree | grep TigerVNC | head -n 1 | cut -d \" -f 2 | cut -d ' ' -f 1`
+sRes=${sTitle}.res
+sHost=${sTitle%%:*}
+
+## Functions
+
+## Main
+viSize=${1:-`head -n 1 /dev/stdin`}
+ssh $sHost "echo $viSize > .vnc/$sRes"

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed May 25 12:25:36 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+ids=`xwininfo -root -tree | grep -i firefox | awk '{print $1}'`
+
+function Viewable() {
+   for id in $ids; do
+      xwininfo -id $id | grep 'Map State' | sed "s/.*:/$id/g"
+   done
+}
+
+Viewable | grep -v UnMapped | awk '{print $1}' | while read id; do
+   xwininfo -id $id
+done
+

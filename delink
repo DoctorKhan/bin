@@ -1,0 +1,11 @@
+#!/bin/bash
+destFile=/usr/local/bin/`fileparts 6 $1`
+rm -f $destFile
+
+shift
+if [ $# == 0 ]; then
+	exit 0
+else
+	delink $@
+fi
+

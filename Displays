@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue May 31 17:22:01 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Displays
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+if [[ "$1" != "+" ]]; then
+	sForm=" | tr '+' ' ' | tr 'x' ' '"
+else
+	shift
+fi
+
+if isMac; then
+	screens="MacRes"
+else
+	screens="xrandr | grep ' connected' | pill 3"
+fi
+
+if isInt $1; then
+	line=$1; shift
+	screens="$screens | sed -n ${line}p"
+fi
+
+if isHost gauss && isLinux; then
+	screens="echo 1920x1280"
+fi
+
+case "$1" in
+	w)   screens="$screens | pill 1 x" ;;
+	l|h) screens="$screens | tr '+' 'x' | pill 2 x" ;;
+	wl)  screens="$screens | pill 1 +" ;;
+	x)   screens="$screens | pill 2 +" ;;
+	y)   screens="$screens | pill 3 +" ;;
+	xy)  screens="$screens | grep -o '+.*'" ;;
+esac
+
+eval "$screens$sForm" 2>/dev/null
+

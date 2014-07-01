@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#
+## Created by khan on Mon May 16 19:04:46 CDT 2011 ##
+#
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+echo 'tell application "'$1'"
+	set the bounds of the first window to {'$2', '$3'}
+end tell' | osascript
+

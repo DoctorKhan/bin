@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [[ $1 == -* ]]; then	sOpt=$1; shift; fi
+if [[ $sOpt == -*u* ]]; then UpdateHostStatus; fi
+if [ ! -d $HOME/bin ]; then	mkdir -p $HOME/bin; fi
+
+for sHost in `cat $HOME/bin/hosts.up`; do
+	rsync -lptgoDuvzd --exclude='*~' --exclude='.*' $sHost:bin/ $HOME/bin/
+	rsync -lptgoDuvzd --exclude='*~' --exclude='.*' $HOME/bin/ $sHost:bin/
+done
+
+find $HOME/bin -mindepth 2 -delete
+find $HOME/bin -mindepth 2 -delete
+find $HOME/bin -mindepth 1 -type d -delete
+
+if [[ $sOpt == -*s* ]]; then syncSettings $@; fi

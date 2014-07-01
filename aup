@@ -1,0 +1,8 @@
+#!/bin/bash
+dir=`pwd`
+flags="-avzHu $@ --exclude '*~' -e ssh"
+host="khan@amygdala.irc.utexas.edu"
+echo Uploading from $dir to $host...
+#echo rsync $flags $dir $host:`dirname $dir`
+rsync $flags $dir $host:`dirname $dir`
+

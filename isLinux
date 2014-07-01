@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu May 12 21:17:53 CDT 2011 ##
+#####################################################
+
+function GetName() 
+{
+	if [ $# == 0 ]; then 
+		uname
+	else
+		ssh "$1" uname
+	fi
+}
+
+test "`GetName $@`" == "Linux"
+exit $?
+

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 16 22:14:49 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WinMove [id] <x> <y>
+#######################################################
+
+if [ $# == 3 ]; then
+	xId=`WindowID "$1"`; shift
+else
+	xId=`ActiveWindowID`
+fi
+
+x1=$1
+y1=$2
+
+sFile=$HOME/.xdotool/calibration
+
+if [ -e $sFile ]; then
+	dx=`cat $sFile | awk '{print $1}'`
+	dy=`cat $sFile | awk '{print $2}'`
+#	echo "$xId"
+	x=$((x1+dx))
+	y=$((y1+dy))
+	xdotool windowmove $xId $x $y
+	# 2>/dev/null
+else
+	xdotool-calibration
+fi

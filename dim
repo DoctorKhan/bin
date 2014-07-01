@@ -1,0 +1,14 @@
+#!/bin/bash
+if isHost Aspire; then
+	iMax=`cat /sys/class/backlight/intel_backlight/max_brightness`
+	iInc=$((iMax/10))
+	iCur=`cat /sys/class/backlight/intel_backlight/brightness`
+	iBri=$((iCur-iInc))
+	if ((iBri<0)); then iBri=0; fi
+	echo $iBri > /sys/class/backlight/intel_backlight/brightness
+elif isHost Gauss; then
+	sudo backlight 12
+else
+	sudo /home/khan/bin/sonybright down
+fi
+

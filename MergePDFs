@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Oct 29 23:16:41 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MergePDFs <file 1> ... <file n> <output file>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+until [ $# == 1 ]; do
+#	if ! file $1 | grep -iq PDF; then
+#		vpConv="$vpConv $1"
+		vpFiles="$vpFiles $1"
+#	fi
+	shift
+done
+pFinal="$1" # Last argument
+
+## Main
+pdftk $vpFiles cat output "$pFinal"
+
+# Wait for merge completion
+wait4 ls "$pFinal"

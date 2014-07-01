@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /home/khan/Programs/flyback/src
+./flyback.py
+

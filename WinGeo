@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 18 09:27:09 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WinGeo
+#######################################################
+
+## Arguments
+eval `ParseOpt -s -w :: $@`
+
+xWin=${w:-`echo $@ | sed 's/ -.*//'`}
+xWin=${xWin:-`ActiveWindowID`}
+
+## Initialize
+iNum='[0-9]*'
+
+## Main
+xwininfo -root -tree | grep "$xWin" | head -n 1 |\
+sed "s/.* \($iNum\)x\($iNum\)+$iNum+$iNum *+\($iNum\)+\($iNum\)$/\1 \2 \3 \4/"
+
+#if ParseOpt s $@; then

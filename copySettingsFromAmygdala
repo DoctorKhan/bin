@@ -1,0 +1,3 @@
+#!/bin/bash
+/media/amygdala/bin/copySettings /media/amygdala ~
+

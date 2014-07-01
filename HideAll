@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+   window=GnoMenu
+else
+   window=$@
+fi
+
+waituntilwindowopen 5 s "$window"
+
+xwininfo -root -tree | grep -i "$window" | awk '{print $1}' | while read id; do
+   if isViewable $id ; then
+      xdotool windowunmap `hex2dec $id`
+   fi
+done
+

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr  7 16:49:15 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then
+	echo "Usage: isValidDomain <domain>"
+fi
+
+exit `nslookup $@ | grep -ic "can't find"`
+

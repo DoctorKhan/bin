@@ -1,0 +1,40 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Mar 6 23:00:40 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: FixSources
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+echo -n Identifying bad sources...
+sudo apt-get update 1>/dev/null 2>/tmp/apterr
+
+echo Parsing...
+grep -o http.* /tmp/apterr | sed 's,.*//,,g' | word 1 | sed -e 's,/\([^/]*\)/[^/]*/[^/]*$, \1,g' -e 's,/dists/, ,g' | tee /tmp/aptgrep
+
+echo -n Searching for source lines... 
+cat /tmp/aptgrep | while read line; do
+	grep -Ins "$line" /etc/apt/sources.list /etc/apt/sources.list.d/* | grep -v '#'
+done > /tmp/aptfix
+
+echo Fixing...
+cat /tmp/aptfix | while read cline; do
+	sLine=`echo $cline | word 3- :`
+	iLine=`echo $cline | word 2 :`
+	pFile=`echo $cline | word 1 :`
+	echo $cline
+	sid "${iLine}s,.*,#$sLine,p" "$pFile"
+done
+
+echo Done.

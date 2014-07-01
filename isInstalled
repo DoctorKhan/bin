@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu May 12 21:39:58 CDT 2011 ##
+#####################################################
+
+## Main
+if [ -z `which $@` ]; then
+	exit 1
+fi
+
+# apt-cache search wmctrl | grep -q "^wmctrld "

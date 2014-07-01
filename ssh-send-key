@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ $# == 0 ]; then
+	host=sandstone
+else
+	host=$1
+fi
+
+sPubFile=$HOME/.ssh/*.pub
+pubkey=`cat $sPubFile`
+
+/usr/bin/ssh $host "mkdir -p .ssh;
+echo $pubkey >> .ssh/authorized_keys;
+echo $pubkey >> .ssh/authorized_keys2;
+chmod go-w \$HOME;
+chmod -R u=rwx,go= .ssh;
+cd .ssh; chmod u=rw *;
+chmod go=r id_*.pub known_hosts"
+

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jul 4 22:06:35 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: EdgeWatcher
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+xdotool behave_screen_edge left exec Rotator
+xdotool behave_screen_edge right exec Rotator
+

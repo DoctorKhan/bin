@@ -1,0 +1,94 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Jul 13 22:47:04 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: TigerResizer
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+
+## Initialize
+pLast=$HOME/.vnc/last
+
+pCal=`create $HOME/.vnc/calibration`
+viCal=`cat $pCal`
+
+dt=2
+
+## Functions
+
+function Resize() {
+	viDims=`RowDiff $@ - $viCal | sed 's/-.*/0/g' | transpose | awk '{print $1"x"$2}'`
+	viSize=`RowDiff $@ - $viCal | sed 's/-.*/0/g' | transpose | awk '{print "+"$3"+"$4}'`
+	echo Calibrate resize: $viDims $viSize
+	
+	viPIDs=`ps aux | vncviewer | grep -v grep`
+	sLast=`echo $sLast | sed -e "s/Size.[0-9x]*/Size $viDims/g" -e "s/+[0-9+]*/$viSize/g"`
+	eval "$pLast" &
+	sleep 3
+	#	until NewInstance; do sleep .2; done
+}
+
+function TigerTitle()
+{
+	sWinTitle=`WinTitle $@ | grep TigerVNC`
+	sWinTitle=${sWinTitle:-`ActiveWindow Title | grep TigerVNC`}
+	sWinTitle=${sWinTitle:-`WinTitle TigerVNC`}
+	echo $sWinTitle
+}
+
+function NewInstance()
+{
+	nNew=`comm -13 <(echo "$viPIDs") <(ps aux | vncviewer | grep -v grep) | wc -l`
+	if ((nNew == 0)) || WindowIsClosed "$sTitle"; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+function SizeChanged()
+{
+	viSizeCur=`WinSize x "$@"`
+	if echo $viSizeCur | grep -q x && [ "$viSizeCur" != "$viSizeInit" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+## Params
+sTitle=`WinTitle ${@:-TigerVNC}`
+sLast=${@:-`cat $pLast`}
+
+## Defaults
+viCal=${viCal:-`CalibrateVNC "$sTitle"`}
+viSizeInit=`WinSize x "$sTitle"`
+sTitle=${sTitle:-`ActiveWindow Title`}
+exit 0
+## Main
+if (($# == 0)); then
+	eval $sLast &
+	WaitForWindow -w TigerVNC
+fi
+
+until WindowIsClosed "$sTitle"; do
+	if isReqMax "$sTitle"; then
+		TigerMaximize
+	fi
+	
+	if SizeChanged "$sTitle"; then
+		sNewGeo=`WinGeo "$sTitle"`
+		echo Size changed: $sNewGeo
+		Resize $sNewGeo
+	fi
+	
+	sleep $dt
+done

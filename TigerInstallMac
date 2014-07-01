@@ -1,0 +1,51 @@
+#!/bin/bash
+
+## Initialize
+cd ~/Desktop
+
+sHost=${1:-`id -un`@sandstone.irc.utexas.edu}
+sLoc=${2:-/export/data/software/TigerVNC}
+
+echo "Downloading TigerVNC. May require password for $sHost."
+dmgloc=`ssh ${sHost} "ls -1t $sLoc/TigerVNC*.dmg | head -n 1"`
+
+scp ${sHost}:$dmgloc .
+dmgname=${dmgloc##*/}
+# Strip extension
+base=${dmgname%.*}
+
+# Mount dmg
+hdiutil attach $dmgname
+
+# Install
+echo Installing TigerVNC, may require user password:
+
+cd /Volumes/$base/
+sudo installer -pkg TigerVNC.pkg -target "/"
+
+# Unmount
+echo Cleaning up...
+hdiutil detach /Volumes/$base -force
+
+# Remove dmg
+rm -f ~/Desktop/$dmgname
+
+# Get support scripts
+sudo mkdir -p /opt/TigerVNC
+sudo scp -r ${sHost}:/export/data/software/TigerVNC/support /opt/TigerVNC/
+sudo chmod a+r,ug+w /opt/TigerVNC/support
+sudo rm /opt/TigerVNC/support/*~
+
+if ! grep -q /opt/TigerVNC/support /etc/bashrc; then
+	echo 'export PATH="/opt/TigerVNC/support:$PATH"' | sudo tee -a /etc/bashrc
+fi
+
+if ! grep -q /opt/TigerVNC/support /etc/csh.cshrc; then
+	echo 'set path=(/opt/TigerVNC/support $path)' | sudo tee -a /etc/csh.cshrc
+fi
+
+sudo ln -s /opt/TigerVNC/bin/vncviewer /usr/bin/vncviewer
+
+touch $HOME/.vnc/update
+
+echo "Type: tiger <user>@<sHost>"

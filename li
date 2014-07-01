@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 14 13:02:28 EDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then
+	 echo "Usage: $0 <case insensitive string>" 
+	 exit 0
+fi
+
+ls -l | grep -i $@
+

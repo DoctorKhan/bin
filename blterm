@@ -1,0 +1,44 @@
+#!/bin/bash
+if [ $# != 0 ]; then
+	title="blterm $1"
+	if [ "$1" == "tc" ]; then
+		govp tc
+	elif [ "$1" == "tr" ]; then
+		govp tr
+	fi
+	shift
+else
+	title="blterm"
+fi
+
+if [ `windowClosed "$title"` == "1" ]; then
+	if [ `xMax` == 1920 ]; then
+		geometry=117x24
+	else
+		geometry=77x15
+	fi
+	gnome-terminal --geometry=$geometry+0-0 --title="$title"&
+
+	waitUntilWindowOpens "$title"
+	wmctrl -a "$title"
+
+	if [ $# != 0 ]; then
+		xtype "cd ~/$1"; pressReturn
+		shift
+	fi
+
+	if [ $# != 0 ]; then
+		if [ "$1" == "downsize" ]; then
+			if isHost albert; then
+				wmctrl -r "$title" -e 0,0,524,635,290
+			elif isHost via nx; then
+				wmctrl -r "$title" -e 0,0,524,637,251
+			fi
+		else
+		xtype "$1"; pressReturn
+		fi
+	fi
+fi
+
+wmctrl -a "$title"
+

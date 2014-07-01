@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Oct 30 13:37:54 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: PrintTemplate <in dir>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+for sArg; do
+	if [ -d "$sArg" ]; then
+		cd "$sArg"
+	fi
+done
+
+## Initialize
+pFinal=Merged55.pdf
+if [ -e $pFinal ]; then
+	mv $pFinal $pFinal~
+fi
+
+pScreen=screen
+pTemplate=Template
+
+## Main
+# Convert docs to pdfs
+p2pdf $pScreen.png page-ranges=1
+p2pdf $pTemplate.ods page-ranges=1
+
+# Merge the PDFs
+MergePDFs $pScreen.pdf $pTemplate.pdf $pFinal
+
+rm -f $pScreen.pdf
+mv $pFinal $pTemplate.pdf
+
+if ! ParseOpt d $@; then
+	Print $pTemplate.pdf
+fi

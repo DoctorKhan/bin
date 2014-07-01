@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Sep 25 15:17:57 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Highlight
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+pFile=`ParseOpt f $@`
+viLines=`ParseOpt l $@ | tr ' ' '\n'`
+
+nLines=`cat $pFile | wc -l`
+
+for ((iLine=1; iLine<=nLines; iLine++)); do
+	line=`sed -n "${iLine}p" "$pFile"`
+	
+	if grep -q $iLine <(echo "$viLines"); then
+		echo -e "\033[1;7m${line}\033[0m"
+	else
+		printf "%s\n" "$line"
+	fi
+done

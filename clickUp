@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "ButtonRelease 1" | xmacroplay -d 0:0

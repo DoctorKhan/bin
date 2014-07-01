@@ -1,0 +1,51 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Aug 29 09:09:46 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: XResizer
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+xn=0; yn=0
+sOutput=`xrandr | sed -n 's/\(.*\) connected.*/\1/p'`
+xm=`xrandr | sed -n 's/.*maximum \([0-9][0-9]*\).*/\1/p'`
+ym=`xrandr | sed -n 's/.*maximum [0-9][0-9]* x \([0-9][0-9]*\)/\1/p'`
+
+## Functions
+function Main() {
+	while read line; do
+		if echo $line | grep -q ButtonPress; then
+			read line
+			xn=`echo $line | tr -s '(),' ' ' | awk '{print $7}'`
+			yn=`echo $line | tr -s '(),' ' ' | awk '{print $8}'`
+			break
+		fi
+	done
+	while read line; do
+		case $line in
+			*MotionNotify*)
+				read line
+				x=`echo $line | tr -s '(),' ' ' | awk '{print $7}'`
+				y=`echo $line | tr -s '(),' ' ' | awk '{print $8}'`
+				viRes=`echo $xm $x $xn $ym $y $yn | awk '{print int($1*$2/$3+0.5),int($4*$5/$6+0.5)}'`
+				#				vScale=`echo $x $xn $y $yn | awk '{print $1/$2"x"$3/$4}'`
+				#				xrandr --output $sOutput --scale $vScale
+				echo $viRes
+			;;
+			*ButtonRelease*)
+				XResize $viRes
+			break ;;
+		esac
+	done
+}
+
+## Main
+xev | Main
+#viRes=`xev | Main | tail -n 1`
+# | while read line; do XResize $line; done

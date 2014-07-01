@@ -1,0 +1,74 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Nov 4 20:42:28 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: vnc-ssh
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+if ssh-add -l 2>&1 | grep -q Could; then
+	. ssh-agent bash
+fi
+
+# Check if key exists
+if [ ! -f ~/.ssh/id_rsa ]; then
+	echo "Enter a password of your choice."
+	ssh-keygen -f ~/.ssh/id_rsa
+fi
+
+# If no identities added
+if ! ssh-add -l | grep -q $HOME; then
+	pEnvir="$HOME/.ssh/environment"
+	# Start agent if necessary
+	if ! ps h -p `echo $SSH_AGENT_PID` &>/dev/null; then
+		if [ ! -f $pEnvir ]; then
+			ssh-agent | grep -v echo > $pEnvir
+			chmod a+rx "$pEnvir"
+		fi
+		. "$pEnvir"
+	fi
+	
+	if ! ps h -p `echo $SSH_AGENT_PID` &>/dev/null; then
+		ssh-agent | grep -v echo > $pEnvir
+		chmod a+rx "$pEnvir"
+		. "$pEnvir"
+	fi
+	
+	# Add identity if necessary
+	if ! /usr/bin/ssh-add -l | grep -q $HOME; then
+		SSH_ASKPASS=$HOME/.sshp /usr/bin/ssh-add </dev/null
+	fi
+fi
+
+pList=`mktemp -t plist.XXXXXX`
+sList=`mktemp -t plist.XXXXXX`
+
+# Validate
+pPass="$pDir/$server.passwd"
+	
+echo "Validate SSH connection..."
+	
+if ! /usr/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes $server echo -n ; then
+	echo "Uploading public key..."
+	sPubFile=$HOME/.ssh/*.pub
+	pubkey=`cat $sPubFile`
+	/usr/bin/ssh $server "mkdir -p .ssh;
+	echo $pubkey >> .ssh/authorized_keys;
+	echo $pubkey >> .ssh/authorized_keys2;
+	chmod go-w \$HOME;
+	chmod -R u=rwx,go= .ssh;
+	cd .ssh; chmod u=rw *;
+	chmod go=r id_*.pub known_hosts"
+fi
+

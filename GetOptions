@@ -1,0 +1,135 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jul 26 21:28:50 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetOptions <Number> [Query] <Arguments>
+
+# *)  -option value (multiple lines)
+# 1)  -option value (one line)
+# 2)  -option value (query)
+# 3)  -option value (removed)
+
+# 4)  1024x768
+# 5)  +0+0
+
+# 6)  user@host:port
+# 7)  user@host
+# 8)  host:port
+
+# 9)  user
+# 10) host
+# 11) port
+# 12) path
+
+#######################################################
+if [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+sType=$1; shift
+sQuery=`echo "$@" | sed 's/-/\n-/g' | grep -v '-'`
+sPrefix=`echo "$@" | sed 's/-/\n-/g' | grep '\-prefix' | word 2-`
+sSuffix=`echo "$@" | sed 's/-/\n-/g' | grep '\-suffix' | word 2-`
+
+function ReadInput()
+{
+	if [ ! -f ReadInput.txt ]; then
+		while read line; do
+			echo $line
+		done | StrTrim |\
+		sed 's/.*vncviewer/-Executable &/g' | grep -o '\-[^-]*' | tr '=' ' ' |\
+		sed -e 's/^\([^ ]* [^ ]*\) \([^$].*\)/\1\n\2/g' | sed -e 's/\(.*:.*\)/-Hostport \1/' \
+		-e 's/-q /\-QualityLevel=/g' > ReadInput.txt
+	fi
+	cat ReadInput.txt
+	
+}
+
+function QueryInput()
+{
+	if (($# > 0)); then
+		ReadInput | grep -i "$1" | word 2-
+	else
+		echo Must supply query. > /dev/stderr
+	fi
+}
+
+function HandleTypes()
+{
+	case `lower $sType` in
+		# -option value (one line)
+		1|single) ReadInput | tr '\n' ' ' | sed 's/ *$/\n/g' ;;
+		
+		# -option value (query)
+		2|query)
+			QueryInput "$sQuery"
+		;;
+		
+		# -option value (removed)
+		3|*removed) ReadInput | sed -e 's/-[^ ]* [^ -]*//g' -Ee 's/[^ ]*\+[0-9]+\+[0-9]+//g' |\
+		sed -Ee 's/[0-9]+x[0-9]+//g' -e 's/  / /g' ;;
+		
+		# 1024x768
+		4|*size|*res*)
+			ReadInput | grep -v geometry | grep -Eo '[0-9]+x[0-9]+'
+		;;
+		# +0+0
+		5|*position|*location)
+		ReadInput | grep -Eo '\+[0-9]+\+[0-9]+' ;;
+		
+		# user@host:port
+		6|*hostnameport)
+			iPort=`QueryInput hostport | word 2 :`
+			echo `QueryInput Hostname`:$iPort
+		;;
+		# user@host
+		7|*hostname)
+			QueryInput via
+		;;
+		# host:port
+		8|*hostport)
+		QueryInput hostport ;;
+		
+		# user
+		9|*user)	sUser=`QueryInput via | word 1 @`
+			echo ${sUser:-$USER}
+		;;
+		
+		# host
+		10|*host)
+			sHost=`QueryInput via | word 2 @` # user@host form
+			sHost=${sHost:-`QueryInput hostport | word 1 : | word 2 @ | grep -v '/'`} # host:port form
+			sHost=${sHost:-`ReadInput | grep -Eo '[^ @]+[.](edu|com|org|net|mil|gov|tv|us|ca|uk)'`} # search for toplevel domains
+			sHost=${sHost:-`ReadInput | grep -Eo '[A-Za-z][A-Za-z0-9\.\-_]+'`} # search for domain-like strings
+			sHost=${sHost:-`ReadInput | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+'`} # ip adress
+			echo $sHost | sed -e 's/^[^a-zA-Z0-9]*//g' -e 's/[^a-zA-Z0-9]*$//g' | tr -dc '[A-Za-z0-9\n ]._-' # Remove anything extra
+		;;
+		
+		# port
+		11|*port) QueryInput hostport | word 2 : ;;
+		
+		# path
+		12|*path*) QueryInput Executable ;;
+		
+		13|quality*) QueryInput QualityLevel ;;
+		
+		# -option value (multiple lines)
+		#	*|all) echo;;
+	esac
+}
+
+sOut=`HandleTypes`
+
+if [ ! -z "$sOut" ] ; then
+	sOut=`echo $sOut | head -n 1 | StrTrim`
+	echo "$sPrefix$sOut$sSuffix"
+	#else
+	#	ReadInput
+fi
+
+rm ReadInput.txt

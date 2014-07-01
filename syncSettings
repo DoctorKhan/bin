@@ -1,0 +1,12 @@
+#!/bin/bash
+cd $HOME
+sHost="$1"
+
+if [ -f "$HOME/.ssh/config" ]; then . .ssh/config; fi
+
+nFiles=`SysFiles | wc -l`
+
+SysFiles | while read pFile; do
+	syncFile "$pFile" $sHost &
+	Progress $((++iFile)) $nFiles sbBar "$pFile"
+done

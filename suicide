@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#killall -s9 -u$LOGNAME
+
+sID=`id -un`
+
+function die()
+{
+	grep $sID | grep -v grep | awk '{print $2}' | xargs kill -9
+}
+
+function parents()
+{
+	ps -ef | sed 1d | while read user pid ppid junk ; do
+		if [[ $user != root && $ppid = 1 ]] ; then
+			echo $pid
+		fi
+	done
+}
+
+comm -23 <(ps aux | grep -v $$) <(parents) | die
+ps aux | grep -v $$ | die
+ps aux | die

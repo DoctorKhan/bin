@@ -1,0 +1,220 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Thu Oct 6 16:56:13 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: FreeSeg <pImage> <loResDir> <hiResDir> [viSteps]
+#        FreeSeg (gives you a dialog box query)
+# Example: FreeSeg subj.img subj_1mm subj_hires 1-5"
+# 1. Convert dicom file to nifti file while simultaneously resizing the voxels, making the file isotropic.
+# 2. Recon in FS to 1mm isotropic voxels (several hours)
+# 3. Recon nifti file created from first mri_convert (yields HiRes recon of Nifti file).
+# 4. Segmentation file creation
+# 5. Convert segmentation to ribbon files
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+viSteps=; pImage=; loResDir=; hiResDir=; nArgs=; # input arguments
+
+
+###### FUNCTIONS
+function FileArgs() { pImage=$1; loResDir=$2; hiResDir=$3; nArgs=$#; } # Store input arguments
+function StepArgs() { viSteps=`echo "$@" | tr ' ' '\n' | grep '^[0-9\-]' | tr -d '\n'`; }
+function isDicom()  { if ! echo $1 | grep -iq .dcm ; then return 1; fi; }
+function Zenity()   { zenity "$@" 2>/dev/null; } # Suppresses some bogus zenity errors
+function Maximum()  { for x; do x=$((x>xmax?x:xmax)); done; echo $xmax; }
+
+# FreeSurfer init script
+export FREESURFER_HOME=/usr/local/freesurfer
+. $FREESURFER_HOME/SetUpFreeSurfer.sh
+
+##### INITIALIZE
+# ------- INPUT -------
+# Read parameters provided on command line
+FileArgs `echo " $@" | sed 's/ [0-9][^ ]*//g'  | StrTrim`
+StepArgs `echo " $@" | sed 's/ [^0-9][^ ]*//g' | StrTrim`
+
+# Paths
+cwd=`pwd`; pSubjectDir=`pwd | grep -o ".*HR/*[^/]*"`
+pImageDir=${pSubjectDir:-/export/data/mri/Anatomy}
+
+# Query the user for pImage, if not provided.
+if [ -z "$pImage" ]; then
+	# Default image file: use the latest img file.# Create directories
+	pImage=$(latest `find $pImageDir -name '*.img' | grep '/FreeSurfer/'`)
+	pImage=`Zenity --file-selection --title="Select an image file" --filename=$pImage --file-filter=*.img`
+fi
+if [ -z $pImage ]; then
+	exit 0
+else
+	pImage=`fullpathname $pImage`
+	pTop=`echo $pImage | grep -o '.*/FreeSurfer'`
+	cd "$pTop"
+	
+	iDim=`mri_info $pImage | grep 'dimensions' | awk '{print $2,$4,$6}' | Maximum`
+	mmPerVox=`mri_info $pImage 2>/dev/null | grep 'voxel size' | tr -d ',' | awk '{print $3,$4,$5}'`
+	VoxelSize=`echo $mmPerVox | awk '{print $1}'`
+	VoxelSize=${VoxelSize:-0.7}
+	
+	# Dimension iDim, usually 300, is the Anatomy max dimension size
+	iDim=`mri_info $pImage 2>/dev/null | grep dimensions | tr -s 'x :' '\n' | sort -g | tail -n 1`
+fi
+
+# ------- OUTPUT -------
+# Query user for Low Res directory, if not specified
+loGuess=${loResDir/.img/_Lo}
+pLoRes=$pTop/${loResDir:-$loGuess}
+if [ -z $loResDir ]; then
+	echo "Default LoRes: $pLoRes"
+	mkdir -p "$pLoRes"
+	cd "$pLoRes"
+	loResDir=`Zenity --file-selection --directory --title="Create or select low resolution directory" | xargs basename`
+fi; if [ -z $loResDir ]; then exit 0; fi
+
+# Query user for High Res directory, if not specified
+hiGuess=${hiResDir/.img/_Hi}
+pHiRes=$pTop/${hiResDir:-$hiGUess}
+if [ -z $hiResDir ]; then
+	echo "Default HiRes: $pHiRes"
+	mkdir -p "$pHiRes"
+	cd "$pHiRes"
+	hiResDir=`Zenity --file-selection --directory --title="Create or select high resolution directory" | xargs basename`
+fi; if [ -z $pHiRes ]; then exit 0; fi
+
+# Create output directories
+for pDir in label scripts stats surf touch mri mri/orig mri/transforms; do
+	pSub=$pHiRes/$pDir
+	if [ ! -d "$pSub" ]; then mkdir -p "$pSub"; fi
+done
+
+# ------- STEPS -------
+# Specify which steps to perform
+if [ -z $viSteps ]; then
+	viSteps=`Zenity --list --height 300 --width=600 --text='Which steps?' \
+	--checklist --column "Execute" --column "Step" --column Description \
+	TRUE 1 "Prepare input files" \
+	TRUE 2 "Low resolution reconstruction (recon-all)" \
+	TRUE 3 "High resolution reconstruction" \
+	TRUE 4 "Create hi res segmentation (by resampling low)" \
+	TRUE 5 "Produce ribbon files from hi res segmentation" \
+	| tr -d '|'`
+fi
+
+# ------- DATA -------
+# Process initial Dicom or Nifti file
+# Path and name of new nifti file
+sSubject=${hiResDir%_*}
+sSubject=`basename $sSubject`
+niftiFile1=$sSubject.nii.gz
+niftiFile2="${sSubject}300.nii.gz"
+
+########################################################
+# INPUT FILE PREPARATION
+function Step1()
+{
+	echo Step 1...
+	cd $pLoRes
+	# 1. Convert dicom file to nifti file while simultaneously resizing the voxels, making the file isotropic.
+	# If you pass a dicom, process dicom. If you pass a nifti, then process the nifti.
+	
+	if isDicom $pImage; then
+		# Path and name of new nifti file
+		mri_convert -vs $mmPerVox -rt cubic $pImage $niftiFile1 -odt short
+		mri_convert -vs $mmPerVox -rt cubic $pImage $niftiFile2 -oic $iDim -ojc $iDim -okc $iDim -odt short
+	else
+		# Or if you are beginning with the volume corrected img file use the following commands:
+		echo mri_convert -i $pImage -o  $niftiFile1 -cs $VoxelSize -odt short
+		mri_convert -i $pImage -o  $niftiFile1 -cs $VoxelSize -odt short
+		echo mri_convert -i $pImage -o  $niftiFile2 -oic $iDim -okc $iDim -ojc $iDim -cs $VoxelSize -odt short
+		mri_convert -i $pImage -o  $niftiFile2 -oic $iDim -okc $iDim -ojc $iDim -cs $VoxelSize -odt short
+	fi
+}
+
+
+###################### RECON #########################
+# 2. Recon in FS to 1mm isotropic voxels (several hours)
+function Step2()
+{
+	cd $pTop
+	echo Step 2...
+	recon-all -subject $loResDir -i $niftiFile1 -all -force
+}
+
+# 3. recon nifti file created from first mri_convert (yields HiRes recon of Nifti file).
+function Step3()
+{
+	echo Step 3...
+	#motioncorr="-motioncorr" # (only used when you are reconstructing multiple volumes, i.e. for a fMRI scan)
+	cd $pHiRes
+	recon-all -subject $hiResDir -i $niftiFile2 $motioncorr -cm -force
+}
+
+function AssertExists()
+{
+	if [ ! -e $@ ]; then
+		echo $@ not found
+		exit 1
+	fi
+}
+########################################################
+# 4. RIBBON (SEGMENTATION) FILE CREATION
+function Step4()
+{
+	echo Step 4...
+	# Copy the aseg.mgz file from the mri folder in the LoRes directory into the mri folder of the HiRes directory:
+	AssertExists $pLoRes/mri/aseg.mgz
+	cp -v $pLoRes/mri/aseg.mgz $pHiRes/mri/aseg.mgz
+	asegFile=$pHiRes/mri/aseg.mgz
+	
+	# Resample the aseg.mgz file from LoRes to HiRes
+	AssertExists $asegFile
+	cd $pTop
+	mri_convert $asegFile -rl $pHiRes/mri/orig/001.mgz -rt cubic -o aseg2.mgz
+	mv -v aseg2.mgz $asegFile # Replace LoRes file
+	
+	# and copy surf folder from LoRes dir to HiRes dir
+	AssertExists $pLoRes/surf
+	cp -vr $pLoRes/surf $pHiRes/
+}
+
+########################################################
+# 5. Create ribbon files using the following command:
+function Step5()
+{
+	echo Step 5...
+	#savedistance="--save_distance"
+	# The above parameter is optional. When it is not used it saves a lot of time; so we do not use it.
+	
+	mris_volmask --label_left_white 2 --label_left_ribbon 3 --label_right_white 41 \
+	--label_right_ribbon 42 --save_ribbon $savedistance $hiResDir
+}
+
+################# MAIN ROUTINE ####################
+function main()
+{
+	echo "Volume anatomy $pImage
+	Low res dir $pLoRes
+	High res dir $pHiRes
+	mm per voxel $VoxelSize x $VoxelSize x $VoxelSize
+	size in voxels $iDim x $iDim x $iDim
+	Steps $viSteps"
+	
+	
+	
+	for iStep in {1..5}; do
+		if regmatch "$iStep" ^[$viSteps]$ ; then
+			eval Step$iStep
+			echo Step $iStep completed `date`
+		fi
+	done
+	echo FreeSeg $pImage $loResDir $viSteps
+	echo Finished `date`
+}
+
+################# EXECUTION ###################
+main 2>&1 | tee -a "$pTop/FreeSeg.log"		# Make a record in the log.
+cd "$cwd"

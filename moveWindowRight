@@ -1,0 +1,10 @@
+#!/bin/bash
+wmctrl -r EvalToolMgd -e 0,508,21,`xSize EvalToolMgd`,`ySize EvalToolMgd`
+sleep 0.1
+#if [ `xMax` == "1920"]; then
+#	xp moveWindowRight 3
+#elif isHost Albert; then
+#	xp moveWindowRight 3
+#else
+#	xp moveWindowRight 30
+#fi

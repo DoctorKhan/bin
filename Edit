@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 28 11:30:49 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then echo "Usage: $0"; exit 0; fi
+
+if [ "$1" == "existing" ]; then
+	shift
+	if [ ! -e "$@" ]; then
+		exit 1
+	fi
+fi
+
+if [ "$EDITOR" != "" ]; then
+	edit=$EDITOR
+	if [ "$edit" == "vi" ]; then edit="vi -"; fi
+else
+	if isMac; then
+		if [ -e /Applications/gedit.app ]; then
+			edit="open -a gedit"
+		else
+			edit="open -t"
+		fi
+	else
+		edit=gedit
+	fi
+fi
+
+if string "Bourne-Again" is in `file -b "$@"`; then
+	BeautifyBash "$@"
+	$edit "$@"
+	BeautifyBash "$@"
+else
+	$edit "$@"
+fi
+

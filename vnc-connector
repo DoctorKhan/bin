@@ -1,0 +1,74 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Aug 25 19:59:28 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-connector
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pSessions=$HOME/.vnc/sessions
+set alias save=". WriteConf"
+
+## Functions
+function DialogResponder()
+{
+	iPort=$1; sUser=$2; sHost=$3; iWidth=$4; iHeight=$5; iChoice=$7
+	pConf=$pSessions/$sHost:$iPort
+	
+	mv $pConf ${pConf}~
+	grep -v ^Width ${pConf}~ | grep -v ^Height > $pConf
+	(echo "Width=$iWidth"; echo "Height=$iHeight") >> $pConf
+	
+	#	. WriteConf Height $iHeight
+	# Save user input
+	
+	DesktopSize=${iWidth}x${iHeight}
+	sHostName=$sUser@$sHost:$iPort
+	pPass=$pSessions/$sHost.passwd
+	
+	case $iChoice in
+		0) . "$pConf"
+			AutoSelect=$((Color>2?1:0))
+			vncviewer -PasswordFile $pPass FullscreenSystemKeys=0 -MenuKey $Menu -AutoSelect $AutoSelect -LowColorLevel \
+			$Color -QualityLevel $Quality -FullScreen $FullScreen -Shared $Shared -DesktopSize $DesktopSize +kb $sHost:$iPort
+		;;
+		1) exit 0 ;;
+		2) vnc-new ;;
+		3) vnc restore $iPort ;;
+		4) vnc suspend $iPort ;;
+		5) vnc kill $iPort ;;
+		6) vnc kill $iPort
+			rm $pConf
+		;;
+	esac
+}
+
+sButtons=; sCols=
+function SessionChooser()
+{
+	yad --list --editable --separator ' ' --title "VNC Connector (©2012 RezSoft)" \
+	--width 800 --height 600 $sButtons $sCols $(vnc-list)
+	echo $?
+}
+
+## Main
+# Define columns
+sColHeaders="Port:NUM User:TXT Host:TXT Width:NUM Height:NUM Status:TXT"
+for sColHeader in $sColHeaders; do
+	sCols="$sCols --column $sColHeader"
+done
+
+sButtonNames="gtk-delete:5 Suspend:4 Restore:3 gtk-new:2 gtk-cancel:1 gtk-connect:0"
+for sButton in $sButtonNames; do
+	sButtons="$sButtons --button $sButton"
+done
+
+# Construct GUI
+DialogResponder	`SessionChooser`
+#DialogRespond $sOut $?

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 24 17:17:08 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WoofIt <dir or file> <to>
+#######################################################
+if isHelp 2 $0 "$@"; then exit 0; fi
+
+file="$1"
+to="$2"
+url="http://"`whatsmyip`":8080/"
+subject="$file"
+
+echo "Please go to $url to receive the file $file" | mail -s "$subject" -t "$to"
+
+woof "$file"

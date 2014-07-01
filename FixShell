@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue Apr 12 21:12:19 CDT 2011 ##
+#####################################################
+
+#if [ $# == 0 ]; then
+#	 echo "Usage: FixShell"
+#	 exit 0
+#fi
+
+function FixZshrc() {
+if [ "`grep -ic .bash_aliases .zshrc`" -eq "0" ]; then
+	Insert . .bash_aliases in .zshrc at aliases
+fi
+}
+
+cd
+
+# change shell to zsh in /etc/passwd/s
+if [ "$SHELL" != "/bin/zsh" ]; then
+	chsh -s /bin/zsh
+	scp sandstone:.zshrc $HOME/
+	FixZshrc
+	/bin/zsh
+else
+	FixZshrc
+fi
+

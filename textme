@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# == 1 ]; then
+	subject="Automated SMS"
+else
+	subject=$1
+	shift
+fi
+
+echo "$@" | mail -s $subject -t reswanul@vtext.com
+

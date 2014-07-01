@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Feb 15 10:48:24 CST 2012 ###
+#######################################################
+
+##################### Help Text #####################
+# Usage: isOpen <filename>
+# Indicates if file is open using lsof | grep
+######################################################
+if (( $# < 1 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Input
+sFileName="$1"
+
+## Main
+# Use lsof (see man lsof))
+
+## Output
+# Return the same exit code as the above command.
+iQuit=$?
+echo $iQuit
+exit $iQuit

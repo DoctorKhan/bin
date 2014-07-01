@@ -1,0 +1,31 @@
+#!/bin/bash
+
+f=$1; shift
+case $f in
+	web) rsync -uvz -e 'ssh -p 1930' ~/Web/* uniformdestination.com:Web/
+	rsync -uvz -e 'ssh -p 1930' uniformdestination.com:Web/* ~/Web/
+;;
+	*)
+if [ -d ~/bin ]; then
+	cd ~/bin
+	syncAll
+fi
+
+if [ -d ~/Documents ]; then
+	cd ~/Documents
+	syncAll
+fi
+
+#if [ -d ~/wtscripts ]; then
+#	cd ~/wtscripts
+#	syncAll
+#fi
+
+#if [ -d ~/.wallpaper ]; then
+#	cd ~/.wallpaper
+#	syncAll
+#fi
+
+syncSettings
+;;
+esac

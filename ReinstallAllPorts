@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Sep 16 17:35:07 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ReinstallAllPorts
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+#port -qv installed | word 1 @ | StrTrim | Unique > allports.txt
+
+#sudo port -fp uninstall --follow-dependents installed
+
+#Clean any partially-completed builds:
+
+#sudo port clean all
+
+# Reinstall
+
+for pkg in `cat allports.txt`; do
+	sudo port install $pkg
+done

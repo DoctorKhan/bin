@@ -1,0 +1,41 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sat Nov 5 13:47:09 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: TigerMaximize
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Arguments
+## Defaults
+sTitle=${@:-TigerVNC}
+
+## Initialize
+pLast=$HOME/.vnc/last
+viSizeBig=`screensize | tr 'x' ' ' | awk '{print $1 + 5, $2 + 5}' | tr ' ' 'x'`
+
+## Functions
+function Changed()
+{
+	viSizeCur=`WinSize x $sTitle`
+	if echo $viSizeCur | grep -q x && [ "$viSizeCur" != "$viSizeInit" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+## Main
+viSizeInit=`WinSize x $sTitle`
+eval $(cat $pLast | sed -e 's/[0-9][0-9]*x[0-9][0-9]*+0+0/+0+0/g' -e 's/[0-9][0-9]*x[0-9][0-9]*/'"$viSizeBig"'/g') &
+while ! Changed; do sleep .2; done
+
+viSizeInit=`WinSize x $sTitle`
+eval $(sed 's/[0-9][0-9]*x[0-9][0-9]* /'"$viSizeCur "'/g' $pLast) &
+while ! Changed; do sleep .2; done
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+	case "$1" in
+		-d)	shift; hex2dec `WindowID $@` ;;
+		"") xprop -root | grep "_NET_ACTIVE_WINDOW(WINDOW)" | awk '{print $NF}' 2>/dev/null ;;		
+		root)
+			xwininfo -root 	|\
+			grep id: 	|\
+			cut -d ' ' -f 4 |\
+			grep -v ^$
+		;;		
+		*)
+			xwininfo -root -tree |\
+			grep -i "0x[^ ]* \"$@.*" |\
+			awk '{print $1}' |\
+			head -n 1
+		;;
+	esac

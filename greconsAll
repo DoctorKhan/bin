@@ -1,0 +1,6 @@
+#!/bin/bash
+for file in `ls P*.3d`; do
+	echo "grecons $@ $file"
+	grecons $@ $file
+done
+

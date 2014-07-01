@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Aug 30 20:55:33 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: XRandrResize
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sOutput=`xrandr | sed -n 's/\(.*\) connected.*/\1/p'`
+
+case $# in
+	2) viArgs=$1x$2; x=$1; y=$2 ;;
+	1) viArgs=$1; x=${1%%x*}; y=${1##*x};;
+	*) exit 0 ;;
+esac
+
+case $viArgs in
+	*.*) xrandr --output $sOutput --scale $viArgs ;;
+	*)
+		sModeName=`cvt $x $y | sed -n 's/.*"\(.*\)_.*".*/\1/p'`
+		sModeLine=`cvt $x $y | tail -n 1 | awk '{$1=""; $2=""; print}'`
+		
+		## Main
+		xrandr --output $sOutput
+		xrandr --newmode "$sModeName" $sModeLine
+		xrandr --verbose --addmode $sOutput $sModeName
+		xrandr --output $sOutput --mode $sModeName
+	;;
+esac
+
+#xrandr --newmode "$xx$y_60.00"   64.75  $x 1056 1152 1304  $y 803 810 831 -hsync +vsync
+#xrandr --verbose --addmode LVDS1 $xx$y_60.00
+#xrandr --output LVDS1 --mode $xx$y_60.00
+

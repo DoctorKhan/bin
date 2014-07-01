@@ -1,0 +1,30 @@
+#!/bin/bash
+blterm tc
+xtype "rm -f /mnt/epic/mrraw/*.out"; pressReturn
+
+if [ $# == 2 ]; then
+	proj="$1"
+	runtype="$2"
+elif [ $# == 1 ]; then
+	if [[ ( "$1" == "sim" ) ||  ( "$1" == "plot" ) ||  ( "$1" == "runonly" ) ]]; then
+		proj=$defaultproj
+		runtype="$1"
+	else
+		proj=$defaultproj
+		runtype="plot"
+	fi		
+else
+	proj=$defaultproj
+	runtype="plot"
+fi
+
+if [ "$runtype" == "sim" ]; then
+	runsim $proj
+else
+	replot $proj
+fi
+if [ "$runtype" == "runonly" ]; then
+	closeWin "/ESE_12M5A/psd/bin/PlotPulseMgd"
+fi
+blterm tc
+xtype "cat /mnt/epic/mrraw/debug.out"; pressReturn

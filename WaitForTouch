@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Sep 15 16:23:49 CDT 2013 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WaitForTouch
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sId=`xinput | grep -i Touchscreen | cut -d= -f2 | awk '{print $1}'`
+sEv="button release"
+
+function EvTrigger()
+{
+	echo "$@" | grep -q "$sEv"
+	return $?
+}
+
+## Main
+script -c "xinput test $sId" |\
+while read sEvents; do
+	if EvTrigger "$sEvents"; then break; fi
+done

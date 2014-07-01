@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 14 14:24:04 EDT 2011 ##
+#####################################################
+
+#if [ $# == 0 ]; then
+#	 echo "Usage: $0"
+#	 exit 0
+#fi
+
+if [ "`hostname`" == "sandstone" ]; then
+	sPath=/export/data
+else
+	sPath=$HOME/export
+fi
+
+while [ $# -gt 0 ]; do
+	sPath="$sPath/$1"
+	shift
+done
+
+echo "$sPath"
+

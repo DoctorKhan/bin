@@ -1,0 +1,49 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Dec 8 22:20:10 CST 2013 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: methyl
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+if (($#==0)); then 
+	cd $HOME/genomes
+	set genome_*.zip
+fi
+## Functions
+
+## Main
+rm -f f1
+touch f1
+for file; do
+	fbase="${file%%.*}"
+	fzt=`TempFile "$fbase".gz`
+	cp "$file" "$fzt"
+	gunzip -f "$fzt"
+	fbt="${fzt%%.*}"
+	
+	fout="${fbase}.tsv"
+	snp | while read snp; do
+		grep "rs$snp[^0-9]" "$fbt"
+	done > "$fout"
+	dos2unix "$fout"
+	echo "$fout" | sed 's/.*genome_\(...\).*_Full.*/\1/g' > f2
+	cat "$fout" | awk '{print $4}' >> f2
+	paste f1 f2 > f3
+	mv f3 f1
+	rm "$fout"
+done
+
+echo "SNP" > f0
+cat "$fout" | awk '{print $1,$2,$3}' >> f0
+paste f0 f1 > genome_Comparison.tsv
+rm f0 f1 f2
+
+more genome_Comparison.tsv

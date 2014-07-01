@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 28 22:08:18 CDT 2011 ##
+#####################################################
+
+minargs=0
+if [ $1 == --help ] || [ $1 == -h ] || [ $# -lt $minargs ]; then echo "Usage: $0"; exit 0; fi
+
+sudo chown -R khan "$@"
+chmod -R ug+rw "$@"
+

@@ -1,0 +1,7 @@
+#!/bin/bash
+# Converts a freesurfer mesh file into a .obj file of the kind used by the bajaj lab.
+
+sFileIn=${1:-/dev/stdin}
+pOut=${2:-/dev/stdout}
+
+surf2raw $sFileIn | raw2obj > $pOut

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 30 14:56:35 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SaveMeshlabNoNormals
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+xdotool windowfocus `WindowID MeshLab v1`
+
+xdotool key ctrl+s; sleep 0.1
+xdotool key space; sleep 0.1
+
+for ii in {1..4}; do
+	xdotool key Tab; sleep 0.1
+done
+
+xdotool key Return

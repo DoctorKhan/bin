@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Aug 18 12:34:54 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WinSizeChanged
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+sWinName="${@:-`ActiveWindowID`}"
+
+pTemp=`create /tmp/"$sWinName".size`
+viSize1=`cat $pTemp`
+
+
+viSize2=`WaitForWindow -t 10 -w "$sWinName" -x WinSize "$sWinName"`
+viSize1=${viSize1:-"$viSize2"}
+
+ds=`RowDiff $viSize2 - $viSize1 | Abs | rowsum`
+echo "$viSize2" > $pTemp
+
+if (( ds == 0 )); then exit 1; fi

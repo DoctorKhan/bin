@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# == 0 ]; then
+	echo "IntegrateThreeColumnData <input file> <output file>"
+	#first col = time, other cols = {x, y}
+else
+	#remove header from the input file
+	cat $1 | grep -v '#' | sed '$d' > $1.temp
+	# remove header and first data point from file
+	cat $1 | grep -v '#' | awk 'FNR>1' > $1.temp2
+	# combine the columns into one file then compute integral. This computes the area in each trapezoid as a function of time.
+	paste $1.temp $1.temp2 | awk '{ta+=($4-$1)*($5-$2)/2; tb+=($4-$1)*($6-$3)/2; print $4,"\t",ta,"\t",tb }' > $2
+	rm -f $1.temp $1.temp2
+fi
+

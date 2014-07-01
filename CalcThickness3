@@ -1,0 +1,168 @@
+#!/bin/bash
+
+######################################################
+### Created by khan Oct 2010                       ###
+######################################################
+
+##################### Help Text ######################
+# Usage: CalcThickness <PialMeshRaw> <ExtraMeshRaw>
+# <Grid Size> <# Surfs> <Steps 1-5>
+######################################################
+if (( $# < 1 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+echo Input arguments:
+for a in $@; do
+	echo $a
+done
+
+# Defaults
+pDeep=${1:-`latest Deep.[or][ba][jw]`} 	# Pial mesh raw file
+pWhite=${2:-`latest White.[or][ba][jw]`} # Extra raw
+pPial=${3:-`latest Pia.[or][ba][jw]`} 	# Pial mesh raw file
+pExtra=${4:-`latest Extra.[or][ba][jw]`} # Extra raw
+
+iGridSize=${5:-350}		# Grid size
+nSurfaces=${6:-16}		# Total number of surfaces to be produced
+viSteps=${7:-123456}		# Steps 1-5
+
+# Go to data directory
+cd "`fileparts 1 $pPial`"
+echo "Main directory: `pwd`"
+
+pWhite="`fileparts 6 $pWhite`"
+pDeep="`fileparts 6 $pDeep`"
+pPial="`fileparts 6 $pPial`"
+pExtra="`fileparts 6 $pExtra`"
+
+# Initialization
+vGridDims="$iGridSize $iGridSize $iGridSize"
+
+pPialSDF=${pPial}iv 		# Pial mesh signed distance function filename
+pExtraSDF=${pExtra}iv 		# Extra
+pWhiteSDF=${pWhite}iv 		# Pial mesh signed distance function filename
+pDeepSDF=${pDeep}iv 		# Extra
+
+nLayers=$((nSurfaces - 1))
+
+# Create output directory
+sPial=`fileparts 2 $pPial`	# Strip extension
+sExtra=`fileparts 2 $pExtra`
+sWhite=`fileparts 2 $pPial`	# Strip extension
+sDeep=`fileparts 2 $pExtra`
+
+pdOutput=$sPial-$sExtra	# Output subdirectory name
+mkdir -p "$pdOutput"
+echo Output directory: `fileparts 7 $pdOutput`
+
+# Link both raw mesh files to subdir
+cd $pdOutput
+ln -f ../$pPial
+ln -f ../$pExtra
+ln -f ../$pWhite
+ln -f ../$pDeep
+
+
+echo "Pial mesh: $pdOutput/$pPial"
+echo "Extra mesh: $pdOutput/$pExtra"
+echo "Number of layers: $nLayers"
+
+for iStep in `echo $viSteps | grep -o '[[:digit:]]' | tr '\n' ' '`; do
+	
+	echo; echo "Step #${iStep}"
+	
+	case $iStep in
+		1)	# Compute signed-distance func for outer
+			echo "Computing signed distance function of outer surface"
+			echo "FastSignDistance $pExtra $vGridDims $pExtraSDF"
+			FastSignDistance $pExtra $vGridDims $pExtraSDF
+		;;
+		2)	# Extract info to be used for computing SDF of inner
+			volinfo $pExtraSDF ; echo
+			dims=`volinfo $pExtraSDF | grep Dimension | cut -d : -f 2 | tr x ' '`
+			bbox=`volinfo $pExtraSDF | grep Bounding  | tr -s '[a-zA-Z]:[,)(] ' ' '`
+			
+			# Computing signed distance function of inner surface
+			echo "Computing signed distance function of inner surface"
+			echo "FastSignDistance $pPial$dims $pPialSDF$bbox"
+			FastSignDistance $pPial$dims $pPialSDF$bbox
+			
+			# Computing signed distance function of inner surface
+			echo "Computing signed distance function of inner surface"
+			echo "FastSignDistance $pWhite$dims $pWhiteSDF$bbox"
+			FastSignDistance $pWhite$dims $pWhiteSDF$bbox
+			
+			# Computing signed distance function of inner surface
+			echo "Computing signed distance function of inner surface"
+			echo "FastSignDistance $pDeep$dims $pDeepSDF$bbox"
+			FastSignDistance $pDeep$dims $pDeepSDF$bbox
+		;;
+		3)	# Interpolating surfaces...
+			echo "Interpolating BSplines."
+			rm -f InterBSpline[0-9]*.rawiv
+			
+			echo "volInterpolate $pExtraSDF $pPialSDF InterBSplineExtra $nSurfaces"
+			volInterpolate $pExtraSDF $pPialSDF InterBSpline $nSurfaces &
+			
+			if ((nLayers == 0)); then exit 0; fi
+			
+			until ((iLayer == nLayers)); do
+				iLayer=`ls -1t *Spline*[0-9]*.rawiv 2>/dev/null | head -n 1 | grep -o [0-9]*`
+				iLayer=${iLayer:-0}
+				sleep 5
+				Progress $iLayer $nLayers volInterp
+			done
+			
+			volInterpolate $pPialSDF $pWhiteSDF InterBSpline $nSurfaces  16 &
+			
+			until ((iLayer == nLayers)); do
+				iLayer=`ls -1t *Spline*[0-9]*.rawiv 2>/dev/null | head -n 1 | grep -o [0-9]*`
+				iLayer=${iLayer:-0}
+				sleep 5
+				Progress $iLayer $nLayers volInterp
+			done
+			
+			volInterpolate $pWhiteSDF $pDeepSDF InterBSpline $nSurfaces 32 &
+			
+			until ((iLayer == nLayers)); do
+				iLayer=`ls -1t *Spline*[0-9]*.rawiv 2>/dev/null | head -n 1 | grep -o [0-9]*`
+				iLayer=${iLayer:-0}
+				sleep 5
+				Progress $iLayer $nLayers volInterp
+			done
+		;;
+		
+		4)	# Computing BSpline coefficients of data.
+			echo "Transfering BSpline Coefficients..."
+			echo "ToSplineCoeff $((4*nSurfaces))"
+			ToSplineCoeff $((4*nSurfaces))
+		;;
+		
+		5)
+			# Computing trajectories.
+			echo "Computing trajectories..."
+			echo "BrainThickness trajectSpline $pDeep InterBSplineCoeff $((4*nSurfaces-1)) InterThick"
+			rm -f InterBSplineCoeff[0-9]*.pcd
+			
+			BrainThickness trajectSpline $pDeep InterBSplineCoeff $((4*nSurfaces-1)) InterThick &
+			
+			until ((iLayer == nLayers)); do
+				iLayer=`ls -1t *[0-9]*.pcd 2>/dev/null | head -n 1 | grep -o [0-9]*`
+				iLayer=${iLayer:-0}
+				Progress $((iLayer+1)) $nSurfaces BrainThickness
+			done
+		;;
+		
+		6)
+			# Creating thickness surface plot.
+			echo "Creating thickness surface plot."
+			nLayers=$((4*nSurfaces-1));
+			echo "BrainThickness plot $pDeep InterThick$nLayers.pcd InterThick.rawc"
+			BrainThickness plot $pDeep InterThick${nLayers}.pcd InterThick.rawc
+		;;
+	esac
+done
+
+echo CalcThickness Complete.
+

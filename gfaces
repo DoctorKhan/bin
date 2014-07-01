@@ -1,0 +1,144 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Oct 23 18:13:53 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+eval `ParseOpt -g sGroup -u sUser -p sPass :: $@`
+
+## Initialize
+pDir=$HOME/.faces
+mkdir -p $pDir
+pSched=$pDir/Schedule.txt
+pPass=$pDir/pk
+
+## Functions
+function Google()
+{
+	pGoogle=`create $pDir/Google.txt`
+	google calendar list --cal=Faces > a
+	#	2>&1 |\
+	#	grep -v '^[Faces]' |\
+	#	StrTrim | tee "$pGoogle"
+}
+
+function Configure()
+{
+	pConf=$pDir/faces.conf
+	
+	if Expired $pConf; then
+		echo -n "Configuring... " >/dev/stderr
+	fi
+	
+	if [ ! -f $pConf ]; then
+		echo
+		read -p  "Faces username: " user
+		read -sp "Faces password: " pass
+		echo "user=$user" > $pConf
+		echo "pass=$pass" >> $pConf
+	fi
+	
+	source $pConf
+	touch $pConf
+}
+
+function SignIn()
+{
+	if Expired "$pPass"; then
+		echo -n "Signing in... " >/dev/stderr
+		sFormData='account=TEXAS_IRC&user='$user'&pass='$pass'&passwd='$pass'&savepwd=1&saveusr=1&savegrp=1&end=0'
+		wget -q http://faces.ccrc.uga.edu/ccrcfaces/login.php --post-data $sFormData -O /dev/stdout \
+		| sed -n 's/.*NAME=.pk. VALUE=.\([a-z0-9]*\).*/\1/p' > $pPass
+	fi
+}
+
+function Show()
+{
+	pk=`cat $pPass`
+	
+	echo Retrieving schedule... >/dev/stderr
+	pDump=$pDir/Dump.txt
+	wget -q -O $pDump "http://faces.ccrc.uga.edu/ccrcfaces/data.php?user=$user&rndm=1868075267&account=TEXAS_IRC&pk=$pk&rindex=5" # &>/dev/null
+	
+	# Parse schedule
+	clear
+	
+	cat $pDump |\
+	sed -n 's/ \(.*\):00 [^ ]*\(.*\) \(.*\):00\( [^|]*\) *|.*/   \1 - \2\3  \4/p' |\
+	grep -A 999 `Today` > $pSched
+	
+	cut -d ' ' -f 1-7 $pSched | cut -d '-' -f 2- > $pSched.1.tmp~
+	cut -sd ' ' -f9- $pSched | sed 's/ /%/' | column -s % -t  > $pSched.2.tmp~
+	
+	paste $pSched.1.tmp~ $pSched.2.tmp~ |\
+	while read line; do
+		sCur=`echo $line | awk '{print $1}'`
+		if [[ "$sCur" != "$sPrev" ]]; then
+			#			echo -e "\033[4m$line\033[0m"
+			echo -------------------------------------------------------
+			echo "$line"
+			read line
+		fi
+		echo "     ${line:5}"
+		
+		sPrev="$sCur"
+	done | more
+	
+}
+
+function Update()
+{
+	pScript="$pDir/script"
+	echo "#!/bin/bash" > $pScript
+	chmod a+x $pScript
+	
+	# Clear existing events
+	echo Clearing existing events...
+	eval 'google -v --cal=Faces calendar delete --title=.* --yes'
+	
+	clear
+	nEvents=`cat $pSched | wc -l`
+	echo $nEvents new events found.
+	sed -E -e 's/[[:space:]]+/ /g' -e 's/ - / /g' -e 's/ *$//g' $pSched > $pScript
+	
+	sSearch='s,^\([0-9\-]*\) \([0-9:]*\) \([0-9:]*\) \(.*\)'
+	sReplace='; google --cal=Faces calendar add \4 on \1 from \2 to \3,g'
+	sProg='echo -n $((++i))'
+	mv "$pScript" "$pScript~"
+	sed "$sSearch,$sProg/${nEvents}: $sReplace" "$pScript~" > "$pScript"
+	source "$pScript"; clear
+}
+
+function Cached() {	cat $pSched; }
+
+function Expired()
+{
+	if [ -e "$@" ]; then
+		sFileDate=`ls -l "$@" | awk '{print $6,$7}'`
+		sFileSecs=`date --date="$sFileDate" +%s`
+		sCurrSecs=`date --date=now +%s`
+		
+		# Minutes passed
+		if (($sCurrSecs - $sFileSecs < 600)); then
+			return 1
+		fi
+	fi
+}
+
+## Main
+vsArgs=`titleCase ${@:-Show}`
+Configure
+SignIn
+for sArg in $vsArgs; do
+	eval $sArg
+done
+
+#| grep -E '(khan|ress|katyal|greene)'
+#| date -d 2011-10-28 +%a

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sun Apr 10 13:47:50 CDT 2011 ##
+#####################################################
+
+if [ $1 == help ]; then
+	echo "Usage: ForwardPort <destination host> <local port> <dest. port>"
+	exit 0
+fi
+
+if (( $# > 0 )); then host=$3;  else host=sandstone.irc.utexas.edu; fi
+if (( $# > 1 )); then local=$1; else local=10000; fi
+if (( $# > 2 )); then dest=$2;  else dest=22; fi
+
+ssh -o GatewayPorts=yes -o TCPKeepAlive=yes -L $local:localhost:$dest $host -f -N
+

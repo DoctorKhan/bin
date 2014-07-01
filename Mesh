@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Mar 15 19:06:45 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Mesh
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pVol=$1
+pRaw=${pVol%%.*}.raw
+
+## Functions
+
+## Main
+Mesher mesh -i "$pVol" -o "$pRaw" --extraction_method=fastcontouring --isovalue 0 --iterations 5

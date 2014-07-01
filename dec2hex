@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ $# == 2 ]; then
+   printf "0x%06x\n" $1
+else
+   echo "obase=16; ibase=10; $1" | bc
+fi
+

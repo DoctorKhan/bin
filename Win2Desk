@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Aug 16 13:51:28 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Win2Desk <xId> <desktop>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+if (($# < 2)); then
+	xId=`ActiveWindowID`
+	iDes=$1
+else
+	xId=$1
+	iDes=$2
+fi
+
+xm=`xMax`
+xy=`WinGeo $xId | word 3-4`
+x=`echo $xy | word 1`
+y=`echo $xy | word 2`
+iCur=`WhichDesk`
+x2=$(( (iDes - iCur)*xm + x))
+WinMove $xId $x2 $y

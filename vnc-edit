@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 30 10:42:02 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-command
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pList=`mktemp`
+iPort=${1:-`head -n 1 $pList | awk '{print $1}'`}
+sHeader="Port User Host Width Height Status Quality Color FullScreen"
+vnc-list > $pList
+s=
+
+## Functions
+function Entry()
+{
+	pConf="$HOME/.vnc/*:$1.cfg"
+	
+	for field in $sHeader; do
+		oldVal=$1
+		if ! [[ $field == Port || $field == Status || $field == Host ]]; then
+			read -p "$field: $oldVal -> " newVal
+		fi
+		
+		if [ -z $newVal ]; then echo "$field: $oldVal -> $oldVal"; fi
+		s="$s ${newVal:-$oldVal}"
+		shift
+	done
+	echo $s > $pConf
+}
+
+## Main
+Entry `cat $pList | grep "^$iPort " "$pList"`

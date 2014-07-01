@@ -1,0 +1,165 @@
+#!/bin/bash
+
+#################
+## Created by khan on Tue Apr  5 22:14:05 CDT 2011 ##
+#################
+
+## Start the VNC server
+function StartVNCServer() {
+	startvnclog=$HOME/.vnc/startvnc.log
+	
+	if $bFlush; then
+		ssh $hostname "rm .vnc/xstartup"
+		ssh $hostname killvnc
+	fi
+	
+	ssh $hostname startvnc 2> $startvnclog
+	
+	while [ `grep -ic 'Remove this' $startvnclog` -gt 0 ]; do
+		`grep Warning $startvnclog | sed 's/.*Warning: \(.*\):.*because of \(.*\)/ssh \1 rm -v \2/g'`
+		ssh $hostname startvnc 2> $startvnclog
+	done
+}
+
+## VNC Password file
+function SetupPasswordFile() {
+	if [ ! -f $pwfile ]; then
+		mkdir $hostdir
+		echo Password file not found. Downloading it...
+		scp $hostname:.vnc/passwd $pwfile
+	fi
+}
+
+function Help()
+{
+	## Help info
+	if [ `echo "$1" | grep -ic "^[\-]*h[^ ]*$"` -gt 0 ]; then
+		echo "Usage: tiger <user>@<host>"
+		echo "Default: tiger `whoami`@sandstone.irc.utexas.edu"
+		exit 0
+	fi
+}
+
+function Authentications()
+{
+	## Set authentications
+	. ssh-agent-check
+	ssh-key-check
+	ssh-add-check
+}
+
+function CheckUpdates()
+{
+	## Check for update every three days
+	if [ `find $HOME/.vnc -maxdepth 1 -mtime +3 -name 'update' | wc -l` -gt 0 ]; then
+		TigerInstall update;
+	fi
+}
+
+function PrepareFiles()
+{
+	vnccom=`whichtiger -v`
+	vncdir=$HOME/.vnc
+	if [ ! -d $vncdir ]; then mkdir $vncdir ; fi
+	lastfile=$vncdir/last
+}
+
+function SetGeometry()
+{
+	if [ "$1" == "max" ]; then
+		geometry=`screensize available`
+		shift
+	else
+		geometry=`getgeo`
+	fi
+}
+
+function SetHostname() {
+	if isAlive $1; then
+		hostname=$1; shift
+	elif [ -f $lastfile ]; then
+		hostname="`cat $lastfile | sed 's/.*via//g' | awk '{print $1}'`"
+	else
+		hostname=`whoami`@sandstone.irc.utexas.edu
+	fi
+}
+
+# Define command
+function SetCommand() {
+	host=`echo $hostname | cut -d '@' -f 2`
+	hostdir=$vncdir/$hostname # For storing session info for this host
+	pwfile=$hostdir/passwd # The VNC pw file for that host
+	
+	iDisp=`ssh $hostname id -u` # Display no. is user id on host
+	command="$vnccom  -geometry '+0+0' -DesktopSize $geometry -passwd $pwfile -via $hostname $host:$iDisp"
+	echo "$command" > $lastfile
+	#	sed -i -e 's/[^[:print:]]//g' -i -e 's/  //g' $lastfile
+}
+
+function RunClient()
+{
+	# Check if the server is alive
+	if [ "`ssh $hostname isVNCActive`" != "1" ]; then
+		echo "TigerVNC server on $hostname is not active."
+		exit 1
+	fi
+	
+	# Run it.
+	viSize=`getgeo`
+	viLoc="`GetLoc +`"
+	runvnc $sOpts "$windowname" "$viSize" "$viLoc"
+	sleep 5
+	waituntilwindowopen 60 s "$windowname"
+}
+
+function Resizer() {
+	TigerResizer $windowname
+}
+
+Help "$1"
+
+### INIT ###
+## Path for bin files
+export PATH="$HOME/.vnc/support:$PATH"
+hostname=
+host=
+lastfile=
+
+# Restart server, if necessary.
+if [ "$1" == "flush" ]; then
+	bFlush=true; shift;
+else
+	bFlush=false
+fi
+
+dt=1.5
+geometry=`getgeo`
+
+#	basehost=`echo $host | cut -d . -f 1`
+
+if [[ $1 == TigerVNC:* ]]; then
+	windowname="$1"
+else
+	windowname="TigerVNC:"
+fi
+
+#### MAIN ###
+sOpts=`echo $@ | grep -o '\-[^ ]*=[^ ]*'`
+sArgs=`echo $@ | sed 's/-[^ ]*=[^ ]*//g'`
+
+Authentications
+CheckUpdates
+PrepareFiles
+SetGeometry "$sArgs"
+SetHostname "$sArgs"
+if [ $# -gt 0 ]; then
+	SetCommand "$sArgs"
+else
+	SetCommand
+fi
+
+StartVNCServer
+SetupPasswordFile
+RunClient
+Resizer
+

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+cd $HOME
+dirs="export gauss projects"
+
+for dir in $dirs; do
+	echo $dir
+	if [ ! -d $dir ]; then
+		mkdir $dir;
+	fi
+done
+
+#sshfs sdc@ircepic.irc.utexas.edu:/export/home/epic /home/khan/epic
+sshfs sandstone:export ~/export -o nonempty
+sshfs rkk225@files.irc.utexas.edu:/projects/ress/data/Users /home/khan/projects
+sshfs gauss
+#sshfs khan@faraday.ph.utexas.edu: /home/khan/faraday
+#sshfs khan@linux4.ph.utexas.edu:/user1/khan /home/khan/physics
+#sshfs vision@plato:/ /home/khan/plato
+#sshfs khan@quartzite
+#sshfs khan@sandstone.irc.utexas.edu: ~/sandstone
+#sshfs rkk225@schist.irc.utexas.edu: /home/khan/schist
+#sshfs sandstone:/export/data/vrSource ~/zqyork
+

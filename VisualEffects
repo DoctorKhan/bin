@@ -1,0 +1,26 @@
+#!/bin/bash
+pressAlt F2
+click 950 578
+sleep 1
+xtype gnome-appearance-properties
+pressEnter
+sleep 1
+wmctrl -a Appearance -e 0,0,0,100,100
+sleep 1
+click 350 80
+sleep 1
+#click 33 405
+pressAlt x
+sleep 7
+pressAlt k
+sleep 1
+pressAlt c
+sleep 1
+click right 1848 1194
+sleep 1
+press p
+sleep 1
+press 3
+pressTab
+press 2
+pressAlt c

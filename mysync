@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ "$1" == "bash" ]; then
+	for host in `otherhosts`
+	do
+		echo "$host: "
+		scp $HOME/.bash_aliases $host:
+	done
+fi
+

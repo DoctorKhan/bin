@@ -1,0 +1,27 @@
+#!/bin/bash
+while [[ "$1" == --* ]]; do
+	sOpts="$sOpts $1"; shift
+done
+
+cd ${2:-.}
+
+remoteDir=`pwd | sed "s,^$HOME/,,g"`
+host="$1"; shift
+
+if isMac; then remoteDir=`echo $remoteDir | sed 's,^/Users/,/home/,g'` ; fi
+
+curDir=`pwd`
+localDir=`cd ..; pwd`
+echo Downloading from $remoteDir on $host...
+args="-auHz --timeout=30 --exclude '*~' --delete-excluded -e /usr/bin/ssh"
+#--min-size=1
+
+rsync $sOpts $@ $args $host:"$remoteDir" "$localDir/"
+
+if [ "$?" != "0" ]; then
+	ssh-fix-hosts $host
+	rsync $sOpts $@ $args $host:"$remoteDir" "$localDir/"
+fi
+
+# Remove empty files older than 100 days
+find "$curDir" -empty -mmin +100 -delete

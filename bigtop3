@@ -1,0 +1,11 @@
+#!/bin/bash
+yTop=`ySize "Top Expanded Edge Panel"`
+xMax=`xMax`; yMax=`yMax`
+xHalfWidth=`echo "$xMax / 2" | bc`
+xHalfLoc=$xHalfWidth
+yHalfWidth=`echo "($yMax - $yTop) / 2" | bc`
+yHalfLoc=`echo "$yHalfWidth + $yTop" | bc`
+wmctrl -r "$1" -e 0,0,0,$xMax,$yHalfWidth
+wmctrl -r "$2" -e 0,0,$yHalfLoc,$xHalfWidth,$yHalfWidth
+wmctrl -r "$3" -e 0,$xHalfLoc,$yHalfLoc,$xHalfWidth,$yHalfWidth
+

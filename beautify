@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ "$1" == "irc" ]; then
+	fname=`basename "$2"`
+	dname=`dirname "$2"`
+	scp sdc@ircepic:"$2" .
+	pname="$fname"
+else
+	pname="$1"
+fi
+
+bcpp -fi $pname -f 2 -qb 5 -na -no -cc 60 > beautifiedcode.c
+sed -i 's/^[\t]*@/@/g' beautifiedcode.c
+
+mv $pname $pname~
+mv beautifiedcode.c $pname
+
+if [ "$1" == "irc" ]; then
+	scp $pname sdc@ircepic:$2
+	scp $pname~ sdc@ircepic:$2~
+	rm $pname
+	rm $pname~
+fi
+

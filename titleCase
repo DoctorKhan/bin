@@ -1,0 +1,14 @@
+#!/bin/bash
+if (($# == 0)); then
+	while read line; do
+		titleCase $line
+	done
+fi
+
+echo $@ | tr -s ' ' '\n' | \
+for sWord; do
+	echo -n "${sWord:0:1}" | tr "[:lower:]" "[:upper:]"
+	echo -n "${sWord:1} " | tr "[:upper:]" "[:lower:]"
+done | sed 's/ *$//g'
+
+echo

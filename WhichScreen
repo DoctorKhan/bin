@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue May 31 15:26:11 CDT 2011 ##
+#####################################################
+
+echo 1
+exit 0
+
+nScreens=`Displays | wc -l | tr -dc '[:digit:]'`
+
+case $nScreens in
+	1)	echo 1; exit 0 ;;
+	2)
+		x1=`Displays 1 x`
+		
+		x2=`Displays 2 x`
+		
+		x=`xLoc $1`
+		#		exit 0
+		
+		w=`WinSize w $1`
+		x=$((x + w/2));
+		
+		if [ $(( (x1 < x && x < x2) || (x2 < x1 && x1 < x) )) == 1 ]; then
+			echo 1
+		else
+			echo 2
+	fi ;;
+esac

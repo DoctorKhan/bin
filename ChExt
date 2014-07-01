@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 30 21:11:44 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+sFile1=$1
+sNewExt=$2
+sFile2=`fileparts 8 "$sNewExt" "$sFile1"`
+if [ $# -ge 3 ]; then
+	$3 "$sFile1" "$sFile2"
+else
+	echo $sFile2
+fi
+

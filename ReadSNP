@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Dec 17 21:27:51 CST 2013 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ReadSnp
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sSNP=$1; shift
+sSNP="rs${sSNP/rs/}"
+
+## Functions
+
+## Main
+if (($# == 0)); then
+	zgrep "$sSNP"'[^0-9]' ~/genomes/*.zip
+else
+	zgrep "$sSNP"'[^0-9]' $@
+fi | sed 's/.*genome_\(.*\)_Full.*rs[^ACTG]*/\1 /' | columnate 2 | sort | tr '_' ' '

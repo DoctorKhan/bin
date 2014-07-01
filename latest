@@ -1,0 +1,18 @@
+#!/bin/bash -f
+function ListFiles()
+{
+	if test -p /dev/stdin >/dev/null; then
+		tee | ls -d1
+	else
+		if (($# == 0)); then ls -1Adt `pwd`; fi
+	fi
+	
+	for pFile; do
+		if [ -d $pFile ]; then pFile="$pFile/*"; fi
+		ls -d1 $pFile
+	done
+}
+
+
+
+ListFiles | grep -v `pwd` #| grep -v '^.*$' | xargs ls -1Adt  2>/dev/null | head -n 1

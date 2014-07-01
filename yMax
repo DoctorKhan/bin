@@ -1,0 +1,4 @@
+#!/bin/bash
+res=`screensize`
+echo "${res#*x}"
+

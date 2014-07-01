@@ -1,0 +1,214 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Wed Feb 8 15:16:58 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo -e \
+	"Usage: `basename $0` <Program>\n\nPrograms:\n" \
+	| sed -n 's/^[ \t]*\([^ *]*\))/\1/p' $0 | cat -b \
+| sed 's/\t/. /g'; echo; exit 0; fi
+#######################################################
+
+## Initialize
+cd /tmp
+software=/export/data/software
+
+function InstallProg()
+{
+	if isInstalled apt-get; then
+		sudo apt-get update
+		sudo apt-get -y $@
+	elif isInstalled port; then
+		sudo port -f selfupdate
+		sudo port -f install $@
+	fi
+}
+
+function RequireProg()
+{
+	for prog in $@; do
+		if ! isInstalled $prog; then
+			InstallProg $@
+		fi
+	done
+}
+
+## Functions
+function MyInstall()
+{
+	for sProg; do
+		case $sProg in
+			y-ppa-manager)
+				ppa-add webupd8team/y-ppa-manager y-ppa-manager
+			;;
+			
+			fail2ban)
+				if which apt-get > /dev/null; then
+					sudo apt-get -y install fail2ban
+				elif which port > /dev/null; then
+					sudo port install fail2ban
+				elif isMac; then
+					#For Macs :
+					#http://sourceforge.net/projects/fail2ban/
+					#http://sourceforge.net/projects/fail2ban/files/fail2ban-stable/fail2ban-0.8.4/fail2ban-0.8.4.tar.bz2/download
+					cd ~/Downloads
+					#tar xvfj fail2ban-0.8.4.tar.bz2
+					#cd ~/Downloads/fail2ban*
+					#sudo python setup.py install
+				fi
+			;;
+			
+			dnsmasq)
+				sudo sid 's/#\(listen-address\).*/\1=127.0.0.1/' /etc/dnsmasq.conf
+				sudo sid 's/#prepend/prepend/' /etc/dhcp/dhclient.conf
+				
+				r=/etc/resolv.conf
+				n=`grep -m 1 -n nameserver $r | word 1 :`
+				if ((n>0)); then
+					ns="nameserver 127.0.0.1"
+					sudo sid "/^$ns/d" $r
+					sudo sid "${n}i$ns" $r
+				else
+					echo $ns | sudo tee -a $r
+				fi
+				
+				sudo /etc/init.d/dnsmasq restart
+				dig ubuntu.com
+				sleep 3
+				dig ubuntu.com
+			;;
+			gnomerc)
+				cd $HOME
+				file=.config/autostart/gnomerc.desktop
+				echo -e '[Desktop Entry]\nType=Application' > $file
+				echo -e	'Exec=$HOME/.gnomerc & \nX-GNOME-Autostart-enabled=true' >> $file
+				echo -e	'Name[en_US]=.gnomerc\nComment[en_US]=Startup script for gnome' >> $file
+				echo -e	'Name=.gnomerc\nComment=Startup script for gnome' >> $file
+				
+				if [ ! -e .gnomerc ]; then
+					if which escript; then
+						escript .gnomerc . echo
+					else
+						echo -n
+					fi
+				fi
+				chmod u+x .gnomerc
+			;;
+			
+			MrGray)
+				scp sandstone:$software/VISTASOFT/Anatomy/MrGray/mrGray.exe .
+				sudo mv mrGray.exe /usr/local/bin/
+			;;
+			
+			nxclient)
+				if isLinux; then
+					wget `getlinks http://www.nomachine.com/download-package.php?Prod_Id=2573 .*.deb`
+					sudo gdebi --n `latest *.deb`
+				elif isMac; then
+					wget `getlinks http://www.nomachine.com/download-package.php?Prod_Id=3024 .pkg.zip`
+					tar -xzvf nxclient*.zip
+					sudo installer -pkg nxclient*.pkg -target "/"
+				fi
+			;;
+			
+			Office2007)
+				sandstone=sandstone.irc.utexas.edu
+				#scp $sandstone:$software/MSOffice/Office2007.iso .
+				#scp $sandstone:$software/licenses/MSOffice2007key.txt .
+				mountdir=/media/Office2007
+				sudo mkdir -p $mountdir
+				sudo mount -t iso9660 Office2007.iso $mountdir -o loop
+				wine /media/Office2007/setup.exe &
+				
+				waituntilwindowopen "Microsoft Office Enterprise 2007"
+				xdotool type `cat MSOffice2007key.txt`
+				xdotool key alt+c
+				#sudo umount
+				#			xdotool windowactivate `windowID Microsoft`; xdotool key alt+c
+			;;
+			VirtualGL)
+				curl -sA "`Version`" http://sourceforge.net/projects/virtualgl/ | grep -o 'http://.*VirtualGL.*/download'
+				getlinks http://sourceforge.net/projects/virtualgl/files/VirtualGL/2.2.1  | grep amd64
+				wget http://sourceforge.net/projects/virtualgl/files/VirtualGL/2.2.1/VirtualGL_2.2.1_amd64.deb
+			;;
+			Office2011)
+				scp sandstone:software/MSOffice/Office2011.* .
+				hdiutil attach Office2011.iso
+			;;
+			
+			SpiderOak)
+				wget `getlinks https://spideroak.com/download/ .*directdownload?platform=ubuntu.*arch=x86_64.*` \
+				-O /tmp/SpiderOak.deb
+				sudo gdebi --n /tmp/SpiderOak.deb
+			;;
+			
+			synapse)
+				ppa-add synapse-core synapse
+			;;
+			
+			ubuntu-tweak)
+				search=${2:-`Version code`}
+				wget $(getlinks https://launchpad.net/ubuntu-tweak/+download "$search.*.deb$")
+				sudo gdebi --n `latest *.deb`
+			;;
+			
+			VirtualBox)
+				oscode=`Version code`
+				wget `getlinks http://www.virtualbox.org/wiki/Linux_Downloads ".*$oscode.*amd64.*\.deb"`
+				sudo gdebi --n `latest *.deb`
+			;;
+			
+			winetricks)
+				wget http://winetricks.org/winetricks
+				sudo mv winetricks /usr/bin/
+				chmod a+x /usr/bin/winetricks
+			;;
+			
+			Win27)
+				# Find link
+				glink="http://www.google.com/search?q=Win2-7&btnI=I%27m+Feeling+Lucky"
+				wget "`getlinks $glink .*download.php?.*`" -O w.html
+				sed -n 's/.*3 seconds.*href="\(.*\)">Click here.*/\1/p' w.html > link.txt
+				
+				# Download location
+				pDown=`sed -n 's/downloads_folder = \(.*\)/\1/p' $HOME/.tucan/tucan.conf`
+				
+				# Download archive
+				sArchive=`tucan -di link.txt | sed -n 's/.*: \(.*\) correct.*/\1/p'`
+				pArchive=`find "$pDown" -type f -name "$sArchive" | head -n 1`
+				
+				# Make temp dir
+				pTemp=/tmp/Win27
+				mkdir -p $pTemp
+				rm -rf $pTemp/*
+				
+				# Extract
+				file-roller -e $pTemp $pArchive
+				
+				# Install
+				find $pTemp -type f -name GUIInstall.sh -exec bash {} \;
+			;;
+			
+			*)	RequireProg $prog 2>&1 >/dev/null
+			;;
+		esac
+	done
+}
+
+function Helpers()
+{
+	if which apt-get > /dev/null; then
+		for prog in lynx tucan aptitude; do
+			if ! isInstalled $prog; then
+				sudo apt-get -y install $prog
+			fi
+		done
+	fi
+}
+
+## Main
+
+Helpers
+MyInstall $@

@@ -1,0 +1,19 @@
+#!/bin/bash
+if which wmctrl >/dev/null ; then
+	if regmatch $@ ^0x ; then
+	set `printf "0x%08X\n" $@`
+	fi
+   wmctrl -l | grep -iq "$@"
+else
+   if ! regmatch $@ ^0x ; then
+      name=`winfullname $@`
+      id=`windowID $name`
+   else
+      id=$@
+   fi
+   
+   xwininfo -id "$id" | grep -iq 'IsViewable'
+fi
+
+exit $?
+

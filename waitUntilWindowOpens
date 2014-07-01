@@ -1,0 +1,14 @@
+#!/bin/bash
+echo "Waiting until window '$@' opens"
+#sleep 0.2
+if [ $# == 2 ]; then
+	until [[ ( `windowOpen "$1"` == 1  ) || ( `windowOpen "$2"` == 1 ) ]]; do
+             sleep 0.1
+	done
+else
+	until [ `windowOpen "$1"` == 1 ]; do
+             sleep 0.1
+	done
+fi
+echo "'$@' window is open."
+

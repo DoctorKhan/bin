@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu May 26 15:28:11 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+echo 'tell application "X11"
+click button 2 of window 1
+end tell' | osascript
+

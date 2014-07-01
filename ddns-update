@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jun 6 19:44:06 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: update-ddns
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+pConf=$HOME/.ddclient.conf
+pCache=$HOME/.cache/ddclient/ddclient.cache
+
+ddclient -file $pConf -cache $pCache
+
+if ddns-check -q; then
+	if [ "$1" == "-v" ]; then
+		echo Succeeded.
+		whatsmyip
+	fi
+else
+	if [ "$1" == "-v" ]; then echo Failed.; fi
+	exit 1
+fi
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Aug 20 21:00:20 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SysFiles
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+echo colors paths profile prompt completion logout .bashrc .cshrc .sshp \
+| tr ' ' '\n' | sed 's/^\([^.]\)/.bash_\1/g'
+
+#.config/terminator/config
+#.emerald
+#.themes
+#.icons

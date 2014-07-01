@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Jun 9 20:35:12 CDT 2011 ##
+#####################################################
+
+##################### Help Text #####################
+script=`basename $0`
+Usage="Usage: $script"
+if isHelp 0 $0 "$@"; then echo $Usage; exit 0; fi
+#####################################################
+
+if [ $# -gt 0 ]; then
+	ls -s "$@" | awk '{print $1}'
+else
+	while read -t 1 line; do
+		if [ -e "$line" ]; then
+			ls -s "$line" | awk '{print $1}'
+		fi
+	done
+fi
+

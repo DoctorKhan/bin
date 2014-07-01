@@ -1,0 +1,20 @@
+#!/bin/bash
+
+pos="$1 $2"
+echo $pos
+shift; shift
+
+if [ $# == 0 ]; then
+	window="TigerVNC:"
+else
+	window=`winfullname "$1"`
+fi
+
+waituntilwindowopen "$window"
+
+until [ "$xid" != "" ]; do
+	xid=`xdotool search --name "$window" | head -n 1`
+done
+
+xdotool windowmove $xid $pos
+

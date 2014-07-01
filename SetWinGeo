@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 18 10:55:21 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SetWinGeo
+#######################################################
+
+if ! isInt $5 && isInt $1; then
+	sWin=`ActiveWindowID`
+	x=$1; y=$2; w=$3; h=$4
+else
+	sWin=$1; shift
+	x=$1; y=$2; w=$3; h=$4
+fi
+
+shift 5
+pCalFile=$HOME/.xdotool/${@:-calibration}
+
+if [ ! -e $pCalFile ]; thens
+	xdotool-calibrate -sWin "$sWin" -pCal "$pCalFile"
+fi
+
+sCalibration=`cat "$pCalFile"`
+eval `ParseOpt -dw -dh -dx -dy :: "$sCalibration"`
+w=$((w+dw)); h=$((h+dh)); x=$((x+dx)); y=$((y+dy))
+
+xdotool windowmove "$sWin" $x $y windowsize "$sWin" $w $h

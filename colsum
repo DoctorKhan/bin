@@ -1,0 +1,13 @@
+#!/bin/bash
+
+awk '{sum+=$1} END {print sum}'
+
+exit $?
+
+while read data
+do
+	data=`echo $data | grep -o '[0-9\.\+\-]' | tr -d '\n'`
+	s=`echo "$s + $data" | sed 's/^ *\( [+-].*\)/0.0\1/g' | sed 's/\(.*[+-]\) *$/\1 0.0/g' | bc -l`
+done
+
+echo $s | sed 's/\.0*$//g'

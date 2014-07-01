@@ -1,0 +1,431 @@
+#!/bin/bash
+
+#------------------------------------------------------#
+#                                                      #
+#   Xfce4-Composite-Editor                             #
+#                                                      #
+#   ©K.D.Hedger 2012                                   #
+#                                                      #
+#   Released under GPL ie do what you want with it     #
+#                                                      #
+#                                                      #
+#------------------------------------------------------#
+
+main ()
+{
+export MAIN_DIALOG="
+<window title=\"Xfce WM Composite Editor\" height_request=\"480\" width_request=\"500\" window_position=\"1\">
+	<vbox>
+
+		<text>
+			<label>\"Requires WM Restart\"</label>
+		</text>
+
+		<hbox>
+			<text>
+				<label>\"Shadow Opacity\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"0\" range-max=\"$SHAD_OPMAX\" >
+				<default>$SHAD_OPSTART</default>
+				<variable>SHAD_SPIN</variable>
+				<action>refresh:SHAD_RANGE</action>
+				<input>echo \$SHAD_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"0\" range-max=\"$SHAD_OPMAX\">
+				<default>$SHAD_OPSTART</default>
+				<variable>SHAD_RANGE</variable>
+				<action>refresh:SHAD_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $SHAD_DEF;else echo \$SHAD_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Delta X\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"$DELTA_X_MIN\" range-max=\"$DELTA_X_MAX\" >
+				<default>$DELTA_X_START</default>
+				<variable>DELTA_X_SPIN</variable>
+				<action>refresh:DELTA_X_RANGE</action>
+				<input>echo \$DELTA_X_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"$DELTA_X_MIN\" range-max=\"$DELTA_X_MAX\">
+				<default>$DELTA_X_START</default>
+				<variable>DELTA_X_RANGE</variable>
+				<action>refresh:DELTA_X_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $DELTA_X_DEF;else echo \$DELTA_X_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Delta Y\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"$DELTA_Y_MIN\" range-max=\"$DELTA_Y_MAX\" >
+				<default>$DELTA_Y_START</default>
+				<variable>DELTA_Y_SPIN</variable>
+				<action>refresh:DELTA_Y_RANGE</action>
+				<input>echo \$DELTA_Y_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"$DELTA_Y_MIN\" range-max=\"$DELTA_Y_MAX\">
+				<default>$DELTA_Y_START</default>
+				<variable>DELTA_Y_RANGE</variable>
+				<action>refresh:DELTA_Y_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $DELTA_Y_DEF;else echo \$DELTA_Y_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Delta Width\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"$DELTA_W_MIN\" range-max=\"$DELTA_W_MAX\" >
+				<default>$DELTA_W_START</default>
+				<variable>DELTA_W_SPIN</variable>
+				<action>refresh:DELTA_W_RANGE</action>
+				<input>echo \$DELTA_W_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"$DELTA_W_MIN\" range-max=\"$DELTA_W_MAX\">
+				<default>$DELTA_W_START</default>
+				<variable>DELTA_W_RANGE</variable>
+				<action>refresh:DELTA_W_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $DELTA_W_DEF;else echo \$DELTA_W_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Delta Height\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"$DELTA_H_MIN\" range-max=\"$DELTA_H_MAX\" >
+				<default>$DELTA_H_START</default>
+				<variable>DELTA_H_SPIN</variable>
+				<action>refresh:DELTA_H_RANGE</action>
+				<input>echo \$DELTA_H_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"$DELTA_H_MIN\" range-max=\"$DELTA_H_MAX\">
+				<default>$DELTA_H_START</default>
+				<variable>DELTA_H_RANGE</variable>
+				<action>refresh:DELTA_H_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $DELTA_H_DEF;else echo \$DELTA_H_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hseparator height_request=\"16\"></hseparator>
+
+		<text>
+			<label>\"Live Update\"</label>
+		</text>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Move Opacity\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"0\" range-max=\"$MOVE_OPMAX\" >
+				<default>$MOVE_OPSTART</default>
+				<variable>MOVE_SPIN</variable>
+				<action>refresh:MOVE_RANGE</action>
+				<input>echo \$MOVE_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"0\" range-max=\"$MOVE_OPMAX\">
+				<default>$MOVE_OPSTART</default>
+				<variable>MOVE_RANGE</variable>
+				<action>exec $SHELL -c 'liveupdate'</action>
+				<action>refresh:MOVE_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $MOVE_DEF;else echo \$MOVE_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Inactive Opacity\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"0\" range-max=\"$INACTIVE_OPMAX\" >
+				<default>$INACTIVE_OPSTART</default>
+				<variable>INACTIVE_SPIN</variable>
+				<action>refresh:INACTIVE_RANGE</action>
+				<input>echo \$INACTIVE_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"0\" range-max=\"$INACTIVE_OPMAX\">
+				<default>$INACTIVE_OPSTART</default>
+				<variable>INACTIVE_RANGE</variable>
+				<action>exec $SHELL -c 'liveupdate'</action>
+				<action>refresh:INACTIVE_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $INACTIVE_DEF;else echo \$INACTIVE_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Frame Opacity\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"0\" range-max=\"$FRAME_OPMAX\" >
+				<default>$FRAME_OPSTART</default>
+				<variable>FRAME_SPIN</variable>
+				<action>refresh:FRAME_RANGE</action>
+				<input>echo \$FRAME_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"0\" range-max=\"$FRAME_OPMAX\">
+				<default>$FRAME_OPSTART</default>
+				<variable>FRAME_RANGE</variable>
+				<action>exec $SHELL -c 'liveupdate'</action>
+				<action>refresh:FRAME_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $FRAME_DEF;else echo \$FRAME_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Resize Opacity\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"0\" range-max=\"$RESIZE_OPMAX\" >
+				<default>$RESIZE_OPSTART</default>
+				<variable>RESIZE_SPIN</variable>
+				<action>refresh:RESIZE_RANGE</action>
+				<input>echo \$RESIZE_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"0\" range-max=\"$RESIZE_OPMAX\">
+				<default>$RESIZE_OPSTART</default>
+				<variable>RESIZE_RANGE</variable>
+				<action>exec $SHELL -c 'liveupdate'</action>
+				<action>refresh:RESIZE_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $RESIZE_DEF;else echo \$RESIZE_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hbox>
+			<text width_request=\"100\">
+				<label>\"Popup Opacity\"</label>
+			</text>
+
+			<spinbutton space-expand=\"false\" space-fill=\"false\" update-policy=\"0\" range-min=\"0\" range-max=\"$POPUP_OPMAX\" >
+				<default>$POPUP_OPSTART</default>
+				<variable>POPUP_SPIN</variable>
+				<action>refresh:POPUP_RANGE</action>
+				<input>echo \$POPUP_RANGE</input>
+			</spinbutton>
+
+			<hscale space-expand=\"true\" space-fill=\"true\" draw-value=\"false\" update-policy=\"0\" wrap=\"true\" range-min=\"0\" range-max=\"$POPUP_OPMAX\">
+				<default>$POPUP_OPSTART</default>
+				<variable>POPUP_RANGE</variable>
+				<action>exec $SHELL -c 'liveupdate'</action>
+				<action>refresh:POPUP_SPIN</action>
+				<input>\"if [ -e $RESET ];then echo $POPUP_DEF;else echo \$POPUP_SPIN;fi\"</input>
+			</hscale>
+		</hbox>
+
+		<hseparator height_request=\"16\"></hseparator>
+
+		<hbox homogeneous=\"true\">
+
+			<checkbox>
+				<label>Composite</label>
+				<default>$COMP_START</default>
+				<variable>usecomposite</variable>
+				<action>exec $SHELL -c \"xfconf-query -c xfwm4 -p /general/use_compositing -s \$usecomposite\"</action>
+			</checkbox>
+
+			<checkbox>
+				<label>Dock Shadow</label>
+				<default>$DOCK_SHADOW</default>
+				<variable>dockshadow</variable>
+				<input>\"if [ -e $RESET ];then echo false;fi\"</input>
+				<action>exec $SHELL -c \"xfconf-query -c xfwm4 -p /general/show_dock_shadow -s \$dockshadow\"</action>
+			</checkbox>
+
+			<checkbox>
+				<label>Frame Shadow</label>
+				<default>$FRAME_SHADOW</default>
+				<variable>frameshadow</variable>
+				<input>\"if [ -e $RESET ];then echo false;fi\"</input>
+				<action>exec $SHELL -c \"xfconf-query -c xfwm4 -p /general/show_frame_shadow -s \$frameshadow\"</action>
+			</checkbox>
+
+			<checkbox>
+				<label>Pop-Up Shadow</label>
+				<default>$POPUP_SHADOW</default>
+				<variable>popupshadow</variable>
+				<input>\"if [ -e $RESET ];then echo false;fi\"</input>
+				<action>exec $SHELL -c \"xfconf-query -c xfwm4 -p /general/show_popup_shadow -s \$popupshadow\"</action>
+			</checkbox>
+		</hbox>
+
+		<hseparator height_request=\"16\"></hseparator>
+		
+		<hbox>
+			<button>
+				<label>Restart WM</label>
+				<action>exec $SHELL -c 'updatewm'</action>
+			</button>
+				
+			<button>
+				<label>Defaults</label>
+				<action>touch $RESET</action>
+				<action>refresh:SHAD_RANGE</action>
+				<action>refresh:DELTA_X_RANGE</action>
+				<action>refresh:DELTA_Y_RANGE</action>
+				<action>refresh:DELTA_W_RANGE</action>
+				<action>refresh:DELTA_H_RANGE</action>
+				<action>refresh:MOVE_RANGE</action>
+				<action>refresh:INACTIVE_RANGE</action>
+				<action>refresh:FRAME_RANGE</action>
+				<action>refresh:RESIZE_RANGE</action>
+				<action>refresh:POPUP_RANGE</action>
+				<action>refresh:dockshadow</action>
+				<action>refresh:frameshadow</action>
+				<action>refresh:popupshadow</action>
+				<action>rm $RESET</action>
+			</button>
+				
+			<button space-expand=\"true\">
+				<input file stock=\"gtk-quit\"></input> 
+			</button>
+
+		</hbox>
+
+	</vbox>
+</window>"
+
+$GTKDIALOG --program=MAIN_DIALOG >/dev/null
+}
+
+init ()
+{
+	GTKDIALOG=gtkdialog
+
+#/general/shadow_opacity
+	SHAD_OPMAX=200
+	SHAD_OPSTART="$(xfconf-query -c xfwm4 -p /general/shadow_opacity)"
+	SHAD_DEF=50
+
+#/general/move_opacity
+	MOVE_OPMAX=100
+	MOVE_OPSTART="$(xfconf-query -c xfwm4 -p /general/move_opacity)"
+	MOVE_DEF=100
+
+#/general/shadow_delta_x
+	DELTA_X_MIN=-64
+	DELTA_X_MAX=64
+	DELTA_X_START="$(xfconf-query -c xfwm4 -p /general/shadow_delta_x)"
+	DELTA_X_DEF=0
+
+#/general/shadow_delta_y
+	DELTA_Y_MIN=-64
+	DELTA_Y_MAX=64
+	DELTA_Y_START="$(xfconf-query -c xfwm4 -p /general/shadow_delta_y)"
+	DELTA_Y_DEF=-3
+
+#/general/shadow_delta_height
+	DELTA_H_MIN=-64
+	DELTA_H_MAX=64
+	DELTA_H_START="$(xfconf-query -c xfwm4 -p /general/shadow_delta_height)"
+	DELTA_H_DEF=0
+
+#/general/shadow_delta_width
+	DELTA_W_MIN=-64
+	DELTA_W_MAX=64
+	DELTA_W_START="$(xfconf-query -c xfwm4 -p /general/shadow_delta_width)"
+	DELTA_W_DEF=0
+
+#/general/inactive_opacity
+	INACTIVE_OPMAX=100
+	INACTIVE_OPSTART="$(xfconf-query -c xfwm4 -p /general/inactive_opacity)"
+	INACTIVE_DEF=100
+
+#/general/frame_opacity
+	FRAME_OPMAX=100
+	FRAME_OPSTART="$(xfconf-query -c xfwm4 -p /general/frame_opacity)"
+	FRAME_DEF=100
+
+#/general/resize_opacity
+	RESIZE_OPMAX=100
+	RESIZE_OPSTART="$(xfconf-query -c xfwm4 -p /general/resize_opacity)"
+	RESIZE_DEF=100
+
+
+#/general/popup_opacity
+	POPUP_OPMAX=100
+	POPUP_OPSTART="$(xfconf-query -c xfwm4 -p /general/popup_opacity)"
+	POPUP_DEF=100
+
+#/general/show_dock_shadow
+	DOCK_SHADOW="$(xfconf-query -c xfwm4 -p /general/show_dock_shadow)"
+
+#/general/show_frame_shadow
+	FRAME_SHADOW="$(xfconf-query -c xfwm4 -p /general/show_frame_shadow)"
+
+#/general/show_popup_shadow
+	POPUP_SHADOW="$(xfconf-query -c xfwm4 -p /general/show_popup_shadow)"
+
+#/general/use_compositing
+	COMP_START="$(xfconf-query -c xfwm4 -p /general/use_compositing)"
+
+	RESET=/tmp/RESET$$
+	
+	export -f updatewm
+	export -f liveupdate
+	
+	export RESET COMP_START SHAD_OPSTART MOVE_OPSTART INACTIVE_OPSTART FRAME_OPSTART RESIZE_OPSTART POPUP_OPSTART DELTA_Y_START DELTA_X_START DELTA_H_START DELTA_W_START
+	export SHAD_DEF MOVE_DEF INACTIVE_DEF FRAME_DEF RESIZE_DEF POPUP_DEF DELTA_Y_DEF DELTA_X_DEF DELTA_H_DEF DELTA_W_DEF
+}
+
+liveupdate ()
+{
+	echo "move_opacity = $MOVE_OPSTART setting to $MOVE_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/move_opacity -s $MOVE_RANGE
+
+	echo "inactive_opacity = $INACTIVE_OPSTART setting to $INACTIVE_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/inactive_opacity -s $INACTIVE_RANGE
+
+	echo "frame_opacity = $FRAME_OPSTART setting to $FRAME_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/frame_opacity -s $FRAME_RANGE
+
+	echo "frame_resize = $RESIZE_OPSTART setting to $RESIZE_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/resize_opacity -s $RESIZE_RANGE
+
+	echo "popup_opacity = $POPUP_OPSTART setting to $POPUP_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/popup_opacity -s $POPUP_RANGE
+}
+
+updatewm ()
+{
+
+	echo "shadow_opacity = $SHAD_OPSTART setting to $SHAD_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/shadow_opacity -s $SHAD_RANGE
+
+	echo "shadow_delta_x = $DELTA_X_START setting to $DELTA_X_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/shadow_delta_x -s $DELTA_X_RANGE
+
+	echo "shadow_delta_y = $DELTA_Y_START setting to $DELTA_Y_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/shadow_delta_y -s $DELTA_Y_RANGE
+
+	echo "shadow_delta_width = $DELTA_W_START setting to $DELTA_W_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/shadow_delta_width -s $DELTA_W_RANGE
+
+	echo "shadow_delta_height = $DELTA_H_START setting to $DELTA_H_RANGE" >&2
+	xfconf-query -c xfwm4 -p /general/shadow_delta_height -s $DELTA_H_RANGE
+
+	xfwm4 --replace &
+}
+
+init
+main
+

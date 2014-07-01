@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri Apr 29 14:32:30 CDT 2011 ##
+#####################################################
+
+minargs=0
+if [ "$1" == "--help" ] || [ "$1" == "-h" ] || [ "$#" -lt "$minargs" ]; then echo "Usage: $0"; exit 0; fi
+
+sudo bash -c 'echo 2 >> /etc/modprobe.d/hid_apple.conf'
+sudo bash -c 'echo 2 >> /etc/modprobe.d/hid-apple.conf'
+sudo update-initramfs -u
+

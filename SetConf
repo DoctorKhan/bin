@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jul 12 08:56:21 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SetConf <File> <Param> <Value>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+if ! [[ $BASHRC == TRUE ]]; then . $HOME/.bashrc; fi
+
+function Main()
+{
+	sArgs="$@"
+	
+	### Parse param and value
+	if regmatch "$sArgs" "="; then
+		param=`echo $sArgs | sed 's/ *=.*//g'`
+		value=`echo $sArgs | sed 's/.*= *//g'`
+	else
+		param="$1"
+		value="$2"
+	fi
+	
+	### Set value
+	if grep -q "^$param *=" "$sFile"; then
+		sed -i -e "s/^\($param *=\).*/\1 $value/" "$sFile"
+	else
+		echo "$param"="$value" >> "$sFile"
+	fi
+	echo $value
+}
+
+sFile="$1"; touch "$sFile"; shift
+
+if (($# > 0)); then Main "$@"; fi
+
+if pipe; then
+	while read line; do
+		Main "$line"
+	done
+fi

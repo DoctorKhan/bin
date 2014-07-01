@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jan 30 00:46:24 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: syncBoth
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+while [[ $1 == -* ]]; do
+	sArgs="$sArgs $1"; shift
+done
+
+pLocal=`pwd -P`
+
+while [[ $1 == -* ]]; do
+	sArgs="$sArgs $1"; shift
+done
+
+# Dirs
+pLocalDown=`cd ..; pwd -P | sed 's,/*$,/,'`
+pRemoteDown=`pwd -P | sed -e "s,^$HOME[/]*,,g"`
+
+pLocalUp=`pwd -P`
+pRemoteUp=`cd ..; pwd -P | sed -e "s,^$HOME[/]*,,g"`
+
+sArgs="-auvz --timeout=20 --exclude '*~' -e /usr/bin/ssh"
+
+## Main
+
+# Remove empty files older than 100 days
+#find "$pLocal" -empty -mmin +100 -delete
+
+pSynced=`create /tmp/nSyncs`
+sHost=${1:-sandstone.irc.utexas.edu}; shift
+
+ssh-fix-hosts $sHost ssh $sHost DeleteMe $pRemoteDown >/dev/null
+# Downloading # ssh-fix-hosts $sHost
+trsync $sArgs $sHost:$pRemoteDown $pLocalDown >/dev/null
+
+DeleteMe >/dev/null
+
+# Uploading	# ssh-fix-hosts $sHost
+trsync $sArgs $pLocalUp $sHost:$pRemoteUp >/dev/null
+
+if ! grep -q "$sHost" "$pSynced"; then
+	echo $sHost >> "$pSynced"
+	sort $pSynced > $pSynced~
+	mv $pSynced~ $pSynced
+fi
+
+#-a = -rlptgoD
+

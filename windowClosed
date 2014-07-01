@@ -1,0 +1,9 @@
+#!/bin/bash
+#xwininfo -name "$@" 2>&1 | grep -c 'No window'
+
+if [ $# == 0 ] || [ `wmctrl -l | grep -c "$@"` == "0" ]; then
+	echo 1
+else
+	echo 0
+fi
+

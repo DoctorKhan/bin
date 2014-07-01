@@ -1,0 +1,4 @@
+#!/bin/bash
+
+WinSize "$@" | awk '{print $2}'
+

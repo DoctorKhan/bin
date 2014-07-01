@@ -1,0 +1,64 @@
+#!/bin/bash
+closeWin "MGD Sim"
+closeWin "/ESE_12M5A/psd/bin/PlotPulseMgd"
+
+proj=`cat $HOME/wtscripts/project`
+
+if [ $# == 1 ]; then
+	if [ "$1" == "plot" ]; then
+		plot="plot";
+	else
+		proj=$1
+	fi
+fi
+	
+if [ $# == 2 ]; then
+	proj=$1; plot=$2
+fi
+
+if [ `windowOpen WToolsMgd` == 0 ]; then
+	startwt "$proj"
+fi
+if [ `windowViewable EvalToolMgd` == 0 ]; then
+	loadcv "$proj"
+fi
+savecv
+
+wmctrl -a "WToolsMgd"
+drag 250 66 250 141
+
+#pressAlt a; xtype m
+waitUntilWindowViewable "MGD Sim"
+
+loadcvsim
+
+# Run LoadCV's
+click 52 226
+sleep 0.3
+#refresh
+click 407 669
+click 407 669
+click 407 669
+sleep 0.1
+
+# Run pulsegen
+click 125 225
+sleep 0.1
+#refresh
+click 407 669
+click 407 669
+click 407 669
+sleep 0.1
+
+#Run Scan
+click 208 226
+sleep 0.1
+#refresh
+click 407 669
+click 407 669
+click 407 669
+
+if [ "$plot" == "plot" ]; then
+	sleep 2
+	click 400 160
+fi

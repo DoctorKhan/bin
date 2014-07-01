@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ "$1" == "nx" ]; then
+	if [ `expr length "${USERNAME}"` == 0 ]; then
+		name="${LOGNAME}"
+	else
+		name="${USERNAME}"
+	fi
+	# echo "ps aux | grep -i $name | grep -ic nxnode"
+	if [ `ps aux | grep -i $name | grep -ic nxnode` -gt 2 ]; then
+		exit 0
+	else
+		exit 1
+	fi
+fi
+

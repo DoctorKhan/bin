@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 17 22:20:14 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WinSize
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+## Initialize
+if [[ "$1" == [+xwhl] ]]; then
+sOpt="$1"
+shift
+fi
+sWinTitle="$@"
+
+## Functions
+function ShowSize()
+{
+case $sOpt in
+	+)   awk '{print "+"$1"+"$2}';;
+	x)   awk '{print $1"x"$2}';;
+	w)   awk '{print $1}' ;;
+	h|l) awk '{print $2}' ;;
+	*)	 awk '{print $1,$2}';;
+esac
+}
+
+## Main
+if isMac; then
+	echo 'tell application "System Events"
+				set frontApp to name of first application process whose frontmost is true
+			end tell
+
+			tell application frontApp
+				bounds of front window
+	end tell' | osascript | tr -d ',' | awk '{print $3-$1,$4-$2}'
+else
+	xwininfo -root -tree | grep -i "$sWinTitle" | head -n 1 |\
+	sed 's/.* \([^ ]*\)x\([^ ]*\)+[^ ]*+[^ ]* .*/\1 \2/g'
+fi | ShowSize
+

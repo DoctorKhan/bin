@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Dec 15 15:32:11 CST 2013 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: InsertImageLyx
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+RightClick
+sleep 0.2
+RightClick
+sleep 0.2
+xdotool mousemove_relative --sync 50 130
+LeftClick
+sleep 0.5
+press Home
+xtype /home/khan/graphics/
+pressCtrl a
+pressCtrl c
+pressEnter
+wmctrl -a LyX
+sleep 1
+pressAlt i
+sleep 0.5
+press g
+sleep 0.5
+pressCtrl v
+pressEnter

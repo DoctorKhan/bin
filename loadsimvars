@@ -1,0 +1,19 @@
+#!/bin/bash
+#Enter diags
+wmctrl -a "MGD Sim"
+click 60 `echo "380 + 35 * 0" | bc`; xtype ifr; 
+click 417 `echo "380 + 35 * 0" | bc`; xtype 2;
+drag 375 405 375 382
+click 60 `echo "380 + 35 * 0" | bc`; pressEnter; sleep 2
+
+click 60 `echo "380 + 35 * 1" | bc`; xtype isl;
+click 417 `echo "380 + 35 * 1" | bc`; xtype 6; 
+click 60 `echo "380 + 35 * 1" | bc`; pressEnter; sleep 2
+
+click 60 `echo "380 + 35 * 2" | bc`; xtype ia_gz4; pressEnter; sleep 2
+click 60 `echo "380 + 35 * 3" | bc`; xtype ia_gzrf1; pressEnter; sleep 2
+#click 60 `echo "380 + 35 * 4" | bc`; xtype per_gy; pressEnter; sleep 2
+#click 60 `echo "380 + 35 * 5" | bc`; xtype per_gz4; pressEnter; sleep 2
+#click 60 `echo "380 + 35 * 6" | bc`; xtype per_gz2a; pressEnter; sleep 2
+#click 60 `echo "380 + 35 * 7" | bc`; xtype per_gzrf1; pressEnter; sleep 2
+

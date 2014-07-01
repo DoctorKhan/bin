@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [[ "$1" == "-s" ]]; then
+	shift; sSubject=$1; shift
+else
+	sSubject=/export/data/mri/Anatomy/FreeSurfer
+fi
+
+export SUBJECTS_DIR=$sSubject
+export FREESURFER_HOME=/usr/local/freesurfer
+export PATH=$FREESURFER_HOME/bin:${PATH}
+
+source $FREESURFER_HOME/SetUpFreeSurfer.sh
+exec $*

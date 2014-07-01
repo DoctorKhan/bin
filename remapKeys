@@ -1,0 +1,55 @@
+#!/bin/bash
+#xmodmap -e "keycode 182 = Insert"
+#xmodmap -e "keycode 115 = Alt_L"
+#xmodmap -e "keycode 116 = Alt_R"
+#xmodmap -e "keycode 64 = Super_L"
+#xmodmap -e "keycode 113 = Super_R"
+
+keysyms=$HOME/keysyms.txt
+gedit $keysyms &
+
+keycodes=$HOME/keycodes.txt
+touch $keycodes
+
+sleep 1
+
+xev | tee $temp | grep -Go 'keycode [0-9]* '
+
+grep -o 'keycode [0-9]* ' $temp | uniq > $keycodes
+
+nKeys=`cat $keycodes | wc -l`
+nSyms=`cat $keysyms | wc -l`
+
+if (( $nKeys < $nSyms )); then
+	nMin=$nKeys
+else
+	nMin=$nSyms
+fi
+
+mkdir -p ~/xmods
+temp=~/xmods/xmodmap
+paste -d = $keycodes $keysyms | grep -v '=$' | sed 's/=/= /g' | head -n $nMin > $temp
+
+# replace lines
+modkeycodes=$HOME/xmodmap-`hostname`
+temp2=/tmp/t2.txt
+touch $modkeycodes $temp2
+
+cat $temp | while read line
+do
+	keycode=`echo $line | cut -d '=' -f 1 | grep -o '[0-9]*'`
+	sed -i "s/keycode *$keycode.*/$line/g" $modkeycodes
+	if (( `grep -ic "$line" $modkeycodes` == 0 )); then
+		echo $line >> $modkeycodes
+	fi
+done
+
+cat $modkeycodes | sort | uniq > $temp2
+mv $temp2 $modkeycodes
+
+rm -f $temp
+
+mkdir $HOME/xmods 2> /dev/null
+mv $modkeycodes $HOME/xmods/
+ln -s $HOME/xmods/xmodmap-`hostname` $HOME/.xmodmaprc 2> /dev/null
+

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Mar 18 21:39:46 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: cml
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Functions
+function isRaw() { if [[ ${1##*.} != raw ]]; then return 1; fi; }
+
+## Initialize
+s=$HOME/.meshlab/Std.mlx
+pFile=$1
+
+## Main
+# Initial data file
+if isRaw $pFile; then
+	pObjIn=`TempFile In.obj`
+	cat $pFile | raw2obj > $pObjIn;
+else
+	pObjIn=$pFile;
+fi
+
+# Convert
+pObjTmp=`TempFile .obj`
+for script in $s; do
+	cwd=`pwd`; cd /tmp
+	meshlabserver -i `basename $pObjIn` -o `basename $pObjTmp` -s $HOME/.meshlab/Std.mlx
+	cd "$cwd"
+	mv $pObjIn $pObjIn~
+	mv $pObjTmp $pObjIn
+done
+
+if isRaw $pFile; then
+	cat $pObjIn | obj2raw > $pFile
+fi
+

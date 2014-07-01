@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 17 22:47:52 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: LoadGeo <window>
+#######################################################
+
+if [ $# == 0 ]; then
+	sWin=`ActiveWindowID`
+else
+	sWin=`WindowID "$@"`
+fi
+
+sFile=$HOME/.xdotool/windows/$sWin
+
+if [ ! -e $sFile ]; then exit 1; fi
+
+sGeo=`cat "$sFile"`
+#echo Loading: $sGeo
+SetWinGeo $sWin $sGeo

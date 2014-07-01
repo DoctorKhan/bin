@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Feb 11 16:03:22 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ScanSim
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+if isInt $1; then iBuildTime=$1; shift; fi
+iBuildTime=${iBuildTime:-5} # in seconds
+
+## Main
+for pFile; do
+	pFile2=$(fileparts 9 `pwd` $pFile)
+	gescansim "$pFile" "$pFile2" $iBuildTime
+done
+

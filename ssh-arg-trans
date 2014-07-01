@@ -1,0 +1,44 @@
+#!/bin/bash
+
+## Created by khan on Tue Apr 19 13:23:22 CDT 2011 ##
+
+#scanner=UT_AUS_3TMR
+scanner=gauss
+transfer=transfer
+
+if [ $# == 0 ]; then
+	 echo "Usage: $0" 
+	 exit 0
+fi
+
+args=$@
+
+if [ "$1" == "scp" ]; then 
+	p="-P"
+	stripped=`echo $args | sed 's/ -[^ ]*[cFiloPS][^ ]* [^ ]*//g' | sed 's/ -[1246BCpqrv][^ ]*//g'`
+else 
+	p="-p"; 
+	# strip ssh options
+	stripped=`echo $args | sed 's/ -[^ ]*[bcDeFIiLlmOopRSWw][^ ]* [^ ]*//g' | sed 's/ -[1246AaCfgKkMNnqsTtVvXxYy][^ ]*//g'`
+fi
+
+host=`echo $stripped | awk '{print $2}' | cut -d : -f 1`
+
+if [ `hostname` == $scanner ]; then
+	if [ `echo $host | grep -ic sandstone` -gt 0 ]; then
+		port=10000
+       	args=`echo $args | sed "s/ \([^ ]*[@ ]*\)$host\([ :]\)/ $p $port \1transfer\2/"`
+	fi
+else
+	if [ `echo $@ | grep -ic transfer` -gt 0 ]; then
+		port=32768
+        	args=`echo $args | sed 's/ \([^ ]*\)transfer[^( :)]*/ '$p' '$port' \1localhost/'`
+	fi	
+fi
+
+if [ `hostname` == $transfer ] && [ `echo $@ | grep -ic sandstone` -gt 0 ]; then
+		args=`echo $args | sed 's/ \([^( :)]*[@ ]*\)sandstone[^( :)]*/\1sandstone.irc.utexas.edu/'`
+fi
+
+echo $args$args2
+

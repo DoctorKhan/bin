@@ -1,0 +1,3 @@
+#!/bin/bash
+cat $@ |while read line; do rm -fv "${line}"; done
+

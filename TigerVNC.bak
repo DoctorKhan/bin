@@ -1,0 +1,141 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jul 26 20:51:13 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: tigervnc user@host:port WidthxHeight -q [0-9]
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+# Last command file
+pLast=`create $HOME/.vnc/last`
+sLast=`cat $pLast`
+sArgs="$@"
+
+function Query()
+{
+	case $1 in
+		0) echo "$sArgs" ;;
+		1) echo "$sLast" ;;
+		2)	case $2 in
+				0) echo "`id -un`@";;
+				1) echo "sandstone.irc.utexas.edu";;
+				2) echo ":`VncPort $Hostname`";;
+				3) screensize available;;
+				4) echo "+0+0";;
+				5) whichtiger -v
+			esac
+		;;
+	esac
+}
+
+function MakeCommand()
+{
+	Host=`echo $Hostname | word 2 @`
+	echo "$Pathname $sOpts $QualityLevel $Position $Password $DesktopSize -via $Hostname $Host:$Port" | StrTrim
+	
+}
+
+#if (($# > 0)); then
+
+vsStatus[0]=" from user input.";
+vsStatus[1]=" from previous session.";
+vsStatus[2]=" by default."
+
+vsPrefix[3]='-prefix -DesktopSize ';
+vsPrefix[4]="-prefix -geometry 2000x2000"S
+
+vsQuery[0]=User;
+vsQuery[1]=Host;
+vsQuery[2]=Port;
+vsQuery[3]=Size;
+vsQuery[4]=Position;
+vsQuery[5]=Pathname
+
+# Set params
+for iOpt in {0..5}; do
+	sQuery="${vsQuery[iOpt]}"; sPrefix="${vsPrefix[iOpt]}"
+	
+	echo -n "$sQuery... "
+	for iSource in {0..2}; do
+		sResp=`Query $iSource $iOpt | GetOptions $sQuery $sPrefix`
+		if [ ! -z "$sResp" ]; then
+			eval "$sQuery=$(dquote "$sResp")"
+			echo "$(dquote "$sResp")${vsStatus[iSource]}"
+			break
+		fi
+	done
+done
+
+# Verify host
+if ! isDomain $Host 2>/dev/null; then
+	Host=
+fi
+
+# Size limits
+x=`echo $Size | word 2 | word 1 x`
+y=`echo $Size | word 2 | word 2 x`
+if (( x > `xMax` )); then x=`xMax`; fi
+if (( y > `yMax` )); then y=`yMax`; fi
+Size=`echo $Size | sed "s/[0-9]*x[0-9]*/${x}x${y}/"`
+
+# Host
+Hostname="$User@$Host"
+Hostport="$Host:$Port"
+
+# QualityLevel
+QualityLevel=`echo $@ | sed -e 's/-q /\-QualityLevel=/g' | StrTrim | GetOptions query QualityLevel`
+
+# Options
+if [ ! -z "$sOpts" ]; then echo "Options... $sOpts"; fi
+
+# Start server on port
+echo Requesting desired port...
+ssh $Hostname vncserver :$Port 2>$HOME/.vnc/port.log
+echo
+
+# Set command
+echo "Command:"
+
+# Password file - read
+PasswordFile="$HOME/.vnc/$Hostname/passwd"
+if [ -e "$PasswordFile" ]; then Password="-passwd $PasswordFile"; fi
+
+MakeCommand > $pLast
+#fi
+
+# Display options
+pOpts=p
+
+cat $pLast | GetOptions Hostname -prefix 'Hostname ' > $pOpts
+cat $pLast | GetOptions Port -prefix 'Port ' >> $pOpts
+cat $pLast | GetOptions QualityLevel -prefix 'QualityLevel ' -suffix " (0=worst, 9=best)" >> $pOpts
+
+if Selector $pOpts; then
+	eval `cat $pOpts | word 1-2 | tr ' ' '='`
+	# Store command
+	MakeCommand > $pLast
+fi
+rm $pOpts
+
+# Execute
+pLog=$HOME/.vnc/tiger.log
+source $pLast 2>$pLog
+
+# Handle connection failures
+if grep -q failed $pLog; then
+	grep -i fail $pLog
+	exit 1
+fi
+
+# Download password file if necessary
+if [ ! -e "$PasswordFile" ]; then
+	echo Password file $PasswordFile not found. Downloading it...
+	scp $Hostname:.vnc/passwd `create $PasswordFile`
+fi

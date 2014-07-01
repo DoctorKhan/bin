@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed Apr 20 08:59:58 CDT 2011 ##
+#####################################################
+
+pHosts="$HOME/.hosts.all"
+
+echo -n | tee "$pHosts.live" "$pHosts.down" "$pHosts.full"
+for sHost in `allhosts`; do
+	(if isAlive $sHost &>/dev/null; then
+			echo "up   - $sHost"
+			echo "$sHost" >> "$pHosts.live"
+		else
+			echo "down - $sHost"
+			echo "$sHost" >> "$pHosts.down"
+	fi) &
+done
+
+nFull=`cat $pHosts.full | wc -l`
+until ((nDone == nFull)); do
+	sleep 1
+	nDone=`cat $pHosts.live $pHosts.down | wc -l`
+	echo -en "Status found: $nDone / $nFull\r"
+done; echo

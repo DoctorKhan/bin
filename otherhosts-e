@@ -1,0 +1,15 @@
+#!/bin/bash
+
+function allhosts()
+{
+	echo sandstone.irc.utexas.edu
+	echo gauss.irc.utexas.edu
+	#echo onyx.irc.utexas.edu
+	echo obsidian.biosci.utexas.edu
+	echo gaidon.dyndns.org
+}
+
+host=`hostname | sed 's/albert/gaidon/g'`
+
+allhosts | grep -iv $host
+

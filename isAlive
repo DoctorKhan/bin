@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr  7 16:26:19 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then exit 1; fi
+
+sHost=`echo $@ | cut -d '@' -f 2`
+n=/dev/null
+sOpt="-o ConnectTimeout=3"
+
+if which nc; then
+	if ! nc -w 3 -z $sHost 22; then
+		exit 1;
+	fi
+else
+	if ! ssh $@ "echo -n" $sOpt; then
+		exit 1
+	fi
+fi 2>&1>$n

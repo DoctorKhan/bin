@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Read input
+if [ $# -gt 0 ]; then
+	# Read from file
+	pMat="$1"
+else
+	# Read frome pipe
+	pTemp=`TempFile`
+	cat /dev/stdin > $pTemp
+	pMat="$pTemp"
+fi
+
+nCols=`head -n 1 $pMat | wc -w`
+for ((iCol=1; iCol <= nCols; iCol++)); do	
+	echo `awk '{print $'"$iCol"'}' "$pMat"`
+done

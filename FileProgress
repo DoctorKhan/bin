@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 25 14:11:32 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FileProgress
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+sLatestFile=`ls -t *.xls | head -n 1 | sed 's/.xls/.csv/' | xargs readlink`
+nCom=`ls *.xls | wc -l`
+nTot=`ls *.csv | wc -l`
+echo $((nCom*100/nTot)) %
+echo $nCom / $nTot
+echo $sLatestFile
+
+if [ "$nCom" == "$nTot" ]; then exit 1; fi
+
+function FileProg()
+{
+	sLatestFile=`ls -t *.xls | head -n 1`
+	nCom=`ls *.xls | wc -l`
+	nTot=`ls *.csv | wc -l`
+	
+	if (( $nCom == 1 )); then
+		t1=`date +%s`
+	else
+		t=`date +%s`
+	fi
+	
+	dt=`echo $t - $t1 | bc`
+	dc=$((nCom - 1))
+	rate=`echo $dc / $dt | bc`
+	
+	nLeft=$((nTot - nCom))
+	tLeft=`echo $nLeft / $rate | bc`
+	
+	minutes=`echo $tLeft / 60 | bc`
+	#	minutes=`Round $mLeft`
+	seconds=`echo $tLeft % 60 | bc`
+	printf "%02d:%02d left\n" $minutes $seconds
+	echo
+	
+	#	echo $((nCom*100/nTot)) %
+	echo $minutes minuts and $seconds s left.
+	#	echo $nCom / $nTot
+	#	readlink `echo $sLatestFile | sed 's/.xls$/.csv/'`
+	
+	# Returning 1 will break the watch statement
+	if (( $nCom == $nTot )); then return 1; fi
+}
+

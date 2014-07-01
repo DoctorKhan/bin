@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri May 20 10:08:35 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+query=$1
+ruleF=/tmp/rules.txt
+
+if [ ! -e $ruleF ]; then getrules; fi
+
+#chainF=/tmp/chain.txt
+#sed -e '/./{H;$!d;}' -e 'x;/'$query'/!d;' $ruleF | grep -v '^$' > $chainF
+#sChain=`sed -n 's/^Chain \([^ ]*\) ([0-9]* references).*/\1/p' $chainF`
+
+function Chains()
+{
+	egrep -n "($query|Chain)" $ruleF |\
+	sed -e 's/:Chain.*//g' |\
+	sed -e 's/.*:[^C][^h][^a][^i][^n].*/:/g' |\
+	uniq | grep -B 1 : | grep -v :
+}
+
+function ChainOnLine() { tail -n +$1 "$ruleF" | head -n 1 | awk '{print $2}'; } #grep -A 9999 ^Chain; } # | grep -v ^$; }
+
+for line in `Chains`; do
+	sChain=`ChainOnLine $line`
+	viRules=`tail -n +$1 "$ruleF" | tail -n +3 | grep -n $query | cut -d : -f 1`	
+	for iRule in $viRules; do echo $sChain $iRule; 	done
+done
+

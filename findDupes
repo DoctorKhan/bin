@@ -1,0 +1,5 @@
+#!/bin/bash
+fdupes -rf $@ | tee dupeList
+sort dupeList | uniq | grep -v '^$' > removeList
+echo "See dupeList and removeList files."
+

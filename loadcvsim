@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Focus window
+wmctrl -a "MGD Sim"
+
+# Press setup
+click 350 310
+waitUntilWindowViewable Setup
+
+# type cvsim
+click 180 90
+pressBackspace 10
+xtype cvsim
+
+# click restore button
+click 50 190
+
+# click cancel button
+click 250 190
+
+# wait until close
+waitUntilWindowHidden Setup
+
+# expand window
+resizeWindow "MGD Sim" 600 2000

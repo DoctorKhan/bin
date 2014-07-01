@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Default
+windowname="$(winfullname ${@:-`ActiveWindow Title`})" #Expand name
+
+if (isMac && [[ "`windowsize $windowname`" != "`MaxWinSize`" ]]) ||\
+!(xprop -name "$windowname" | grep -q MAXIMIZED); then
+	exit 1
+fi
+

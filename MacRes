@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jun 14 16:47:20 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MacRes
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+miRes=`system_profiler SPDisplaysDataType | grep Resolution | awk '{print $2$3$4}'`
+nScreens=`echo "$miRes" | wc -l`
+
+# Origins for each monitor:
+winfile=/Library/Preferences/com.apple.windowserver
+viX=`defaults read $winfile | grep -m $nScreens ' OriginX' | tr -dc '[:digit:]\n'`
+viY=`defaults read $winfile | grep -m $nScreens ' OriginY' | tr -dc '[:digit:]\n'`
+
+for ((iScreen=1; iScreen <= nScreens; iScreen++)); do
+	viRes=`echo "$miRes" | sed -n "${iScreen}p"`
+	x0=`echo "$viX" | sed -n "${iScreen}p"`
+	y0=`echo "$viY" | sed -n "${iScreen}p"`
+	echo $viRes+$x0+$y0
+done

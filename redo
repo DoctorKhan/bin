@@ -1,0 +1,20 @@
+#!/bin/bash
+#cd /home/khan/SpEC/svn_gcc/Evolution/FoshSystem/FoshBoundaryConditions
+#make -s
+cd /home/khan/SpEC/svn_gcc/TetradFormulations/TetradFormPsi0BCs
+make -s
+make -s allexec
+cd /home/khan/SpEC_RUNS/Run007
+ba
+#kdialog --msgbox "Executing Run003"&
+flush
+lamboot
+./Execute 2>&1 | tee out
+#tome out
+ConvertOneD -target grace *.oned
+if [ "$1" == "-t" ]
+then
+        textme "Execution complete."
+fi
+ba
+#xmgrace -nxy filename

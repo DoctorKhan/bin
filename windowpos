@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ $# == 0 ]; then
+	window="`winfullname TigerVNC:`"
+else
+	window="`winfullname $1`"
+fi
+
+if [ "$window" != "GnoMenu" ]; then
+	frame=frame
+fi
+
+waituntilwindowopen 5 s "$window"
+
+until [ "$line" != "" ]; do
+	id=`windowID $frame "$window"`
+	line=`xwininfo -id "$id" | grep Corners | awk '{print $2}'`
+done
+
+echo $line | sed 's/\([^0-9][0-9]*\)/ &/g' | awk '{print $1,$2}'
+
+#echo $line | awk '{print $3,$4}'
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "KeyStrPress $1" | xmacroplay -d 0:0 &> /dev/null
+echo "KeyStrRelease $1" | xmacroplay -d 0:0 &> /dev/null
+

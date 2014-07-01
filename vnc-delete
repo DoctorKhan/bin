@@ -1,0 +1,22 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Sep 2 17:01:52 CDT 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: vnc-delete
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+pFile=`ps aux | grep "Xvnc :$1 " | grep -v grep | awk '{print $14}'`.cfg
+rm "$HOME/.vnc/$pFile"
+vncserver -kill :$iPort

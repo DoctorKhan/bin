@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "$@" | mail -s "Rez" 8303051092@txt.att.net
+

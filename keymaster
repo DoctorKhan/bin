@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# Khan 06/30/2009
+# Sets up ssh keys
+
+if [ $# == 0 ]; then
+	if [ `basename $0` == "keymaster.tmp" ]; then
+		$0 host
+	else
+		$0 setup
+	fi
+fi
+
+setupDir() {
+	if [ ! -d ~/.ssh ]; then
+		cd ~
+		mkdir .ssh
+		chmod u+rwx .ssh
+		chmod go-rwx .ssh
+		cd - > /dev/null
+	fi
+}
+
+setPerm() {
+		#set local permissions
+	if [ -d ~/.ssh ]; then
+		cd ~
+		chmod u+rwx .ssh
+		chmod go-rwx .ssh
+		
+		cd ~/.ssh
+		chmod u=rw authorized_keys authorized_keys2 config environment id_rsa id_rsa.pub id_dsa id_dsa.pub known_hosts 2> /dev/null
+		chmod go-rwx authorized_keys authorized_keys2 environment id_rsa id_dsa 2> /dev/null
+		chmod go+r config id_rsa.pub id_dsa.pub known_hosts 2> /dev/null
+		chmod g+w config 2> /dev/null
+		cd - > /dev/null
+	fi
+}
+
+until [ $# == 0 ]; do
+	if [ "$1" == "setup" ]; then
+		
+		# Create .ssh dir
+		setupDir
+				
+		# Make key
+		cd ~/.ssh
+		if [ ! -f ~/.ssh/id_rsa.pub ]; then
+			echo "Generating key pair..."
+			ssh-keygen -b 2048 -t rsa
+		fi
+	
+		# Upload key
+		echo "Enter hostname where you will login via ssh (e.g. rkk225@files.irc.utexas.edu):" 
+		read host
+		scp id_rsa.pub $host:keytoadd.pub
+		echo "Connecting to remote host..."
+		scp $0 $host:keymaster.tmp
+		echo -e "After logging in, type:\\n\\t./keymaster.tmp\\nat the command prompt and press enter."
+		ssh $host
+
+		# Set local permissions
+		cd - > /dev/null
+		setPerm
+		
+		#finish
+		echo "Type ssh-add to add your identity and you may log in to $host."
+	fi
+	if [ "$1" == "host" ]; then
+		setupDir
+		setPerm
+		cat ~/keytoadd.pub >> ~/.ssh/authorized_keys
+		cat ~/keytoadd.pub >> ~/.ssh/authorized_keys2
+		rm -f ~/keytoadd.pub
+		setPerm
+		echo -e "\\nPlease type exit at the command prompt and press enter."
+		rm -f ~/keymaster.tmp
+	fi
+	if [ "$1" == "permissions" ]; then
+		setPerm
+	fi
+	if [ "$1" == "help" ]; then
+		echo "To setup ssh keys on the client:"
+		echo "Usage: keymaster setup"
+		echo -e "\\nTo add ssh keys to the host machine:"
+		echo "Usage: keymaster host"
+		echo -e "\\nTo set ssh directory to proper permissions:"
+		echo "Usage: keymaster permissions"
+	fi
+	shift
+done
+

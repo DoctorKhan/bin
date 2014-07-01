@@ -1,0 +1,8 @@
+#!/bin/bash
+
+find /home -maxdepth 2 -name '.ICEauthority' -exec ls -l {} \; | grep root | awk '{print $NF}' | \
+sed 's,/home/\([^/]*\)\(.*\),\1:\1 /home/\1\2,' | while read line
+do 
+	sudo chown $line
+done
+

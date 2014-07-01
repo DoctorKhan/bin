@@ -1,0 +1,3 @@
+#!/bin/bash
+3dcodeAll
+grecons.lnx $@ -i 15 *.3d

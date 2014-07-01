@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon Apr 25 11:38:26 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then echo "Usage: $0"; exit 0; fi
+
+hostline=$@
+
+rdir=`echo $hostline | cut -sd : -f 2`
+rlogin=`echo $hostline | cut -d : -f 1`
+ruser=`echo $rlogin | cut -sd @ -f 1`
+rhost=`echo $rlogin | cut -d @ -f 2`
+rname=`echo $rhost  | cut -d . -f 1`
+
+echo rlogin=$rlogin
+echo ruser=$ruser
+echo rhost=$rhost
+echo rname=$rname
+echo rdir=$rdir
+

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 11 22:04:38 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: linkify <dir> <dest>
+#######################################################
+if [[ "$1" == --help ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+## Initialize
+cwd=`pwd`
+
+while [[ $1 == -* ]]; do sOpts="$sOpts $1"; shift; done
+
+pDir1=${1:-`pwd`}
+pDir2=${2:-"/usr/local/bin"}
+
+## Functions
+function LinkIt()
+{	
+	if isFinFile "$1"; then
+		pFile1=`follow "$1"`
+		sudo ln -vfs "$pFile1" "$pDir2"
+	fi
+}
+
+## Main
+if [[ -d "$pDir1" ]]; then
+	FindExecFiles "$pDir1"
+else
+	echo "$pDir1"
+fi |\
+while read pFile; do
+	LinkIt "$pFile"
+done
+
+# RemoveBadLinks $pDir2 2>/dev/null

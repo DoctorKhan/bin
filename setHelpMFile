@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "`showHelpMFile $1 | cat -s`" > $1
+

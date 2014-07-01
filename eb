@@ -1,0 +1,12 @@
+#!/bin/bash
+d1=/home/khan/SpEC/svn_gcc/TetradFormulations/AbsorbingBoundaryConditions/
+d2=/home/khan/SpEC/svn_gcc/TetradFormulations/AbsorbingBoundaryConditions/ABCComputeItems/
+d3=/home/khan/SpEC/svn_gcc/TetradFormulations/BianchiIdentities/BIComputeItems/
+d4=/home/khan/SpEC/svn_gcc/TetradFormulations/TetradEinsteinBianchi/TetEBComputeItems/
+f1=/home/khan/SpEC/svn_gcc/Dust/Domain/DataMesh/DataMesh
+f2=/home/khan/SpEC/svn_gcc/TetradFormulations/BianchiIdentities/InitialData/WeylSchwarzschild
+f3=/home/khan/SpEC/svn_gcc/TetradFormulations/AbsorbingBoundaryConditions/ExactTetradSolutionsAbs/TetradSchwarzschildBonaMasso.cpp
+h=*.hpp
+c=*.cpp
+kdevelop $d1$h $d1$c $d2$h $d2$c $d3$h $d3$c $d4$c $d4$h $f1.hpp $f1.cpp $f2.hpp $f2.cpp $f3 &
+

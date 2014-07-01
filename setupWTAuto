@@ -1,0 +1,4 @@
+#!/bin/bash
+gedite $1
+# open terminal windows
+startwt $@

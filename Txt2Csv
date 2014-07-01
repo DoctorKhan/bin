@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 16 10:26:17 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Txt2Csv <file> <delim> <delim2>
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+s='/'; bI=false; bO=false
+sDelim1="[[:space:]]"; sDelim2=",";
+
+while [[ $1 == -* ]]; do
+	iSh=1
+	if [[ $1 == *s* ]]; then s='+/'; fi
+	if [[ $1 == *i* ]]; then bI=true; fi
+	if [[ $1 == *o* ]]; then bO=true; fi
+	if [[ $1 == *d* ]]; then
+		sDelim1="$2"
+		sDelim2="$3"
+		shift 2
+	fi
+	shift
+done
+
+if test -p /dev/stdin >/dev/null; then
+	while read line; do
+		set "$line"
+		for sFileIn in "$@"; do
+			if $bI; then
+				sed -iE 's/'"$sDelim1$s$sDelim2"'/g' "$sFileIn"
+				ChExt "$sFileIn" .csv mv
+			elif $bO; then
+				sOut=`ChExt "$sFileIn" .csv`
+				sed -E 's/'"$sDelim1$s$sDelim2"'/g' "$sFileIn" > "$sOut"
+				echo "$sOut"
+			else
+				sed -E 's/'"$sDelim1$s$sDelim2"'/g' "$sFileIn"
+			fi
+			
+		done
+	done
+fi
+

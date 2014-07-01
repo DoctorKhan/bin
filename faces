@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Oct 23 18:13:53 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+eval `ParseOpt -g sGroup -u sUser -p sPass :: $@`
+
+## Initialize
+pDir="$HOME/.faces"
+pSchedFinal=`create $pDir/Final.txt`
+pTrimmed=`create $pDir/Trimmed.txt`
+pDate=`create $pDir/Date.txt`
+pTimes=`create $pDir/Times.txt`
+pDescr=`create $pDir/Descriptions.txt`
+pRaw=`create $pDir/RawSched.txt`
+pPass=`create $pDir/pk`
+pConf=`create $pDir/faces.conf`
+
+mkdir -p $pDir
+ 
+## Main
+if ! ((`cat $pConf | wc -l`==2)); then faces-configure > "$pConf"; fi; . $pConf
+if faces-expired; then faces-signin > "$pPass"; fi; . $pPass
+
+faces-retrieve | faces-format

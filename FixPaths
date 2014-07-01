@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu May 12 21:52:23 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if string "^[\-]*h[^ ]*$" is in "$1" || [ "$#" -lt "$minargs" ]
+then echo "Usage: $0"; exit 0; fi
+
+bin=$HOME/bin
+
+if [ `echo $PATH | grep -ic $bin` -gt 0 ]; then
+	return
+elif [ ! -d $bin ]; then
+	mkdir $bin
+fi
+
+files="$HOME/.profile\n$HOME/.bashrc\n$HOME/.bash_login\n$HOME/.bash_profile\n$HOME/.cshrc"
+
+for file in `echo -e $files; do
+	if [ -f $file ] && [ `egrep -ic '^[^#]*PATH=.*\$PATH' $file` -gt 0 ]; then
+		echo 'if [ -d "$HOME/bin" ] ; then PATH="$HOME/bin:$PATH"; fi' >> $file
+		return
+	fi
+done
+
+for file in .profile .bashrc .bash_login .bash_profile .cshrc; do
+	if [ -f $file ]; then
+		echo 'if [ -d "$HOME/bin" ] ; then PATH="$HOME/bin:$PATH"; fi' >> $file
+		return
+	fi
+done
+
+echo 'if [ -d "$HOME/bin" ] ; then PATH="$HOME/bin:$PATH"; fi' >> .profile
+return
+

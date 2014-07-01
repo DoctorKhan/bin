@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jun 26 22:13:12 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetLoc
+#######################################################
+
+sLoc=`grep -Eo '\+[0-9]+\+[0-9]+' $HOME/.vnc/last`
+sLoc=${sLoc:-+0+0}
+
+calfile=$HOME/.vnc/calibration
+if [ ! -f $calfile ] || [ `cat $calfile | wc -l` != 1 ]; then echo "0 0" > $calfile ; fi
+
+case "$1" in
+	+)	echo $sLoc ;;
+	xa)  echo $sLoc | cut -d + -f 2 ;;
+	ya)  echo $sLoc | cut -d + -f 3 ;;
+	xc) 	awk '{print $1}' $calfile ;;
+	yc) 	awk '{print $2}' $calfile ;;
+	*)  	echo $sLoc | tr '+' ' ' | awk '{print $1,$2}' ;;
+esac

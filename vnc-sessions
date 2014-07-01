@@ -1,0 +1,78 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Aug 20 19:15:49 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-sessions
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Aug 25 19:59:28 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-list
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pSessions=$HOME/.vnc/sessions
+pCurrent=`latest $pSessions/*/*.txt`
+pList=`TempFile VNCList`
+
+## Functions
+
+## Main
+# Define columns
+sColHeaders="Port:NUM User:TXT Host:TXT Width:NUM Height:NUM Status:TXT"
+for sColHeader in $sColHeaders; do
+	sCols="$sCols --column $sColHeader"
+done
+
+sButtonNames="gtk-delete:5 Suspend:4 Restore:3 gtk-new:2 gtk-cancel:1 gtk-connect:0"
+for sButton in $sButtonNames; do
+	sButtons="$sButtons --button $sButton"
+done
+
+# Construct GUI
+sSelection=$(yad --list --editable --title "VNC Connector (©2012 RezSoft)" --width 800 --height 600 $sButtons $sCols `vnc-list`)
+if [ ! -z $sSelection ]; then
+	iPort=${sSelection%%|*}
+	sHost=`echo $sSelection | cut -d'|' -f 3`
+	pCurrent=$pSessions/$sHost:$iPort
+	
+	case $? in
+		0) . "$pCurrent"
+			AutoSelect=$((Color>2?1:0))
+			DesktopSize=${Width}x${Height}
+			pSession=${pSession:-`readlink -f "$0"`}
+			iPort=${pSession##*:}
+			
+			sHost=`basename $pSession`
+			sHost=${sHost%%:*}
+			
+			pPass=$pSession/$sHost.passwd
+			
+			echo		vncviewer -PasswordFile $pPass FullscreenSystemKeys=0 -MenuKey $Menu -AutoSelect $AutoSelect -LowColorLevel $Color -QualityLevel $Quality -FullScreen $FullScreen -Shared $Shared -DesktopSize $DesktopSize $sHost:$iPort $@
+		;;
+		1) exit 0 ;;
+		2) vnc-new ;;
+		3) vnc restore $iPort ;;
+		4) vnc suspend $iPort ;;
+		5) vnc kill $iPort ;;
+		6) vnc kill $iPort
+			rm $pCurrent
+		;;
+	esac
+fi

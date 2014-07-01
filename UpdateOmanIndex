@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 28 13:03:07 CDT 2011 ##
+#####################################################
+
+cd /tmp
+echo -n "Updating index of linuxmanpages.com... "
+for ii in {1..8}; do
+	lynx -dump http://linuxmanpages.com/man$ii/ > $ii
+done
+
+IndexFile="$1"
+sed -n 's/.*[*+] \[[0-9]*\]\([A-Za-z][^ ]*\).*/\1/p' [1-8] | sort > $IndexFile
+
+echo Complete.
+

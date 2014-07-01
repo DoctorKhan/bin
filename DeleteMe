@@ -1,0 +1,34 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sat Feb 4 10:36:50 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: DeleteMe
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+while (($#>0)); do
+	if [[ $1 == -* ]]; then
+		sArgs="$sArgs $1"
+	else
+		pDir="$pDir $1"
+	fi
+	shift
+done
+
+pDir="${pDir:-$HOME/$pDir}"
+cd "${pDir## }"
+
+## Main
+if [ -f .DeleteMe ]; then
+	cat .DeleteMe | grep -v ^$ |\
+	while read file; do
+		rm -rvf $sArgs "$file"
+	done
+fi
+

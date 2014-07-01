@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon May 23 11:08:03 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ppa-add <ppa> <packages>
+#######################################################
+if (( $# < 1 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+ppa=ppa:`echo $1 | sed 's/.*://'`; shift
+
+sudo add-apt-repository $ppa
+
+sudo apt-get update
+for sApp; do
+	sudo aptitude -y install $sApp
+done
+
+

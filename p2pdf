@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Oct 29 22:53:13 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: p2pdf <File> <Printer Options>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+sPrinter=cups-pdf
+
+rm -f ~/PDF/*
+
+while (($# > 0)); do
+	pFile="$1"; shift
+	pDir=`fileparts 1 $pFile`
+	
+	for sOpt in "$@"; do
+		sOpts="-o $sOpt "; shift
+	done
+	
+	if file $pFile | grep -q OpenDocument; then
+		libreoffice -headless -norestore -convert-to pdf "$pFile" >/dev/null
+		pFile=`fileparts 5 pdf "$pFile"`
+	elif file $pFile | grep -q PNG; then
+		pOrig="$pFile"
+		pFile=`fileparts 5 pdf "$pFile"`
+		convert $pOrig $pFile
+	fi
+	
+	wait4 ls "$pFile"
+	lpr "$pFile" -o fit-to-page $sOpts -P $sPrinter
+	wait4 ls ~/PDF
+	
+	pOutput=`latest ~/PDF`
+	pFinal=`fileparts 9 "$pFile" "$pOutput"`
+	mv -f "$pOutput" "$pFinal"
+done

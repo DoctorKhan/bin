@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 23 14:28:24 CDT 2011 ###
+#######################################################
+
+##################### Help Text #####################
+# Usage: isProcess <name> <filter out>
+# Get processes, removing lines with "grep," "isProcess,"
+# etc. Also remove anything passed as argument 2.
+######################################################
+if (( $# < 1 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+sProcName="$1" # First argument
+sIgnore="$2"   # Second argument
+
+# "\" indicates continuation of one line onto the next line.
+# "|" pipes the standard output from one command to the
+# standard input of another.
+
+# "$#" is the number of input arguments
+# "$?" indicates exit status of last command.
+
+# Use "man <command>" for other info.
+
+ps aux | grep -Ev '(grep|isProcess|KeepAlive|tester)' \
+| if (($# > 1)); then grep -v "$sIgnore"; else tee; fi \
+| grep -q "$sProcName"
+
+# Return the same code as the above command.
+exit $?

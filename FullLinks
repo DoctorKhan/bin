@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Oct 10 10:31:05 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FullLinks
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+pLinks=`mktemp`
+AllLinks -v "$@" > $pLinks
+
+GetLinkNames "$@" |\
+while read line; do
+	n=`echo "$line"  | sed 's/^\([0-9]*\).*/\1/g'`
+	l1=`echo "$line" | sed -n "s/^[0-9]*\.\(.*\)/\1/p" | StrTrim`
+	l2=`sed -n "s/^$n\.\(.*\)/\1/p" $pLinks | StrTrim`
+	#	echo $n $l2
+	echo -e "$l1|$l2"
+done

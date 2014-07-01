@@ -1,0 +1,35 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Fri Sep 9 13:14:39 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Write to file
+# Usage: stdin | wf <file>
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+######################################################
+
+pFile="$@"
+sName=`basename "$@"`
+pTemp=`TempFile "$sName"`
+
+
+cp "$pFile" "$pTemp"
+#cat /dev/stdin > $pTemp
+tee > "$pTemp"
+
+#if ! isEmptyFile "$pTemp"; then
+#iPerm=`stat -f "%A" "$pFile"`
+#fi
+
+cp "$pFile" "${pFile}~"
+
+cat "$pTemp" > "$pFile"
+#if file "$pFile" | grep -q executable; then
+#	chmod $iPerm "$pFile"
+#fi

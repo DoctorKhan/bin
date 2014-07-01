@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Sep 17 21:44:50 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage:   opt [<var>=]<opt>
+#
+# Example: opt -s Size -p Port :: -s 1024x768 -p 82
+# Output:  Size="1024x768"; Port="82"
+#
+# Example: opt -s -p :: -s 1024x768 -p 82
+# Output:  s="1024x768" p="82"
+#
+# Example: opt [Opts|Args]
+# Output:  All [Options|Other Args]
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+if [[ "$@" != *::* ]]; then
+	if [[ "$sArgs" != "" ]]; then
+		eval `ParseOpt $@ :: $sArgs`
+	else
+		ParseOpt $@
+		return $?
+	fi
+else
+	eval `ParseOpt $@`
+fi

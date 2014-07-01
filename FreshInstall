@@ -1,0 +1,108 @@
+#!/bin/bash
+
+## DEFAULTS
+if [ $# == 0 ]; then
+	set common
+fi
+
+## HELP
+if [[ $1 == *help || $1 == -h ]]; then
+	echo "Usage: `basename $0` common home"
+	more $0
+fi
+
+## PPAs
+addppa="sudo add-apt-repository ppa"
+for ppa in compiz freenx-team; do
+	if ! find /etc/apt -name '*.list' | grep -q $ppa; then
+		$addppa:$ppa
+	fi
+done
+
+## PACKAGES
+a="sudo apt-get -y --force-yes"
+u="$a update"
+i="$a install"
+
+until [ $# == 0 ]; do
+	case $1 in
+		upgrade)
+			$i upgrade
+		;;
+		common)
+			## APPEARANCE
+			# emerald
+			$i unclutter emerald gnome-color-chooser
+			# compiz
+			$i compizconfig-settings-manager compiz-fusion-plugins-unsupported
+			#$i rss-glx
+			
+			## INTERNET
+			$i firefox dnsmasq openssh-server remmina
+			
+			## INTERFACE
+			$i nautilus-open-terminal terminator
+			$i googlecl
+			
+			## OFFICE
+			# gnuplot-x11
+			$i  vim jabref abiword lyx texlive texlive-latex-recommended pdfedit \
+			scantailor libtiff-tools
+			# screenlets avant-window-navigator
+			$i gedit-plugins gedit-developer-plugins
+			
+			## SYSTEM
+			gdebi
+			
+			## COMPATIBILITY
+			$i wine
+			
+			## UTILITIES
+			$i ssh sshfs fslint fdupes gnome-schedule htop synapse
+			# ntp unison-gtk
+			# checkgmail
+			
+			## AUTOMATION
+			$i xmacro wmctrl xdotool
+			
+			## CONVENIENCE APPS
+			# $i prism-google-docs prism-google-mail prism-google-calendar
+			# sudo apt-get -y --force-yes google-gadgets-gtk
+			
+			# SECURITY
+			$i fail2ban guarddog
+			
+			# DDNS
+			#$i ddclient
+			
+			# MULTIMEDIA
+			$i nautilus-image-converter vlc ubuntu-restricted-extras adobe-flashplugin
+			
+			# APPEARANCE
+			$i bashdb
+			
+			# DOCUMENTATION
+			manpages-posix
+		;;
+		home)
+			$i deluge
+		;;
+		#proposed)
+		# DDNS
+		#	$i ez-ipupdate
+		# if ez-ipupdate doesn't work use ddclient
+		#	$i ddclient
+		#	$i resolvconf
+		#Suggested packages:
+		#  konqueror-nsplugins msttcorefonts ttf-xfree86-nonfree xfs transfig equivs
+		#  auctex nas libfftw3-dev jackd liblrdf0-dev libqt4-dev rcs dvipost tex4ht
+		#  hevea tth latex2html groff libtiff-tools gnuhtml2latex wv chktex noweb menu
+		#  sgmltools-lite linuxdoc-tools writer2latex latex2rtf sun-java6-fonts
+		#  rhino-doc sun-java6-plugin ia32-sun-java6-plugin debhelper perl-tk dvi2tty
+		#  dvidvi texpower libmyodbc odbc-postgresql libct1 mozilla-plugin-vlc
+		#  videolan-doc
+		#;;
+	esac
+	shift
+done
+

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Feb 22 16:54:54 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: RestoreSessions
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sDate=${1:-"Feb2012/01"}
+## Functions
+
+## Main
+for sSubject in Greene Khan Ress Tucker; do
+	cp -v "/export/backup/$sDate/data/mri/Anatomy/${sSubject}HR/Cortex/NormDepthMap.mat" "/export/data/mri/Anatomy/${sSubject}HR/Cortex/NormDepthMap.mat"
+done
+
+for sSession in 031010cg 030310rk 031810dr 050310dt 100611cb; do
+	cp -v /export/backup/$sDate/data/mri/LaminarHemo/${sSession}/* /export/data/mri/LaminarHemo/${sSession}/
+done
+

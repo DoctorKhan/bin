@@ -1,0 +1,6 @@
+#!/bin/bash
+xp tileAll 100 &> /dev/null
+sleep .3
+xp tileAll 100 &> /dev/null
+sleep .3
+xp tileAll 100 &> /dev/null

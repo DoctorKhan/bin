@@ -1,0 +1,25 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Wed Oct 5 16:04:53 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: xmod-getmap
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+######################################################
+
+xmodmap -pke | grep -v =$
+echo 'clear shift
+clear lock
+clear control
+clear mod1
+clear mod2
+clear mod3
+clear mod4
+clear mod5'
+xmodmap -pm | grep -A 99 shift | grep x | sed 's/ (0x[^)]*)//g' | tr -s ', ' ' ' | sed 's/^[^ ]*/add & =/g'

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+###################### Help Text ######################
+# Usage: screensize
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+case $1 in
+	super)
+		xRes=`Displays | transpose | tr ' ' '+' | bc | head -n 1`
+		yRes=`Displays | transpose | tr ' ' '+' | bc | head -n 2 | tail -n 1`
+		shift
+	;;
+	available|border)
+		case `hostname` in
+			albert)	echo 1280x760; exit 0 ;;
+			gauss)	echo 1910x1150; exit 0 ;;
+		esac
+		
+		iScreen=`WhichScreen`
+		xRes=`Displays $iScreen w`
+		yRes=`Displays $iScreen h`
+		yRes=$(( yRes * 9/10 ))
+		shift
+	;;
+	max|noborder)
+		case `hostname` in
+			albert)	echo 1280x776; exit 0 ;;
+			gauss)	echo 1910x1150; exit 0 ;;
+		esac
+
+		iScreen=`WhichScreen`
+		xRes=`Displays $iScreen w`
+		yRes=`Displays $iScreen h`
+		p=`PanelHeight`
+		yRes=$((yRes-p))
+		shift
+	;;
+	
+	*)
+		iScreen=`WhichScreen`
+		xRes=`Displays $iScreen w`
+		yRes=`Displays $iScreen h`
+	;;
+esac
+
+case $1 in
+	w) echo $xRes ;;
+	h) echo $yRes ;;
+	*) echo "${xRes}x${yRes}" ;;
+esac
+
+# xdotool getdisplaygeometry

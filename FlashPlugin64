@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sun May 15 10:51:13 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+sudo apt-get --yes purge flashplugin-installer
+cd "/home/khan/.mozilla/firefox/eo11nhfd.default/extensions/flashaid@lovinglinux.megabyet.net/chrome/content/tmp" && rm -f flashplayer64* && wget http://updates.webgapps.org/flashplayer64 && tar xvf flashplayer64 && sudo chown root:root libflashplayer.so && sudo chmod 0644 libflashplayer.so && sudo mv libflashplayer.so /usr/lib/mozilla/plugins/ && rm -f flashplayer64* && sudo ln -s /usr/lib/mozilla/plugins/libflashplayer.so /usr/lib/firefox-addons/plugins/libflashplayer.so
+TWEAK=$(cat /etc/adobe/mms.cfg | grep 'OverrideGPUValidation')
+if test -z "${TWEAK}";then
+echo 'OverrideGPUValidation=true' | sudo tee -a /etc/adobe/mms.cfg
+fi
+cat /etc/adobe/mms.cfg | sed '/EnableLinuxHWVideoDecode=1/d' | sudo tee /etc/adobe/mms.cfg
+NPVIEWER=/usr/lib/nspluginwrapper/i386/linux/npviewer
+if test -f "${NPVIEWER}";then
+TWEAK=$(cat /usr/lib/nspluginwrapper/i386/linux/npviewer | grep  'GDK_NATIVE_WINDOWS=1')
+if test -z "${TWEAK}";then
+echo '#!/bin/sh' | sudo tee /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo 'TARGET_OS=linux' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo 'TARGET_ARCH=i386' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo 'case "$*" in' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo '*libflashplayer*)' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo '	export GDK_NATIVE_WINDOWS=1' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo '	;;' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo 'esac' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+echo '. /usr/lib/nspluginwrapper/noarch/npviewer' | sudo tee -a /usr/lib/nspluginwrapper/i386/linux/npviewer
+fi
+fi
+

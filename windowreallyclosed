@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri May 13 10:20:28 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+if ! windowopen "$@"; then
+	sleep 1
+	if ! windowopen "$@"; then
+		exit 0
+	fi
+fi
+
+exit 1
+

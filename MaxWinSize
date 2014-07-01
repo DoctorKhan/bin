@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sun May 22 12:21:50 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+if isMac; then
+	screensize available
+	exit 0
+fi
+
+mkdir -p $HOME/.vnc
+
+# Initialize
+iScr=`WhichScreen`
+mfile=$HOME/.vnc/maxsize.$iScr
+
+if grep -q '^[0-9]*x[0-9]*$' $mfile; then
+	cat $mfile
+else
+	SetMaxWinSize
+fi
+
+# Dependencies: c, ec, isEmpty, isMac, regmatch, rep, screensize, SetMaxWinSize, ted, WhichScreen, WinSize

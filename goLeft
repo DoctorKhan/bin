@@ -1,0 +1,3 @@
+#!/bin/bash
+pressCtrlAlt Left
+sleep 1

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Dec 10 21:26:13 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: tvnc <host>:<port>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pLast="$HOME/.vnc/last"
+if [ ! -d $HOME/.vnc ]; then mkdir -p $HOME/.vnc; fi
+
+## Functions
+
+## Main
+if (($#>0)); then
+	sFirst=$1; shift
+	
+	sHost=${sFirst%%[: ]*}
+	pHost="$HOME/.vnc/$sHost"
+	if [ ! -d "$pHost" ]; then mkdir -p "$pHost"; fi
+	
+	pLastPort="$pHost/lastport"
+	if [ ! -e "$pLastPort" ]; then echo 1 > "$pLastPort"; fi
+	
+	if ! echo $sFirst | grep -q ':'; then
+		iPort=`cat "$pLastPort"`
+	fi
+	iPort=${sFirst##*[: ]}
+	
+	sCom="$sHost:$iPort $@"
+	
+	echo $sCom > "$pLast"
+	echo $iPort > "$pLastPort"
+else
+	sCom=`cat "$pLast"`
+	sHost=${sCom%%[: ]*}
+	pHost="$HOME/.vnc/$sHost"
+fi
+
+sCom=`echo $sCom | sed 's/-s albert/1280x800/g'`
+sCom=`echo $sCom | sed 's/[0-9]*x[0-9]*/-DesktopSize &/g'`
+sCom=`echo $sCom | sed 's/-s /-DesktopSize /g'`
+s="vncviewer -passwd $pHost/passwd -FullScreen $sCom $viDisp"
+if ! eval $s; then
+	echo $s
+fi

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon May 23 22:34:41 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MaximizeWindow
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+if !(isMaxed "$@"); then
+
+if isMac; then
+	cat ~/bin/MaximizeWindow.scpt | osascript
+else
+	#Require xdotool
+	xId=`WindowID -d $@`
+	
+	xdotool windowactivate --sync $xId key --delay 50 alt+space x
+fi
+
+fi
+
+	#	Require wmctrl
+	#	wmctrl -r ${@:-":ACTIVE:"} -b add,maximized_vert,maximized_horz
+	

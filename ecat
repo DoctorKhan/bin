@@ -1,0 +1,5 @@
+#!/bin/bash
+which firefox | head -n 1
+read -n 1 -s
+which firefox | head -n 1 | xargs less
+

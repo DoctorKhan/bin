@@ -1,0 +1,7 @@
+#!/bin/bash
+# Converts an ascii .asc file produced by mris_convert of freesurfer into a .raw mesh file of the kind used by the bajaj lab.
+
+sFileIn=${1:-/dev/stdin}
+sFileOut=${2:-/dev/stdout}
+
+grep -v ^# "$sFileIn" | awk '{$4=""; print}' > "$sFileOut"

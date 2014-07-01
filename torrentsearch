@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Apr 10 09:29:53 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: torrentsearch -n <search results> -d <torrents
+# desired> -q <search query>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+n=/dev/null
+pDir=/tmp/torrents
+pFind=$pDir/find.txt
+
+FixDeluge
+eval `ParseOpt -n nGoogle -d nDesired -q sQuery :: $@`
+
+## Defaults
+sQuery=${sQuery:-`echo $@ | sed 's/ -.*//g'`}
+nGoogle=${nGoogle:-100}
+nDesired=${nDesired:-5}
+
+# Query
+sGoogleQuery=`echo "$sQuery torrent" | tr ' ' '+'`
+sGoogleSearch="http://www.google.com/search?q=$sGoogleQuery"
+echo $sGoogleSearch
+nTorrents=0
+
+# Files
+pTorrents=`create -new $pDir/torrents.txt`
+pLinks=`create -new $pDir/links.txt`
+pResults=`create -new $pDir/results.txt`
+
+## Main
+cd $pDir
+clear
+
+# Loop
+until (( $nTorrents > $nDesired )); do
+	SearchLinks "$sGoogleSearch"
+	
+	# Extract the torrent files from google result links
+	echo "$sQuery" > $pFind
+	
+	# Extract and download links
+	if ExtractLinks "$sQuery"; then
+		DownloadTorrents "$sQuery"
+		nTorrents=`cat "$pTorrents" | wc -l`
+		echo Number of torrents: $nTorrents
+		sleep 1
+	else
+		exit 1;
+	fi
+done

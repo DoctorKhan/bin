@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+	echo "Usage:   isHost <hostname>"
+	echo "Example: isHost Gauss"
+	echo "Result:  true or false"
+	exit 0
+fi
+
+case $# in
+		1) uname -a | sed 's/UT_AUS_3TMR/UT_AUS_3TMR scanner/g' | grep -q $@ ; exit $? ;;
+		2) isActive nx ; exit $? ;;
+		3) if isHost $1 && isActive nx; then exit 0; else exit 1; fi ;;
+esac
+
+# This is a reminder of how to replace "[ `isHost albert` == 1 ]" with "isHost albert" in a directory
+# grep isHost * | cut -d : -f 1 | uniq | while read file; do sed -i 's/[[(] `\([$HOME/bin/]*isHost [^`]*\)` [=!]= [^ ]* [])]/\1/g' $file; done
+

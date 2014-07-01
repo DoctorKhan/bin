@@ -1,0 +1,42 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Fri Dec 2 23:27:19 CST 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: LinkIt
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+pSrcDir=$HOME/bin
+
+pDestDir=/usr/local/bin
+
+source ~/.bash_colors
+	B=$BBlue
+	G=$BGreen
+	N=$Color_Off
+
+	pDest=`fileparts 9 "$pDestDir" "$@"` # second pFile gets path of first
+	if [ ! -e "$pDest" ] ; then
+		pSrce=`fileparts 7 "$@"` # absolute pathname
+
+		# link
+		echo -e "${B}Linking$N: $pSrce <-- $pDest"
+#		sudo ln -s "$pSrce" "$pDest"
+
+		# permission
+		sudo chmod ug+x "$pSrce"
+	else
+		sSrce=`fileparts 6 "$@"`
+		echo "Exists: $sSrce"
+	fi

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Nov 10 09:56:35 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetTheme
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Arguments
+## Defaults
+
+## Initialize
+sUrl=${1:-"http://compiz-themes.org/content/search.php?xsortmode=new&search=1&type=103&user=&text=mac&sort=0&scorefilter=0&license=99&page=1"}
+sBase=`echo $sUrl | tr -s '/' '\n' | grep -Ev '^(http|$)' | head -n 1`
+nPages=${2:-3}
+
+a=`TempFile a`
+b=`TempFile b`
+pThemeLinks=`TempFile ThemeLinks`
+
+## Validation
+## Functions
+## Main
+
+for iPage in `seq 1 $nPages`; do
+	sUrl=`echo $sUrl | sed "s/page=./page=$iPage/g"`
+	AllLinks "$sUrl" | grep content/show.php | sed 's/[?].*//g' | Unique > $pThemeLinks
+	
+	for theme in `cat $pThemeLinks`; do
+		wget "$theme" -O $a
+		wget "$sBase`sed -n 's/.*=.\(.content.*download.php[^>]*\)[^>].*/\1/p' $a`" -O $b
+		wget "$sBase`sed -n 's/.*=.\(.CONTENT[^ >?]*\)[?].*/\1/p1' $b`"
+	done
+done

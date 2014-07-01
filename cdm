@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Nov 20 13:10:13 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: cdm
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+n=/dev/null
+
+if ParseOpt v "$@" > $n; then
+	bVerbose=true; shift
+else
+	bVerbose=false
+fi
+
+sArgs=${@:-`cat /dev/stdin`}
+
+## Functions
+function getdir()
+{
+	if ! test -e "$sArgs"; then
+		if ! s=`which "$sArgs"`; then
+			if ! s=`locate -r "/$sArgs$" | xargs ls -1dt 2>/dev/null | head -n 1`
+			then
+				s="$sArgs"
+			fi
+		fi
+	fi
+	
+	if [ ! -d "$s" ]; then
+		echo `dirname "$s"`
+	else
+		echo "$s"
+	fi
+}
+
+## Main
+cd `dirname $(follow "$sArgs")`
+
+if $bVerbose; then pwd -P; fi

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue May 31 18:19:50 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+iScreen=`WhichScreen`
+mfile=`create $HOME/.vnc/maxsize.$iScreen`
+
+xprop -root | sed -n 's/^_NET_WORKAREA.*, \([0-9]*\), \([0-9]*\)$/\1x\2/p' | tee $mfile
+
+#pos=`Displays + $iScreen xy`
+#gnome-terminal --geometry=50x50$pos -t Tester &
+#MaximizeWindow Tester
+#wmctrl -a Tester
+#GetWindowSize > tee $mfile
+#CloseWindow Tester
+

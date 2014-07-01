@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Nov 17 07:57:19 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ExtractLinks
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pDir=/tmp/torrents
+pResults=$pDir/results.txt
+pFind=$pDir/find.txt
+sArgs=${@-`cat $pFind`}
+sTrack=
+
+## Main
+sQuery=${sArgs%% -.*}
+find_query=`echo '+*'$sQuery'*.torrent' | tr ' ' '*'`
+
+echo "Extracting links $find_query..."
+echo "httrack --get-files --purge-old --continue --mirror --update --updatehack \
+--go-everywhere --can-go-up-and-down --depth=8 --ext-depth=8 --mirrorlinks --keep-links=1 --near \
+--cookies=1 --sockets=20 --host-control=2 -*p3 \
+--preserve --cache=2 --long-names=1 --display=2 --timeout=2 --min-rate=5000 -* \
+--verbose --extended-parsing=1 --list $pResults $find_query"
+
+httrack "$find_query" -g -r6 -%e6 --continue --sockets=20 -%v2 --host-control=2 --list $pResults
+
+#--get-files --purge-old --continue --mirror --update --updatehack \
+#--go-everywhere --can-go-up-and-down --depth=8 --ext-depth=8 --mirrorlinks --keep-links=1 --near \
+#--cookies=1 --sockets=20 --host-control=2 -*p3 \
+#--preserve --cache=2 --long-names=1 --display=2 --timeout=2 --min-rate=5000 -* \
+#--verbose --extended-parsing=1 "$find_query" --list $pResults
+
+s=$?
+if ((s != 0 )); then
+	echo "Error $s in httrack"
+	exit $s
+fi
+

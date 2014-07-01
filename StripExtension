@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue Jun  7 10:43:39 CDT 2011 ##
+#####################################################
+
+### Help Text
+Usage="Usage: `basename $0`"
+if isHelp 0 $0 "$@"; then echo $Usage; exit 0; fi
+
+###
+echo "$@" | sed 's/\.[^\.]*$//'
+

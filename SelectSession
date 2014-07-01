@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 19 12:03:08 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SelectSession
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+pSessions="$HOME/.vnc/sessions.txt"
+ls -1rt $HOME/.vnc/sessions > $pSessions
+
+## Choose conf file
+nSessions=`cat "$pSessions" | wc -l`
+if ((nSessions == 0)); then
+	echo $USER@sandstone > ~/.s.out
+else
+	Selector -f "$pSessions" -t "Select a session: "
+fi
+
+login=`cat ~/.s.out`
+pConf=`create $HOME/.vnc/sessions/$login`
+
+# Save login
+WriteConf "${pConf}.2" login="$login"

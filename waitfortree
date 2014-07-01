@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#
+## Created by khan on Sun May 22 10:00:40 CDT 2011 ##
+#
+
+until xwininfo -root -tree 2>/dev/null
+do
+	echo -n
+done
+

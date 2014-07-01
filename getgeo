@@ -1,0 +1,10 @@
+#!/bin/bash
+
+lastfile=$HOME/.vnc/last
+
+if [ -f $lastfile ] && [ `grep -ic '[0-9]x[0-9]' $lastfile` -gt 0 ]; then
+	cat $lastfile | sed 's/.*DesktopSize//g' | awk '{print $1}'
+else
+	screensize available
+fi
+

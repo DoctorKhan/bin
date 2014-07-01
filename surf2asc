@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Converts a freesurfer mesh file into an ASCII .asc.
+
+sFileIn=$1
+sGuessAsc=${sFileIn%.*}.asc
+sFileOut=${2:-asc}
+
+(echo -ne "Converting freesurfer $sFileIn to $sFileOut... "
+mris_convert $sFileIn $sFileOut) >/dev/stderr
+
+echo $sFileOut

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Aug 26 21:49:15 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-list-remote
+# List the remote sessions active in ps
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+## Functions
+
+## Main
+for sHost; do
+	timeout 10 ssh $sHost vnc-list-local
+done | sort

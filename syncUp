@@ -1,0 +1,46 @@
+#!/bin/bash
+
+cd ${2:-.}
+
+while [[ "$1" == --* ]]; do
+	sOpts="$sOpts $1"; shift
+done
+
+if [ -d "$2" ]; then
+	cd $2;
+	set $1 $3 $4 $5 $6 $7 $8 $9
+fi
+
+if [ $# == 0 ]; then
+	for host in `otherhosts`; do
+		syncUp $host --delete
+	done
+else
+	remoteDir=`cd ..; pwd | sed "s,^$HOME[/]*,,g"`
+	if [ "$remoteDir" != "" ]; then
+		remoteDir=$remoteDir/
+	fi
+	host="$1" ; shift
+	
+	localDir=`pwd`
+	
+	if ( regmatch "$localDir" Documents ) && ( regmatch "$host" sandstone ); then
+		exit 0
+	fi
+fi
+
+# Remove empty files older than 100 days
+find "$localDir" -empty -mmin +100 -delete
+
+echo Uploading from $localDir to $host...
+args="-auHz --timeout=30 --exclude '*~' --delete-excluded -e /usr/bin/ssh"
+
+rsync $sOpts $@ $args "$localDir" $host:"$remoteDir"
+
+if [ "$?" != "0" ]; then
+	ssh-fix-hosts $host
+	rsync $sOpts $@ $args "$localDir" $host:"$remoteDir"
+fi
+
+#-a = -rlptgoD
+

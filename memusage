@@ -1,0 +1,26 @@
+#!/bin/bash
+if [[ $1 == pie ]]; then
+	sudo smem --pie=user
+else
+	OLDIFS=$IFS
+	IFS=$'\n'
+	nUserSum=0
+	nTotalUse=0
+	
+	for line in `ps -eo user,rss --sort user | sed -e 's/  */ /g' | awk -F'[ ]' {'print $0'}`; do
+		sNewUser=`echo $line | cut -d" " -f1`
+		nMem=`echo $line  | cut -d" " -f2`
+		if [[ $sNewUser != $sCurrentUser ]] && [ $(echo "$nMem" | grep -E "^[0-9]+$") ]; then
+			if ((nUserSum > 0)); then
+				sUserSum=`echo "scale=2; $nUserSum / 1000" | bc`
+				printf '%12.2f MB : %s\n' $sUserSum $sCurrentUser
+			fi
+			sCurrentUser=$sNewUser; nUserSum=0
+		fi
+		nUserSum=$((nUserSum+nMem))
+		((nTotalUse+=nMem));
+	done
+	nTotal=$(free | grep Mem: | awk '{print $2}')
+	echo $nTotalUse/$nTotal Bytes total
+	IFS=$OLDIFS
+fi | sort -n

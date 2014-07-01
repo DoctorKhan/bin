@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 24 17:09:57 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: kqsa
+#######################################################
+
+KeepAlive QuickSilver &
+
+exec osascript <<\EOF
+tell application "Terminal" to activate
+tell application "System Events" to tell process "Terminal" to keystroke "h" using command down

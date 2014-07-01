@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 24 13:48:11 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-size
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Main
+if isMac; then
+	echo 'tell application "System Events"
+				set frontApp to name of first application process whose frontmost is true
+			end tell
+
+			tell application frontApp
+				bounds of front window
+	end tell' | osascript | tr -d ',' | awk '{print $3-$1,$4-$2}'
+else
+	xwininfo -root -tree | grep -i "TigerVNC" | head -n 1 |\
+	sed 's/.* \([^ ]*\)x\([^ ]*\)+[^ ]*+[^ ]* .*/\1 \2/g'
+fi | tr ' ' 'x'
+

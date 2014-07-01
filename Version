@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu May 12 15:51:05 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Version
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+if isMac; then
+	echo -n "Intel "
+	system_profiler SPSoftwareDataType | grep -o 'Mac OS X [^ ]*'
+else
+	code=`lsb_release -cs`
+	if [ "$1" == "code" ]; then
+		echo $code
+	else
+		echo `lsb_release -ds` `Cap $code`
+	fi
+fi

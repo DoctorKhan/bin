@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+	echo "Usage: ComparisonOfDiffs 018 016"
+	echo "Will take each file containing 018 in its name and subract from it"
+	echo "the corresponding ones matching 016. e.g. SubtractThreeColumnData Diff018.dat Diff016.dat"
+else
+	for file in `ls -X | grep $1`
+	do
+		file2=${file/$1/$2}
+		outFile=`getMatchOfBack $file $file2`
+		SubtractThreeColumnData $file $file2 Compare_$1-$2_$outFile
+	done
+fi
+

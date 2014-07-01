@@ -1,0 +1,31 @@
+#!/bin/bash
+echo $4
+if [ $# == 0 ]; then
+echo "Usage example: flattenFilenames '*.dat'"
+echo "results in:"
+echo "cp ./Res67/CVL2.dat ./Res67CVL2.dat"
+echo "cp ./Res77/CVL2.dat ./Res77CVL2.dat"
+echo "cp ./Res57/CVL2.dat ./Res57CVL2.dat"
+echo "cp ./Res87/CVL2.dat ./Res87CVL2.dat"
+echo ""
+echo "Usage example: flattenFilenames '*.dat' in Res67"
+echo "results in:"
+echo "cp ./Res67/CVL2.dat ./Res67CVL2.dat"
+else
+	if [ $# == 3 ]; then
+		for file in `find . -name $1 | grep $3`
+		do
+       			newname1=${file%/*}
+			newname2=`basename $file`
+       			cp $file $newname1$newname2
+		done
+	else
+		for file in `find . -name $1`
+		do
+       			newname1=${file%/*}
+			newname2=`basename $file`
+       			cp $file $newname1$newname2
+		done
+	fi
+fi
+

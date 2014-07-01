@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 11 21:09:56 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SetHelp <file>
+#######################################################
+if (( $# < 1 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+for file in "$@"; do
+	# Locate script
+	pScript=`fex "$file"`
+	
+	# Identify last line of help lines
+	iLine=`grep -n '^#' "$pScript" | cut -d : -f 1 | Derivatives | sed -n -e 's/\([0-9]*\) 1 0/\1/p' | tail -n 1`
+	iLine=${iLine:-1}
+	
+	# Check if there is a help function already
+	viLastLong=`cat SetHelp | grep -n $(RepStr 54 '#') | word 1 : | Derivatives | tail -n 1`
+	if ((`echo $viLastLong | word 2` < 6)) && ((`echo $viLastLong | word 3` == 1)); then
+		iLine=`echo $viLastLong | word 1`
+	fi
+	
+	# Create backup
+	pBackup="${pScript}~"
+	cp "$pScript" "$pBackup"
+	
+	# Put help text in file
+	HelpText "$pBackup" | tee "$pScript" # Help text
+	sed -e "1,${iLine}d" "$pBackup" | sed -e '/isHelp/d' -e '/./,$!d' >> "$pScript" # Remainder of file
+done

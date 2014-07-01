@@ -1,0 +1,16 @@
+#!/bin/bash
+pFile=`fullpathname $1`; shift
+vsHosts="${@:-`otherhosts`}"
+sFlags="auvzH"
+
+function TwoWay()
+{
+	sHost="$@"
+	ssh-fix-hosts "$sHost"
+	trsync -$sFlags -e /usr/bin/ssh "$pFile" "$sHost":"$pFile"
+	trsync -$sFlags -e /usr/bin/ssh "$sHost":"$pFile" "$pFile"
+}
+
+for sHost in $vsHosts; do
+	TwoWay $sHost &
+done >/dev/null

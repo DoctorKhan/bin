@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+	basepath=`pwd`
+else 
+	basepath=$@
+fi
+
+find $basepath -type d | while read newpath
+do
+	source addpath $newpath
+done
+
+export $PATH
+echo PATH:
+echo $PATH | tr ':' '\n'
+

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue May 24 17:42:22 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+# x1 y1 x2 y2
+# UpperLeft = (x1, y1), LowerRight = (x2, y2).  y increases downward
+
+num=$2
+: #{num:=1}
+
+if [ ! "$1" ]; then
+	echo 'tell application "System Events"
+set frontApp to name of first application process whose frontmost is true
+end tell
+
+tell application frontApp
+if the (count of windows) is not 0 then
+        set window_name to name of front window
+end if
+end tell
+
+tell application frontApp
+	quit
+	end tell' | osascript | tr -d ','
+else
+	echo 'tell application "'$1'"
+	quit
+end tell' | osascript | tr -d ','
+fi

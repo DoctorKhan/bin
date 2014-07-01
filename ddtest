@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Sep 12 18:46:43 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ddtest
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+#if ! mount | grep -q tmpfs; then
+#	sudo -v
+#	sudo mount -t tmpfs tmpfs /tmp
+#fi
+dd if=/dev/zero of=/tmp/700mb count=1400k

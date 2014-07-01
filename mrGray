@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#mfast nomatlab
+
+if [ ! -e "$HOME/.wine/dosdevices/e:" ]; then
+	ln -s "/export/data" "$HOME/.wine/dosdevices/e:"
+fi
+
+wine e:/software/VISTASOFT/Anatomy/MrGray/mrGray.exe
+

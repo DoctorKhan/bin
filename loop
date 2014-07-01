@@ -1,0 +1,5 @@
+#!/bin/bash
+while [ 3 -lt 4 ]; do
+	eval $@
+done
+ 

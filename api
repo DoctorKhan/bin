@@ -1,0 +1,26 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sat Feb 2 14:17:53 CST 2013 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: api [-i] <package>
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+if [[ $1 == "-i" ]]; then shift; else args="-y"; fi
+
+## Main
+sudo -v
+#(read -t 60 -n 1 iAction; if test "$iAction"; then echo >/dev/stdin; fi &)
+
+while ps aux | grep -v grep | grep -q aptitude; do
+	sleep 1
+done
+
+sudo aptitude install $args $@
+exit $?

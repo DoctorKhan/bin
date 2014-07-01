@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jul 24 09:25:04 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ActiveWindow
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+case $1 in
+	Title)
+		xwininfo -root -tree | grep `ActiveWindowID` | cut -d \" -f 2
+	;;
+	Name)
+		xwininfo -root -tree | grep `ActiveWindowID` | cut -d \" -f 4
+		
+	;;
+	Class)
+		xwininfo -root -tree | grep `ActiveWindowID` | cut -d \" -f 6
+		
+	;;
+esac

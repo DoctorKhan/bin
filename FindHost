@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Oct 23 15:48:19 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FindHost
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+
+for ((ii=0; ii<255; ii++)); do 
+	echo $ii
+	(ssh -f 146.6.162.${ii} "uname -a" -o ConnectTimeout=2 PasswordAuthentication=0) &
+done > $HOME/hosts.found

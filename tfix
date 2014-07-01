@@ -1,0 +1,33 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Mon Sep 9 12:09:25 CDT 2013 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: touchmanager
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+script -c "xinput test 9" | while read s1; do
+	echo "$s1"
+	if echo "$s1" | grep -q "button press   1"; then
+		echo "DOWN"
+		xdotool mousedown 1
+		while ! echo "$s1" | grep -q "button release"; do
+			read s1;
+			echo "$s1"
+		done
+		xdotool mouseup 1
+		echo; echo "UP"
+	fi
+done
+

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. cdm Tile
+echo 'tell application "AppleScript Runner"
+do script Tile.applescript
+end tell' | osascript c, cdm, ec, es, escript, li, Tile, Tile.applescript

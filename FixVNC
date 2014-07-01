@@ -1,0 +1,7 @@
+#!/bin/bash
+host=`sed 's/.*\-via//g' $HOME/.vnc/last | awk '{print $1}'`
+
+sed -n 's/^Warning.*because of \(.*\)/\1/p'` /dev/stdin | while read badfile; do
+	echo "ssh $host rm -f $badfile"
+	ssh $host rm -f $badfile
+done

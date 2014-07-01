@@ -1,0 +1,106 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Oct 23 18:13:53 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+eval `ParseOpt -g sGroup -u sUser -p sPass :: $@`
+
+## Initialize
+pDir=$HOME/.faces
+pSched=$pDir/Schedule.txt
+mkdir -p $pDir
+
+## Functions
+function Google()
+{
+	pGoogle=`create $pDir/Google.txt`
+	google calendar list --cal=Faces > a
+	#	2>&1 |\
+	#	grep -v '^[Faces]' |\
+	#	StrTrim | tee "$pGoogle"
+}
+
+function Configure()
+{
+	echo -n "Configuring... " >/dev/stderr
+	pConf=$pDir/faces.conf
+	if [ ! -f $pConf ]; then
+		read -p  "user: " user
+		read -sp "pass: " pass
+		echo "user=$user" > $pConf
+		echo "pass=$pass" >> $pConf
+	fi
+	source $pConf
+}
+
+function Down()
+{
+	Configure
+	
+	echo -n "Signing in... " >/dev/stderr
+	pKFile=$pDir/pk
+	curl -s "http://faces.ccrc.uga.edu/ccrcfaces/login.php4?account=TEXAS_IRC&user=$user&pwd=$pass" |\
+	sed -n 's/.*NAME=.pk. VALUE=.\([a-z0-9]*\).*/\1/p' > $pKFile
+	pk=`cat $pKFile`
+	
+	echo Retrieving schedule... >/dev/stderr
+	pDump=$pDir/Dump.txt
+	wget -q -O $pDump "http://faces.ccrc.uga.edu/ccrcfaces/data.php4?user=$user&rndm=1868075267&account=TEXAS_IRC&pk=$pk&rindex=5" # &>/dev/null
+	
+	# Parse schedule
+	clear
+	
+	cat $pDump |\
+	sed -n 's/ \(.*\):00 [^ ]*\(.*\) \(.*\):00\( [^|]*\) *|.*/   \1 - \2\3  \4/p' |\
+	> $pSched
+	#	if ! ParseOpt a $@; then grep -A 999 `Today` > $pSched; fi
+	
+	paste <(cat $pSched | cut -d ' ' -f1-7) <(cat $pSched | word 5- | columnate 2)
+	
+	#cut -d ' ' -f 3 --complement |\
+}
+
+function Update()
+{
+	pScript="$pDir/script"
+	echo "#!/bin/bash" > $pScript
+	chmod a+x $pScript
+	
+	# Clear existing events
+	echo Clearing existing events...
+	eval 'google -v --cal=Faces calendar delete --title=.* --yes'
+	
+	clear
+	nEvents=`cat $pSched | wc -l`
+	echo $nEvents new events found.
+	sed -E -e 's/[[:space:]]+/ /g' -e 's/ - / /g' -e 's/ *$//g' $pSched > $pScript
+	
+	sSearch='s,^\([0-9\-]*\) \([0-9:]*\) \([0-9:]*\) \(.*\)'
+	sReplace='; google --cal=Faces calendar add \4 on \1 from \2 to \3,g'
+	sProg='echo -n $((++i))'
+	sed -i "$sSearch,$sProg/${nEvents}: $sReplace" "$pScript"
+	source "$pScript"; 	clear
+}
+
+function Cached()
+{
+	cat $pSched
+}
+
+## Main
+set ${@:-Down}
+set `titleCase $@`
+for sArg in $@; do
+	eval $sArg
+done
+
+#| grep -E '(khan|ress|katyal|greene)'
+#| date -d 2011-10-28 +%a

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+test -p /dev/stdin
+
+sourceFile=`fileparts 7 $1`
+sudo chmod ug+x $sourceFile
+destfn=`fileparts 6 $1`
+if [ $2 ] && [ ! -e $2 ]; then destfn="$2"; fi
+
+destFile=/usr/local/bin/$destfname
+
+echo "$destFile -> $sourceFile"
+sudo ln -s $sourceFile $destFile
+
+shift
+if [ $# == 0 ]; then
+	exit 0
+else
+	linkify $@
+fi
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+	proj=`cat $HOME/wtscripts/project`
+else
+	proj="$1"
+fi
+
+if [ `windowViewable "WToolsMgd"` == "0" ]; then
+	brterm tc $proj
+	xtype wt; pressReturn
+	blterm tc wtscripts
+	waitUntilWindowViewable WToolsMgd
+fi

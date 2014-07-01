@@ -1,0 +1,19 @@
+#!/bin/bash
+closeWin "WToolsMgd"
+closeWin "/ESE_12M5A/psd/bin/PlotPulseMgd"
+closeWin "MGD Sim"
+
+proj=`cat $HOME/wtscripts/project`
+
+if [ $# == 1 ]; then
+	if [[ ( "$1" == "runonly" ) || ( "$1" == "sim" ) || ( "$1" == "replot" ) || ( "$1" == "runsim" ) || ( "$1" == "plot" ) ]]; then
+		psdremake $proj $1
+	else
+		psdremake $1 replot
+	fi
+else
+	brterm tc $proj "psdqmake sim; wt"
+	waitUntilWindowViewable "WToolsMgd"
+	loadcv
+	runsim plot
+fi

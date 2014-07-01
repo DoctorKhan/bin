@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Feb 18 09:53:10 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: PanelHeight
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+if which xwininfo >/dev/null; then
+	xwininfo -root -tree | grep panel | sed -n "s/.*`screensize w`x\([0-9]*\).*/\1/p" | head -n 1
+else
+	echo 24
+fi

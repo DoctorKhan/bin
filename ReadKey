@@ -1,0 +1,75 @@
+#!/bin/bash
+#(i copied bashV4 from F11 since it has associative arrays)
+#while IFS='^B'
+#read -sn1 a # ^B is Control B
+#do
+#	printf "%d" $a
+n=`ParseOpt n "$@"`
+if [ -z $n ]; then
+	m=-1
+else
+	m=$((n-1))
+fi
+
+sArgs=`echo "$@" | sed 's/-n[^\-]*//g'`
+read -s -n 1 $sArgs a
+k=`perl -e "printf('%d',ord('$a'));"`
+if (( k == 27 )) ; then
+	while IFS='' read -s -n 1 -t 1 c
+	do
+		l=`perl -e "printf('%d',ord('$c'));"`
+		k="$k $l"
+		grep "^$k 0 " $0 > /dev/null
+		if (( $? == 0 )) ; then
+			break
+		fi
+	done
+	sKey=`grep "^$k 0 " $0 | word 5`
+	echo "-${sKey}-"
+else
+	echo -n "$a"
+	if ((m > 0)); then
+		read -n $m $sArgs b
+	elif ((m < 0)); then
+		read $sArgs b
+	fi
+fi
+
+exit
+
+# never gets here
+
+27 79 70 0 end
+27 79 72 0 home
+27 79 81 0 f2
+27 79 82 0 f3
+27 79 83 0 f4
+27 91 49 53 126 0 f5
+27 91 49 55 126 0 f6
+27 91 49 56 126 0 f7
+27 91 49 57 126 0 f8
+27 91 50 48 126 0 f9
+27 91 50 49 126 0 f10
+27 91 50 52 126 0 f12
+27 91 50 126 0 insert
+27 91 51 126 0 delete
+27 91 49 126 0 home
+27 91 52 126 0 end
+27 91 53 126 0 pageUp
+27 91 54 126 0 pageDown
+27 91 65 0 up
+27 91 66 0 down
+27 91 67 0 right
+27 91 68 0 left
+27 91 49 59 53 67 0 ctl-right
+27 91 49 59 53 68 0 ctl-left
+27 91 49 59 53 65 0 ctl-up
+27 91 49 59 53 66 0 ctl-down
+27 91 69 0 keypad-five
+9 0 tab
+33 0 bang
+35 0 pound
+36 0 dollarSign
+37 0 percent
+38 0 ampersand
+40 0 openParen

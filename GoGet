@@ -1,0 +1,164 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jun 14 12:43:29 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GoGet
+#######################################################
+
+if (( $# == 0 )); then
+	echo "Usage: GoGet <Program>"
+	echo Programs: ; egrep -o '[[:space:]]+[[:alpha:]].*[)]$' GoGet | tr -d ')'
+	exit 0
+fi
+
+cd /tmp
+
+if which apt-get; then
+	for prog in lynx tucan aptitude; do
+		if isInstalled $prog; then
+			sudo apt-get -y install $prog
+		fi
+	done
+fi
+software=/export/data/software
+
+while [ $# -gt 0 ]; do
+	case $1 in
+		VirtualGL)
+			curl -sA "`Version`" http://sourceforge.net/projects/virtualgl/ | grep -o 'http://.*VirtualGL.*/download'
+			getlinks http://sourceforge.net/projects/virtualgl/files/VirtualGL/2.2.1  | grep amd64
+			wget http://sourceforge.net/projects/virtualgl/files/VirtualGL/2.2.1/VirtualGL_2.2.1_amd64.deb
+			Office2011)
+				scp sandstone:software/MSOffice/Office2011.* .
+				hdiutil attach Office2011.iso
+			;;
+			winetricks)
+				wget http://winetricks.org/winetricks
+				sudo mv winetricks /usr/bin/
+				chmod a+x /usr/bin/winetricks
+			;;
+			ubuntu-tweak)
+				wget `getlinks http://ubuntu-tweak.com/ .*.deb`
+				sudo gdebi --n `latest *.deb`
+			;;
+			
+			SpiderOak)
+				wget `getlinks https://spideroak.com/download/ .*directdownload?platform=ubuntu.*arch=x86_64.*`
+				sudo gdebi --n `latest *.deb`
+			;;
+			
+			VirtualBox)
+				oscode=`lsb_release -sc`
+				wget `getlinks http://www.virtualbox.org/wiki/Linux_Downloads ".*$oscode.*amd64.*\.deb"`
+				sudo gdebi --n `latest *.deb`
+			;;
+			MrGray)
+				scp sandstone:$software/VISTASOFT/Anatomy/MrGray/mrGray.exe .
+				sudo mv mrGray.exe /usr/local/bin/
+			;;
+			nxclient)
+				if isLinux; then
+					wget `getlinks http://www.nomachine.com/download-package.php?Prod_Id=2573 .*.deb`
+					sudo gdebi --n `latest *.deb`
+				fi
+				if isMac; then
+					wget `getlinks http://www.nomachine.com/download-package.php?Prod_Id=3024 .pkg.zip`
+					tar -xzvf nxclient*.zip
+					sudo installer -pkg nxclient*.pkg -target "/"
+				fi
+			;;
+			
+			synapse)
+				sudo add-apt-repository ppa:synapse-core
+				sudo apt-get -y install synapse
+			;;
+			
+			Office2007)
+				sandstone=sandstone.irc.utexas.edu
+				#scp $sandstone:$software/MSOffice/Office2007.iso .
+				#scp $sandstone:$software/licenses/MSOffice2007key.txt .
+				mountdir=/media/Office2007
+				sudo mkdir $mountdir
+				sudo mount -t iso9660 Office2007.iso $mountdir -o loop
+				wine /media/Office2007/setup.exe &
+				
+				waituntilwindowopen "Microsoft Office Enterprise 2007"
+				xdotool type `cat MSOffice2007key.txt`
+				xdotool key alt+c
+				sudo umount
+				#			xdotool windowactivate `windowID Microsoft`; xdotool key alt+c
+				
+				
+			;;
+			fail2ban)
+				#			http://sourceforge.net/projects/fail2ban/
+				#			http://sourceforge.net/projects/fail2ban/files/fail2ban-stable/fail2ban-0.8.4/fail2ban-0.8.4.tar.bz2/download
+				cd ~/Downloads
+				#			tar xvfj fail2ban-0.8.4.tar.bz2
+				#			cd ~/Downloads/fail2ban*
+				#			sudo python setup.py install
+			;;
+			Win27)
+				#			glink="http://www.google.com/search?q=Win2-7&btnI=I%27m+Feeling+Lucky"
+				#			wget "`getlinks $glink .*download.php?.*`" -O w.html
+				#			sed -n 's/.*3 seconds.*href="\(.*\)">Click here.*/\1/p' w.html > link.txt
+				#
+				#			if ! which tucan ; then
+				#				sudo aptitude -y install tucan
+				#			fi
+				#
+				#			tucan -w updates
+				#			tucan -di link.txt | sed -n 's/.*: \(.*\) correct.*/\1/p'
+				
+				#find `pwd` -maxdepth 1  | grep -v `pwd`$
+				
+				cd `sed -n 's/downloads_folder = \(.*\)/\1/p' $HOME/.tucan/tucan.conf`
+				
+				if [ -d `latest` ]; then
+					cd `latest`
+				fi
+				
+				pwd
+				
+				archive=`latest`
+				
+				if [ "`fileparts 4 $archive`" == "lzma" ]; then
+					tar --lzma -xvf $archive
+				else
+					tar -xzvf $archive
+				fi
+				
+				instdir=`ls -1 | grep -v $archive`
+				mv $instdir /tmp/
+				/tmp/$instdir/GUIInstall.sh
+			;;
+			
+			gnomerc)
+				cd; file=.config/autostart/gnomerc.desktop
+				echo -e '[Desktop Entry]\nType=Application' > $file
+				echo -e	'Exec=$HOME/.gnomerc & \nX-GNOME-Autostart-enabled=true' >> $file
+				echo -e	'Name[en_US]=.gnomerc\nComment[en_US]=Startup script for gnome' >> $file
+				echo -e	'Name=.gnomerc\nComment=Startup script for gnome' >> $file
+				
+				if [ ! -e .gnomerc ]; then
+					if which escript; then
+						escript .gnomerc . echo
+					else
+						echo -n
+					fi
+				fi
+				chmod u+x .gnomerc
+			;;
+			
+			*)
+				if ! which $1 2>&1 >/dev/null
+				then sudo aptitude -y install $1
+				fi
+			;;
+	esac
+	shift
+done
+

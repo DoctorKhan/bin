@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sun Jun  5 09:51:00 CDT 2011 ##
+#####################################################
+
+if [ $# -lt 2 ]; then
+	echo "Usage: `basename $0` <nArgs> <Script> <Arguments>"
+	exit 1
+fi
+
+n="$1"
+sCaller="$2"
+shift 2
+
+if (( $# < $n )) || [[ "$1" == *-h* ]] ; then
+	echo
+	sed -n '/###.*Help Text/,/.*####.*/p' $sCaller
+	echo
+	exit 0
+else
+	exit 1
+fi
+

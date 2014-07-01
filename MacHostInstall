@@ -1,0 +1,28 @@
+#!/bin/bash
+
+cd ~/Desktop
+
+if [ $# -lt 2 ]; then
+	host=sandstone.irc.utexas.edu
+else
+	host=$2
+fi
+
+echo Downloading $1. May require password for $host.
+scp $host:/export/data/software/MacDMGs/*$1*.dmg .
+dmgname=`ls -1t *$1*.dmg | head -n 1`
+scp $host:/export/data/software/MacDMGs/*$1*.txt .
+
+###
+#hdiutil attach "$dmgname"
+#base=`ls -1t /V *$1* | sed 's/.dmg//g'`
+#cd /Volumes/*$1*/
+#vdir=`pwd`
+#echo Installing $1, may require user password:
+#sudo installer -pkg TigerVNC.pkg -target "/"
+#cp -r *.app /Applications/
+#echo Cleaning up...
+#hdiutil detach $vdir -force
+
+dmginstall "$dmgname"
+

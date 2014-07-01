@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Aug 25 19:59:28 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-connector
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+# Initialize
+pList=`mktemp`
+vnc-list | column -t > $pList
+sHead="Port User Host Width Height Status Quality Color FullScreen"
+
+# Main
+(echo $sHead; cat $pList) | column -t		 Show list
+
+ Select port
+iPort=${1:-`cat $pList | awk '{print $1}'`}
+if [ -z $iPort ]; then
+	read -p "Select port: " iPort
+fi
+iPort=${iPort:-1}
+
+ Select action
+if grep -q "^$iPort " $pList; then
+	echo
+	read -n 1 -p "N)ew |E)dit |T)erminate |D)elete |P)ause |U)npause |C)onnect : " iAction
+	echo
+	
+	case ${iAction:-c} in
+		e) vnc-edit $iPort ;;
+		t) vnc-kill $iPort ;;
+		d) vnc-delete $iPort;;
+		p) vnc-stop $iPort ;;
+		u) vnc-cont $iPort ;;
+		c) vnc-command $iPort ;;
+	esac
+fi

@@ -1,0 +1,24 @@
+#!/bin/bash
+closeWin "WToolsMgd"
+#closeWin "/ESE_12M5A/psd/bin/PlotPulseMgd"
+#closeWin "MGD Sim"
+
+if [ $# == 0 ]; then
+	project=`DefaultProject`
+	runafter="runsim plot"
+else
+	project=$1; shift
+	runafter="$@"
+fi
+
+brterm tc $project "bash -c 'if [ \` psdqmake sim | grep Succeeded | grep -ic 3\` == 1 ] ; then zenity --info --title=Compile-success; else zenity --info --title=Compile-failure; fi'"
+
+waitUntilWindowOpens "Compile"
+	
+if [ `wmctrl -l | grep Compile | grep -ic failure` == 0 ]; then
+	wmctrl -a Compile ; pressEnter
+	blterm tc
+	xtype "$runafter"; pressEnter
+else
+	wmctrl -a Compile 
+fi

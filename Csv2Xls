@@ -1,0 +1,129 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 25 13:35:08 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: csv2xls [dir]
+#######################################################
+
+# Declaration
+nFiles=
+xId=
+
+# CSV file location
+if [ -d "$1" ]; then
+	pDataDir="$1"
+else
+	pDataDir=`zenity --file-selection --directory | tail -n 1`
+fi
+
+# Go to directory
+cd "$pDataDir"
+
+# Set CSV delimiter
+sDelim="${2:- }"
+sTemp="/tmp"
+### FUNCTIONS ###
+
+function UniqueName()
+{
+	date --rfc-3339=ns | sed 's/[^0-9]//g'
+}
+
+function MakeLinks()
+{
+	## Make temporary links of all csv files
+	echo "Making temporary links..."
+	filelist=`TempFile csvfiles`
+	
+	find "`pwd`" -iname '*.csv' > $filelist
+	nFiles=`cat $filelist | wc -l`
+	
+	cat $filelist | \
+	for (( iFile=1; iFile <= nFiles; iFile++ )); do
+		pDataFile="`line`"
+		pLink=`TempFile`.csv
+		
+		ln -s  "$pDataFile" "$pLink"	# Link file
+		
+		# Progress
+		echo -en "\r$iFile / $nFiles = $((iFile*100/nFiles)) %"
+	done
+	echo
+	
+	## Go to directory with all the links
+	cd $sTemp
+}
+
+function ConvertDelim()
+{
+	## Convert delimiter to ","
+	echo -en "Converting delimiters...\r"
+	if [ "$sDelim" != "," ]; then
+		sed -i --follow-symlinks "s/$sDelim/,/g" [0-9]*.csv
+	fi
+}
+
+function ConvertLinks()
+{
+	## Convert (the links)
+	echo "Converting files...     "
+	ls *.csv > all
+	#	mv $filelist all
+	nCom=0
+	
+	until (( `cat all | wc -l` == 0 )); do
+		head -n 250 all > singleset
+		nSet=`cat singleset | wc -l`
+		nDes=$((nSet + nCom))
+		
+		cat singleset | xargs soffice -invisible -convert-to xls  > /tmp/convert.log
+		
+		until (( nCom == nDes )); do
+			sleep .2
+			nCom=`ls *.xls 2> /dev/null| wc -l`
+			echo -en "\r$nCom / $nFiles = $((nCom*100/nFiles)) %"
+		done
+		sed -i -e '1,250d' all
+	done
+	echo
+}
+
+function MoveFiles()
+{
+	
+	nCom=0
+	## If there are output files, move them to their original directories
+	echo Moving files...
+	until (( nCom == nFiles )); do
+		for file in `ls [0-9]*.xls 2>/dev/null`; do
+			# CSV file corresponding to XLS
+			csv=`echo "$file" | sed 's/.xls$/.csv/g'`
+			target=`readlink $csv | sed 's/.csv$/.xls/g'`
+			mv "$file" "$target"; ((++nCom))
+			echo -en "\r$nCom / $nFiles = $((nCom*100/nFiles)) %"
+		done
+	done
+	
+	echo
+}
+
+function CheckOffice()
+{
+	if ! which libreoffice >/dev/null; then
+		sudo add-apt-repository ppa:libreoffice
+		sudo apt-get update
+		sudo apt-get -y install libreoffice
+	fi
+}
+
+# Main
+CheckOffice
+MakeLinks
+ConvertDelim
+ConvertLinks
+MoveFiles
+
+echo Complete.

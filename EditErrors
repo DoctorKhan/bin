@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sat Jun  4 10:21:53 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+efile=/tmp/editerr
+
+"$@" 2>&1 | sed -n 's/\(.*\):\([0-9]*\): error:.*/\1 +\2/p' | xargs gedit
+

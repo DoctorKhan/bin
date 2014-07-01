@@ -1,0 +1,37 @@
+#!/bin/bash
+
+case "$@" in
+	"")
+		ActiveWindowID
+	;;
+	
+	root)
+		xwininfo -root 	|\
+		grep id: 	|\
+		cut -d ' ' -f 4 |\
+		grep -v ^$
+	;;
+	
+	*)
+		xwininfo -root -tree |\
+		grep -i "0x[^ ]* \"$@.*" |\
+		awk '{print $1}' |\
+		head -n 1
+	;;
+esac
+
+#if [[ $# == 0 ]] || [[ "$@" == "" ]]; then
+#	ActiveWindowID
+#if [[ "$query" == root ]]; then
+#	xwininfo -root 	|\
+#	grep id: 	|\
+#	cut -d ' ' -f 4 |\
+#	grep -v ^$
+#else
+#	xwininfo -root -tree 	|\
+#	grep -i "$query" 	|\
+#	head -n 1 		|\
+#	awk '{print $1}' 	|\
+#	grep -v ^$
+#fi
+

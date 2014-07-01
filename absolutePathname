@@ -1,0 +1,13 @@
+#!/bin/bash
+for file in `echo $@`
+do
+	file = echo 
+	dir=`dirname "$file"`	
+	fname=`basename "$file"`
+	cd "$dir"
+	dir="`pwd`"
+	echo -ne "$dir/$fname"  | sed 's/ /\\ /g'
+	echo -ne " "
+done
+echo
+

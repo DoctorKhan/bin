@@ -1,0 +1,17 @@
+#!/bin/bash
+closeWin "/ESE_12M5A/psd/bin/PlotPulseMgd"
+
+if [ `windowViewable "WToolsMgd"` == "0" ]; then
+	plotpulse $@
+else 
+	if [ `windowViewable "EvalToolMgd"` == "0" ]; then
+		startevaltool
+	fi
+	savecv
+
+	wmctrl -a "WToolsMgd"
+	pressAlt a
+	xtype p
+	waitUntilWindowViewable "/ESE_12M5A/psd/bin/PlotPulseMgd"
+	blterm tc
+fi

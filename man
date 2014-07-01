@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr 28 12:28:32 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then echo "Usage: $0 <query>"; exit 0; fi
+
+man=/usr/bin/man
+hfile=/tmp/help.tmp
+query=$@
+
+if $man $query 2>/dev/null || oman $query; then exit 0
+elif eval "$query --help 2>&1 | tee $hfile | grep -q Usage" || \
+eval "$query -h 2>&1 | tee $hfile | grep -q Usage" || eval "$query 2>&1 | tee $hfile | grep -q Usage"; then
+	less $hfile
+	exit 0
+else
+	exit 1
+fi
+

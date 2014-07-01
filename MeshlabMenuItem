@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 30 15:19:39 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MeshlabMenuItem
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+xdotool windowfocus `WindowID MeshLab v1`
+
+xdotool key alt+$1; sleep 0.02; shift
+
+nDown=$1; shift
+
+for (( i=0; i < nDown ; i++)); do
+	xdotool key Down; sleep 0.02
+done
+
+while [ $# -gt 0 ]; do
+	nDown=$1; shift
+	xdotool key Right; sleep 0.05
+
+	for (( i=1; i < nDown ; i++)); do
+		xdotool key Down; sleep 0.02
+	done
+done
+
+xdotool key Return; sleep 0.02

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu May 19 15:16:21 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+tvnc "$@" &
+tvnc-resizer "$@"&
+

@@ -1,0 +1,11 @@
+#!/bin/bash
+#click Layout button
+./click 56 149
+sleep 1
+#select max time and replace with 70
+xp $0 30
+./pressReturn
+sleep 0.2
+./click 42 290
+sleep 0.2
+./click 102 291

@@ -1,0 +1,6 @@
+#!/bin/bash
+cd ~/.kde/share/config
+cat kaffeinerc | grep -v ".wmv" | grep -v ".avi" | grep -v ".mpg" | grep -v ".mpeg" | grep -v ".asf" > kaffeinerc
+rm -f arkrc
+cd /tmp
+#rm -f *

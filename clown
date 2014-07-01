@@ -1,0 +1,8 @@
+#!/bin/bash
+dir=`pwd`
+flags="-avzHu $@ --exclude '*~' -e ssh"
+host="khan@faraday.ph.utexas.edu"
+echo Downloading from $dir on $host...
+#echo rsync $flags $host:$dir `dirname $dir`
+rsync $flags $host:$dir `dirname $dir`
+

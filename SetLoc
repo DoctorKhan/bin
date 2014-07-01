@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Jul 6 21:51:20 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SetLoc
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+lastfile=$HOME/.vnc/last
+calfile=$HOME/.vnc/calibration
+if [ ! -f $calfile ] || [ `cat $calfile | wc -l` != 1 ]; then echo "0 0" > $calfile ; fi
+
+while (( $# > 0 )); do
+	case "$1" in
+		x)
+			sed -i -e "s/ \(+[0-9]*\)\(+[0-9]*\) / +$2\2 /g" $lastfile
+			shift 2
+		;;
+		y)
+			sed -i -e "s/ \(+[0-9]*\)\(+[0-9]*\) / \1+$2 /g" $lastfile
+			shift 2
+		;;
+		xc)
+			echo "$2 `GetLoc yc`" > $calfile
+			shift 2
+		;;
+		yc)
+			echo "`GetLoc xc` $2" > $calfile
+			shift 2
+		;;
+		*)
+			SetLoc x $1 y $2
+			shift 2
+		;;
+	esac
+done

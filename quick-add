@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed May 11 22:01:01 CDT 2011 ##
+#####################################################
+
+minargs=1; usage="Usage: $0"
+if string "^[\-]*h[^ ]*$" is in "$1" || [ "$#" -lt "$minargs" ]
+then echo "Usage: $0"; exit 0; fi
+
+gcalcli quick "$@"
+# Default reminders from google calendar.
+#gcalcli remind 90 textme Reminder: %s
+#gcalcli remind 15 textme Urgent: %s
+

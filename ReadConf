@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jul 12 09:08:01 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ReadConf <File> <sParam> <Value>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+## Initialize
+sFile=`create $1`; shift
+bPrompt=`tester ParseOpt p $@`
+
+## Functions
+function ReadParam()
+{
+	sParam="$@"
+	sValue=`sed -n "s/$sParam *=* *//p" "$sFile"`
+	
+	if $bPrompt && test -z $sValue; then
+		echo -n "$sParam: " >/dev/stderr
+		read sValue
+		WriteConf $sFile $sParam $sValue
+	fi
+	
+	if [ -z $sValue ]; then
+		exit 1
+	else
+		echo "$sValue"
+	fi
+}
+
+## Main
+if (($# > 0)); then
+	ReadParam "$@"
+else
+	while read line; do
+		ReadParam "$line"
+	done
+fi

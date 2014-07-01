@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Aug 16 14:13:06 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: RunOnDesk <n> <application>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+
+#d=`echo $@ | GetOptions query d`
+#w=`echo $@ | GetOptions query w`
+#x=`echo $@ | GetOptions query x`
+
+if isInt $1; then
+	d=$1; shift
+else
+	d=`WhichDesk`
+fi
+
+eval $@ &
+
+WaitForNewWindow 'Win2Desk $xId' $d

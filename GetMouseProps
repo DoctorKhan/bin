@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Oct 23 21:22:03 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetMouseProps
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+#	Device Accel Constant Deceleration (262):	1.000000
+#	Device Accel Adaptive Deceleration (263):	20.000000
+#	Device Accel Velocity Scaling (264):	19.000000
+
+## Initialize
+iDev="${1:-Touchpad}"; iProp="$2"
+
+## Functions
+
+## Main
+if ! isInt "$iDev"; then
+	iDev=`xinput | grep "$iDev" | cut -d= -f2 | awk '{print $1}'`
+fi
+xinput -list-props $iDev | grep "$iProp" | more

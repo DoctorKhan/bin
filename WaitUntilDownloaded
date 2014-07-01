@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 30 14:36:33 CDT 2011 ##
+#####################################################
+
+#minargs=0
+#usage="Usage: `basename $0`"
+
+#if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ] ; then
+#	echo $usage
+#	exit 0
+#fi
+
+f="$1"
+s1=-2
+s2=-1;
+
+until [ "$s2" == "$s1" ]; do
+	s1=`ls -s "$f" | awk '{print $1}'`
+	sleep 1
+	s2=`ls -s "$f" | awk '{print $1}'`
+	echo -n $s2 $f
+done
+

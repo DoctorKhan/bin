@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Author: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+# Copyright:
+# License: this is available under the GPL, v or later
+
+# this script should take a .sDMG which contains an .app or a .pkg,
+# mount it, and either move the .app to /Applications or install the
+# .pkg
+
+set -e
+# set -x
+
+sDMG="$1"
+sTarg=/
+
+echo "working with $sDMG"
+
+sAttached=$(hdiutil attach "$sDMG" | tail -n 1)
+pMount=$(echo $sAttached | awk '{print $NF}' )
+
+bInstalled=no
+
+for PKG in "${pMount}/"*.[m]*pkg; do
+	if [ -r "$PKG" ] ; then
+		echo "Installing $PKG"
+		sudo installer -pkg "$PKG" -target "$sTarg"
+		bInstalled=yes
+	fi
+done
+
+## and install truetype fonts:
+## http://developer.apple.com/documentation/Carbon/Conceptual/ATS_Concepts/atsfonts_concepts/chapter__section_.html
+## it might be even better to put things in /Network/Library/Fonts at some point.
+
+for TTF in "${pMount}/"*.ttf; do
+	if [ -r "$TTF" ] ; then
+		echo "installing $TTF"
+		sudo mkdir -p /Library/Fonts
+		sudo cp "$TTF" /Library/Fonts
+		TARGFILE=/Library/Fonts/"$(basename "$TTF")"
+		sudo chmod a+r "$TARGFILE"
+		bInstalled=yes
+	fi
+done
+
+for APP in "${pMount}/"*.app; do
+	if [ -r "$APP" ] ; then
+		echo "installing $APP"
+		ABASE=$(basename "$APP")
+		TARGDIR="${sTarg}/Applications/$ABASE"
+		BKUP="${TARGDIR}.old"
+		if [ -e "$TARGDIR" ] ; then sudo mv "$TARGDIR" "$BKUP" ; fi
+		sudo ditto --rsrc "$APP" "$TARGDIR"
+		if [ -e "$BKUP" ] ; then sudo rm -rf "$BKUP" ; fi
+		bInstalled=yes
+	fi
+done
+
+if [ "$bInstalled" != "yes" ] ; then
+	echo "failed to find anything to install in $pMount"
+	exit
+fi
+
+hdiutil detach "$pMount" -force

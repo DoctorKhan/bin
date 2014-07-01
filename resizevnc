@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat May 19 17:41:35 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ResizeVnc [<width>x<height>|<max>]
+#######################################################
+if (( $# < 1 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sWin="$@"
+if isMaxed $@; then
+	viSize=`MaxWinSize`
+else
+	viSize=`WinSize x $sWin`
+fi
+viLoc=`WinLoc + $sWin`
+
+## Main
+
+#eval `ps aux | grep vncviewer | grep -o 'DesktopSize=[0-9x]*'`
+#if [[ $DesktopSize != $viSize ]]; then
+notify-send -t 1 "Window Resize" "$viSize"
+tiger -s $viSize
+#fi
+
+#for ii in {1..6}; do
+#	viSize=`WinSize "$@" x`
+#	if ((viSize != ))`windowsize`" != "$viSize" ]; then break; fi
+#	sleep 0.25
+#done
+#waituntilwindowopen 3 s
+

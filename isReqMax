@@ -1,0 +1,25 @@
+#!/bin/bash
+
+windowname="${@:-`WinTitle TigerVNC`}"
+
+## MAIN
+if isMac; then
+	x=`xLoc "$windowname"`
+	
+	if (( x == 0 )); then
+		exit 0
+	else
+		exit 1
+	fi
+else
+	id=`WindowID "$windowname"`
+	if [ "$id" != "" ] && [ `xprop -id $id |\
+		grep _NET_WM_STATE | grep MAXIMIZED_VERT |\
+		grep -ic MAXIMIZED_HORZ` -gt 0 ]; then
+		echo $windowname requests maximization.
+		exit 0
+	else
+		exit 1
+	fi
+fi
+

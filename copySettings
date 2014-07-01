@@ -1,0 +1,10 @@
+#!/bin/bash
+echo "Beginning copy..."
+cp -f $1/.bash_aliases $2/
+mkdir $2/bin
+cp -rf $1/bin $2/
+cp -rf $1/.emerald $2/
+cp -rf $1/.themes $2/
+#cp -rf $1/.icons $2/
+echo "Complete."
+

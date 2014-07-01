@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for file in `echo $@`; do
+	fileout=`echo $file | sed 's/.mgz/.nii.gz/g'`
+	
+	surf mri_convert $file $fileout
+done
+

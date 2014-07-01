@@ -1,0 +1,106 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Apr 5 22:14:05 CDT 2011 ###
+######################################################
+
+##################### Help Text ######################
+# Usage: tiger <user>@<Host>
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+######################################################
+
+## Read params
+sArgs=`echo $@ | sed 's/-? \([^ @]*\)@\([^ @]*\)/-u \1 -h \2/g'`
+eval `ParseOpt -s vSize -q iQual -p iPort -h sHost -u sUser :: $sArgs`
+
+## Default params
+vSize=${vSize:-`screensize available`}
+sHost=${sHost:-sandstone.irc.utexas.edu}
+sUser=${sUser:-$USER}
+iPort=${iPort:-`ssh $sUser@$sHost vncport`}
+
+## Initialization
+pLog=`TempFile startvnc.log`
+pLast=$HOME/.vnc/last
+
+sGeometry="-geometry 2000x2000+0+0"
+sDesktop="-DesktopSize $vSize"
+
+sHostname=$sUser@$sHost
+sHostPhrase="-via $sHostname $sHost"
+
+pPass=`ls -1t $HOME/.vnc/$sHostname*/passwd | head -n 1`
+sPass="-passwd $pPass"
+
+## Functions
+function Remote() { ssh $sHostname $@; }
+
+function Authentications()
+{
+	. ssh-agent-check
+	ssh-key-check
+	ssh-add-check
+}
+
+function GetPasswordFile()
+{
+	if [ -f $pPass ]; then return; fi
+	
+	echo -en "Password file $pPass not found.";	echo -n "Downloading... "
+	
+	if scp $login:.vnc/passwd $pPass &>/dev/null; then
+		echo "complete."
+	else
+		echo "failed."
+		sPass=""
+	fi
+}
+
+function Execute()
+{
+	echo vncviewer $sPass $sGeometry $sDesktop \
+	$sHostPhrase:$iPort > $pLast
+	
+	vncviewer $sPass $sGeometry $sDesktop \
+	$sHostPhrase:$iPort 2>$pLog
+}
+
+function Connect()
+{
+	for iRepeat in {1..10}; do
+		Execute
+		if ! grep -q refused $pLog; then	break; fi
+		iPort=`Remote vncport new`
+	done
+}
+
+## Main
+Authentications
+GetPasswordFile
+Connect &
+WaitForWindow -t 20 -w "TigerVNC: .*:$iPort"
+TigerResizer
+
+#####
+## Check if lock files must be removed
+#while grep -q 'Remove this' $pLog; do
+#	# Remove file
+#	eval `sed -n 's/.*Warning: \(.*\):.*because of \(.*\)/ssh \1 rm -v \2/p'`
+#		ssh $sServerLogin "vncserver $@ :$iPort" 2> $pLog
+#done
+
+#function FixConnection()
+#{
+#	while grep -q failed "$pExeLog"; do
+#		echo "Connection failed. Trying port $((++port))..."
+#		SaveSession
+#		StartVNCServer ":$port"
+#		Execute
+#	done
+#}
+
+

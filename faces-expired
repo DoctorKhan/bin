@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 24 22:07:05 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces-expired
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+#if [ -e "$@" ]; then
+#	sFileDate=`ls -l "$@" | awk '{print $6,$7}'`
+#	sFileSecs=`date --date="$sFileDate" +%s`
+#	sCurrSecs=`date --date=now +%s`
+#
+#	# Minutes passed
+#	if (($sCurrSecs - $sFileSecs < 600)) && ! isEmpty "$@"; then
+#		exit 1
+#	fi
+#fi
+
+if faces-retrieve | grep -iq expired; then
+	exit 0
+else
+	exit 1
+fi
+

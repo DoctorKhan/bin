@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed May 25 16:36:26 CDT 2011 ##
+#####################################################
+
+#if [[ $1 == --help ]];
+#then echo $usage; exit 0; fi
+
+#Require gedit-plugins
+
+#### Change comment/uncomment shortcuts
+file="/usr/lib/gedit*/plugins/codecomment.py"
+if [ ! -e $file ]; then
+	file=`locate -l 1 -r codecomment.py$`
+fi
+
+if [ -e "$file" ]; then
+	sudo sed -i 's/<control>M/<control>R/g' $file
+	sudo sed -i 's/<shift>M/T/g' $file
+fi
+

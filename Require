@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Dec 18 16:26:16 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Require <package> <package> ...
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+for sPackage; do
+	if ! isInstalled $sPackage; then
+		if isPackage $sPackage; then
+			sudo apt-get -y install $sPackage
+		else
+			AutoGet $sPackage
+		fi
+	fi
+done

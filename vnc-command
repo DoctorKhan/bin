@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 30 10:42:02 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-command
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pSessions=$HOME/.vnc
+sHostName=`echo $@ | tr -d '()' | tr ' ' '@' | cut -d ':' -f 1`
+shift;
+sHostPort=$@
+
+
+if [[ $1 == *hared || $2 == *hared ]]; then
+	Shared=1
+else
+	Shared=0
+fi
+
+## Functions
+function ShowCommand()
+{
+	sHostPort=$1; DesktopSize=${2:-`screensize x`}; Quality=${3:-8} Color=${4:-2} FullScreen=$5
+	pConf=$pSessions/$sHostPort.cfg
+	
+	# Save user input
+	pPass=$pSessions/$sHostName/passwd
+	nc=$((Color>2?1:0))
+	
+	if [[ $Color == Auto || $nc == 1 ]]; then
+		AutoSelect=1
+		Color=2
+	else
+		AutoSelect=0
+	fi
+	
+	if [[ $FullScreen == Yes ]]; then FullScreen=1; else FullScreen=0; fi
+	echo vncviewer -PasswordFile=$pPass \
+	-AutoSelect=$AutoSelect -LowColorLevel=$Color -QualityLevel=$Quality \
+	-FullscreenSystemKeys=0 -FullScreen=$FullScreen -DesktopSize=$DesktopSize \
+	-MenuKey F3 -Shared=$Shared +kb $sHostPort
+}
+
+
+## Main
+
+# Select action
+	pConf=`create $pSessions/$sHostPort.cfg`
+	sConf=`cat $pConf`
+	ShowCommand ${sConf:-$sHostPort}

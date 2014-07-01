@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 30 21:08:47 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+function ConvertFiles() {
+	while [ $# -gt 0 ]; do
+		asc2surf -rm `raw2asc "$1"`
+		shift
+	done
+}
+
+if [ "$1" == "-rm" ]
+shift
+ConvertFiles "$@"
+rm "$@"
+else
+ConvertFiles "$@"
+fi

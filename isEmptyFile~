@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun  9 21:42:05 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+script=`basename $0`
+Usage="Usage: $script"
+if isHelp 0 $0 "$@"; then echo $Usage; exit 0; fi
+#######################################################
+
+function FileSize() { wc -c "$@" 2>/dev/null | awk '{print $1}'; }
+
+if (($# == 0)) || [[ -d "$@" ]] || ((`FileSize "$@"` > 0))
+	then exit 1
+fi

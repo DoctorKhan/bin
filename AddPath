@@ -1,0 +1,17 @@
+#!/bin/bash
+
+bAfter=`tester [ "$1" == "after" ] || [ "$2" == "after" ] `
+
+# Set current dir as path to add
+if [ $# == 0 ]; then set `pwd`; fi
+
+path2add="$1"
+
+if ! echo $PATH | egrep -q "(^|:)$path2add($|:)" ; then
+	if [ "$2" = "after" ] ; then
+		export PATH=$PATH:$path2add
+	else
+		export PATH=$path2add:$PATH
+	fi
+fi
+

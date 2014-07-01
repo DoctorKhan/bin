@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 30 15:43:19 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MeshlabCleaner
+#######################################################
+
+# Nonmanifold vertices
+MeshlabMenuItem l 3 13
+
+# nonman Faces
+MeshlabMenuItem l 3 12
+
+# Unreferenced vertex
+MeshlabMenuItem l 3 8
+
+# Dup vertex
+MeshlabMenuItem l 3 9

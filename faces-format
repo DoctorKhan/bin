@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 24 22:11:17 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces-show
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pDir="$HOME/.faces"
+#pSchedFinal=`create $pDir/Final.txt`
+pTrimmed=`create $pDir/Trimmed.txt`
+
+pDate=`create $pDir/Date.txt`
+pTimes=`create $pDir/Times.txt`
+pDescr=`create $pDir/Descriptions.txt`
+
+#pRaw=/dev/stdin
+pPass="$pDir/pk"
+pConf="$pDir/faces.conf"
+## Functions
+
+## Main
+. $pConf
+. $pPass
+
+# Parse schedule
+(echo `date "+%Y-%m-%d"` 000 Today; tee) |\
+sort -n | grep -A 999 '000 Today' | tail -n +2 |\
+sed -n 's/ \(.*\):00 [^ ]*\(.*\) \(.*\):00\( [^|]*\) *|.*/   \1 - \2\3  \4/p' > $pTrimmed
+
+cut -sd  ' ' -f 1-5 $pTrimmed   | xargs -Ih date +'%b %e' -d h > $pDate
+awk '{print $2"-"$4}' $pTrimmed | column -t  > $pTimes
+cut -sd ' ' -f 7-  $pTrimmed    | column -t > $pDescr
+
+sDate=`date "+%A, %B %d, %Y"`
+(echo "User:   $user, $sDate"
+	paste -d ' ' $pDate $pTimes $pDescr | while read line; do
+		
+		iCurDate="${line:4:2}"
+		if [[ "$iCurDate" == "$iPrevDate" ]]; then 			# echo -e "\033[4m$line\033[0m"
+			sDate="  "
+		else
+			echo "_______________________________________________________"
+			sDate="$iCurDate"
+			iPrevDate="$iCurDate"
+		fi
+		
+		iCurMonth="${line:0:3}"
+		
+		if [[ "$iCurMonth" == "$iPrevMonth" ]]; then 			# echo -e "\033[4m$line\033[0m"
+			sMonth="   "
+		else
+			sMonth="$iCurMonth"
+			if ((iCurDate<10)); then
+				sMonth=" $sMonth"
+				sDate=${sDate:1}
+			fi
+			
+			iPrevMonth="$iCurMonth"
+		fi
+		
+		sBegin="${line:7:5}"
+		sEnd="${line:13:5}"
+		sRest="${line:19}"
+		echo "$sMonth $sDate |$sBegin|-|$sEnd| $sRest"
+done) | more

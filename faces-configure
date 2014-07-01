@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 24 22:08:50 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces-configure <file.conf>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Main
+echo -n "Configuring... " >/dev/stderr
+
+read -p  "Faces username: " user
+read -sp "Faces password: " pass
+echo "user=$user"
+echo "pass=$pass"

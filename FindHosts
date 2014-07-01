@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Nov 16 16:41:16 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FindHosts
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -pAllHosts "#"; exit 0; fi
+#######################################################
+
+## Initialize
+viGroup=${@:-146.6.162}
+pHosts="$HOME/.hosts"
+pAllHosts=/tmp/pAllHosts
+b=/tmp/b
+c=/tmp/c
+
+## Functions
+
+## Main
+if [ ! -e $pHosts ]; then
+	for iHost in {1..255}; do
+		viIP="$viGroup.$iHost"
+		sHost=`gethost $viIP`
+		printf "%-14s %s\n" "$viIP" "$sHost"
+	done | tee | grep '^[0-9]' > $pAllHosts
+	
+	# Build hosts file
+	grep -v ' dhcp' $pAllHosts | grep -v ' static' > $pHosts
+	grep ' static' $pAllHosts >> $pHosts
+	grep ' dhcp' $pAllHosts >> $pHosts
+fi
+
+more "$pHosts"
+
+#		printf "%8s\r" "$iHost/255"
+

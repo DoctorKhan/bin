@@ -1,0 +1,27 @@
+#!/bin/bash
+xdotool type "$@"
+#MyString=$@
+#echo $MyString | awk -v ORS="" '{ gsub(/./,"&\n") ; print }' | \
+#while read char
+#do
+#	if [ "$char" == "" ]; then
+#		char=space
+#	elif [ "$char" == "." ]; then
+#		char=period
+#	elif [ "$char" == "/" ]; then
+#		char=slash
+#	elif [ "$char" == "_" ]; then
+#		echo "KeyStrPress Shift_L" | xmacroplay -d 0:0 &> /dev/null
+#		char=minus
+#	elif [ "$char" == "*" ]; then
+#		echo "KeyStrPress Shift_L" | xmacroplay -d 0:0 &> /dev/null
+#		char=8
+#	elif [ "$char" == "~" ]; then
+#		echo "KeyStrPress Shift_L" | xmacroplay -d 0:0 &> /dev/null
+#		char=grave	
+#	fi
+#	echo "KeyStrPress $char" | xmacroplay -d 0:0 &> /dev/null
+#	echo "KeyStrRelease $char" | xmacroplay -d 0:0 &> /dev/null
+#	echo "KeyStrRelease Shift_L" | xmacroplay -d 0:0 &> /dev/null
+#done
+	

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#######################################################
+#### Created khan on Sat Aug 25 19:59:28 CDT 2012 #####
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-list
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Function
+
+## Main
+ps aux | grep 'Xvnc :' | grep -v grep | awk '{print $15,$14,$8}' |\
+sed -e 's/ l$/ Multi-threaded/' -e 's/ L$/ Memory-locked/' \
+-e 's/ <$/ High-priority/' -e 's/ N$/ Low-priority/' \
+-e 's/ +$/ Foreground/' -e 's/ D$/ Sleeping/' -e 's/ R$/ Running/' \
+-e 's/ S$/ Waiting/' -e 's/ T$/ Stopped/' -e 's/ s$/ Leader/' \
+-e 's/ Z$/ Zombie/' -e 's/ ^ *//' |\
+sort | column -t

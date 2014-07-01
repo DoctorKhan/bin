@@ -1,0 +1,70 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Sep 4 11:12:08 CDT 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: ArrangeIconsXFCE
+
+######################################################
+#if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+#sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+cd $HOME/.config/xfce4/desktop
+ln -fs `latest icons.screen0-*.rc` icons.screen0.rc;
+
+perl <<'EOF'
+#make sure you change 'user' on line 4 to the username of the desktop you want to organize
+use strict;
+use warnings;
+my $conffile = `echo \$HOME/.config/xfce4/desktop/icons.screen0.rc`;
+
+open(CONF,"$conffile") or die "can't find the config file";
+my $all;
+while (<CONF>) { $all=$all.$_; }
+my @oldnames=($all=~/\[(.*)\]/g);
+my @allnames = `grep '^\[' icons.screen0.rc | tr -d '[]' | sort | tr '\n' ' '`;
+#my @allnames=sort { lc($a) cmp lc($b) } @oldnames;
+
+print "testing sort:";
+print join("\n",@allnames);
+my @rows=($all=~/row=(\d*)/g);
+print join("\n",@allnames);
+
+my $maxrow = `grep '^row=' icons.screen0.rc | cut -d = -f 2 | sort -n | tail -n 1`;
+my $maxcol = `grep '^col=' icons.screen0.rc | cut -d = -f 2 | sort -n | tail -n 1`;
+
+print "\n\nOk now I will print the amount of rolls\n\n\n";
+@rows=sort(@rows);
+#my $maxrow=$rows[-1];
+
+print "the max rows is $maxrow\n";
+my $numicons=scalar(@allnames);
+
+print "number of icons is $numicons\n";
+my @cols=($all=~/col=(\d*)/g);
+@cols=sort(@cols);
+#my $maxcol=$cols[-1];
+
+print "the max cols is $maxcol\n";
+my $i=0;
+
+open(OUTPUT,'>icons.screen0.rc');
+for (my $j=0;$j<=$maxcol;$j++) {
+	if ($i<=19) {
+		for (my $k=0;$k<=$maxrow;$k++) {
+			print OUTPUT "\[$allnames[$i]\]\nrow=$k\ncol=$j\n\n";
+			$i++;
+		}
+	}
+}
+close(OUTPUT);
+EOF
+

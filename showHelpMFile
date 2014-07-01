@@ -1,0 +1,23 @@
+#!/bin/bash
+
+FILE=$1
+lines=$(awk 'END {print NR}' $FILE)
+mid=$((1))
+awk -v pos="$mid" '{
+if(NR<=pos)
+print
+}' $FILE
+echo ""
+echo "%"
+echo "% `head -1 $1 |  sed -e 's/^ *[^ ]* //'`;"
+echo "%"
+echo "% "
+echo "%"
+echo "% `/home/khan/bin/titleCase $USER` `date '+%D'`"
+echo "%"
+echo ""
+awk -v pos="$mid" '{
+if(NR>pos)
+print
+}' $FILE
+

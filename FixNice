@@ -1,0 +1,23 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Wed Dec 7 21:14:13 CST 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: nicer
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+ps h -eo pid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:22,comm | grep rescue | awk '{print $1}' | xargs -I pid sudo renice -n 0 -p pid
+
+ps h -eo pid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:22,comm | grep cpu_stopper | awk '{print $1}' | xargs -I pid sudo renice -n 0 -p pid
+

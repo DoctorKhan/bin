@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 30 21:16:29 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+fin="$1"
+fout=`ChExt "$fin"`
+mris_convert "$fin" "$fout"
+echo "$fout"
+

@@ -1,0 +1,232 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Apr 5 22:14:05 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: tiger <user>@<Host>
+######################################################
+#if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+#	grep -A 99999 "# Help.*#*" $0 |\
+#	grep -E -m 2 -B 99999 "#{10,}"
+#echo
+#exit 0
+#fi
+######################################################
+
+function Flush()
+{
+	if [[ $flush == on ]]; then
+		ssh $login "rm .vnc/xstartup"
+		ssh $login killvnc
+		flush=off
+		SaveSession
+	fi
+}
+
+## VNC Password file
+function SetupPasswordFile()
+{
+	if [ ! -f $passwd ]; then
+		echo Password file $passwd not found. Downloading it...
+		echo scp $login:.vnc/passwd $passwd
+		scp $login:.vnc/passwd $passwd
+	fi
+}
+
+function Authentications()
+{
+	## Set authentications
+	. ssh-agent-check
+	ssh-key-check
+	ssh-add-check
+}
+
+function CheckUpdates()
+{
+	export PATH="$HOME/.vnc/support:$PATH"
+	pUpdate="$HOME/.vnc/update"
+	
+	## Check for update every three days
+	if (( `TimePassed "$pUpdate"` > 72 )); then
+		TigerInstall update;
+		touch "$pUpdate"
+	fi
+}
+
+function Execute()
+{
+	pExeLog=$HOME/.vnc/execute.log
+	sName="TigerVNC$((++n))"
+	echo $viewer $Geometry $Color "$@" $DesktopSize $Quality $Password -via $login $host:$port -name="$sName" 1>"$pLast" 2> "$pExeLog"
+	cat "$pLast" | tr '-' '\n'
+	source "$pLast" &
+	
+	
+}
+
+function FixConnection()
+{
+	while grep -q failed "$pExeLog"; do
+		echo "Connection failed. Trying port $((++port))..."
+		SaveSession
+		StartVNCServer ":$port"
+		Execute
+	done
+}
+
+function RunClient()
+{
+	if [ ! -z $quality ]; then Quality="-QualityLevel=$quality"; fi
+	if [[ "$fullcolor" != "on" ]]; then Color="-FullColor=0"; fi
+	if [ -e "$passwd" ]; then Password="-passwd=$passwd"; fi
+	#	s=$DesktopSize
+	if [ ! -z $DesktopSize ]; then DesktopSize="-DesktopSize=$DesktopSize"; fi
+	p=${position:-"+0+0"};
+	Geometry="-geometry=2000x2000$p"
+	
+	Execute
+	#	WaitForWindow -w "$sName"
+	#	Execute "-DesktopSize -"
+}
+
+## Start the VNC server
+function StartVNCServer() {
+	ssh $login startvnc $@ 2> $startvnclog
+	
+	while [ `grep -ic 'Remove this' $startvnclog` -gt 0 ]; do
+		`grep Warning $startvnclog | sed 's/.*Warning: \(.*\):.*because of \(.*\)/ssh \1 rm -v \2/g'`
+		ssh $login startvnc 2> $startvnclog
+	done
+}
+
+#function SaveSession()
+#{
+#	WriteConf $pConf \
+#	continue=~~1 \
+#	port=$port \
+#	quality=$quality \
+#	fullcolor=$fullcolor \
+#	flush=$flush \
+#	size=$DesktopSize
+#
+#	WriteConf "$pConf.2" \
+#	viewer=$viewer \
+#	user=$user \
+#	host=$host \
+#	login=$login \
+#	passwd=$passwd
+#}
+
+function ViewerLoc()
+{
+	TryPaths "/opt/TigerVNC/bin/vncviewer" "/usr/bin/vncviewer"
+	return $?
+}
+
+function New_Session()
+{
+	read -p "Enter session name: " login
+	LoadConf
+	EditSession
+}
+
+function Delete_Session()
+{
+	SelectSession
+	rm -rf $HOME/.vnc/$login
+}
+
+function MakeSessionsFile()
+{
+	pSessions="$HOME/.vnc/sessions"
+	
+	if [ ! -e $pSessions ]; then
+		for session in VNCSessions; do
+			echo $session=~~$iSession++login=$session >> "$pSessions"
+		done
+	fi
+	
+	nSessions=`cat "$pSessions" | wc -l`
+}
+
+function SelectSession()
+{
+	MakeSessionsFile
+	
+	## Choose conf file
+	if ((nSessions == 0)); then
+		host=sandstone.irc.utexas.edu
+		login=$USER@$host
+		pConf=`create $HOME/.vnc/$login/tiger.conf`
+	else
+		source `Selector -f "$pSessions" -t "Select a session: "`
+		login=`cat ~/.s.out`
+		pConf=`create $HOME/.vnc/$login/tiger.conf`
+	fi
+	
+	# Save login
+	WriteConf "${pConf}.2" login="$login"
+}
+
+function LoadConf()
+{
+	pConf=`create $HOME/.vnc/$login/tiger.conf`
+	# Load conf
+	sed -i -e 's/.*[=]*\([^=]*@.*\..*\)/login=\1/g' "$pConf"
+	source $pConf
+	source "`create $pConf.2`"
+	
+	### Initialization ###
+	pLast=`create $HOME/.vnc/last`
+	startvnclog=$HOME/.vnc/startvnc.log
+	viewer=${viewer:-`ViewerLoc`}
+	if [ -z "$viewer" ]; then TigerInstall; fi
+	
+	host=`echo $login | word 2 @`
+	host=${host:-sandstone.irc.utexas.edu}
+	
+	port=${port:-`ssh $login "id -u"`} # Display no. is user id on Host
+	passwd=$HOME/.vnc/$login/passwd # The VNC pw file for that Host
+	fullcolor=${fullcolor:-on}
+	quality=${quality:-8}
+	flush=${flush:-off}
+	size=${size:-`screensize available`}
+	pN=`create $HOME/.vnc/n`
+	n=`cat $pN`
+	n=$((${n:-0} % 50))
+	
+	sWinName=TigerVNC$n
+	#	SaveSession
+}
+
+function EditSession()
+{
+	LoadConf
+	Selector -f $pConf -t $login
+	exit 0
+}
+
+
+function MainMenu()
+{
+	SelectSession
+	EditSession
+	clear
+	
+	LoadConf
+	Authentications
+	CheckUpdates
+	StartVNCServer
+	SetupPasswordFile
+	Flush
+	RunClient
+	sleep 5
+	FixConnection
+	#TigerResizer
+}
+
+# Main
+clear
+MainMenu

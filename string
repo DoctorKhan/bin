@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon Apr 11 14:02:59 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then
+	echo "Usage: string <whatever> is in <other>"
+	exit 0
+fi
+
+search="$1"
+
+if [ "$3" == "not" ]; then
+	target="$5"
+	(! regmatch "$target" "$search")
+	exit $?
+else
+	target="$4"
+	regmatch "$target" "$search"
+	exit $?
+fi
+

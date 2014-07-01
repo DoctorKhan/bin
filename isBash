@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jan 30 14:31:52 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: isBash <
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+iBashVersion=`bash --version | sed -n 's/.*bash.*version \([0-9]\).*/\1/p'`
+iDesiredVersion=${1:-4}
+
+## Main
+if ((iBashVersion < iDesiredVersion)); then
+	exit 1
+fi
+

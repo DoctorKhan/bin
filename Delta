@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jul 17 22:53:28 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Delta
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+function vecdiff()
+{
+	read vc
+	for ci in $vc; do
+		echo "$ci - $1" | bc -l
+		shift
+	done | tr '\n' ' '
+	echo
+}
+
+function main()
+{
+	read vp;
+	while read vn; do
+		echo $vn | vecdiff $vp
+		vn=$vp
+	done
+}
+
+cat ${@:-/dev/stdin} | main

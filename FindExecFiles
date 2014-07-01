@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jan 31 17:09:51 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FindExecFiles
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+find ${@:-`pwd`} ! -type d -perm +111 \
+| grep -v '~$' \
+| grep -iv Makefile | grep -v Doxyfile \
+| grep -iv Readme | grep -v /INSTALL$ \
+| grep -v [^/]*[.] \
+| grep -v '\..*' \
+| sort
+

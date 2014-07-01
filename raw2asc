@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#
+## Created by khan on Fri May 20 13:53:06 CDT 2011 ##
+#
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+fin=${1:-/dev/stdin}
+echo "#!ascii version of $basefname"
+sed -n '2p' "$fin"
+#	cat $fin | awk '{if ($3) print $1,"",$2,"",$3," 0"; else print $1,$2}'
+cat $fin | awk '{if ($3) print $1,"",$2,"",$3," 0"}' > ${2:-/dev/stdout}

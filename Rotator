@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jul 4 21:46:24 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Rotator
+#######################################################
+#if isHelp 0 $0 "$@"; then exit 0; fi
+
+xev -root | \
+while read line; do
+	if echo $line | grep -q 256; then
+		xdotool key ctrl+alt+Left
+		echo $line
+	fi
+	if echo $line | grep -q 1024; then
+		xdotool key ctrl+alt+Right
+		echo $line
+	fi
+done
+

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Nov 1 11:14:22 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: VNCPort <current> <user@server>
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+sFile=$1
+sHostname=$2
+
+case $sFile in
+	next) startvnc
+	sFile=current ;;
+esac
+
+#pDir=$HOME/.vnc/$sHostname
+#pFile=$pDir/$sFile
+
+ssh $sHostname "cat .vnc/$sFile"
+#mkdir -p $pDir
+
+#if [ ! -e $pFile ]; then
+#	scp -q $sHostname:.vnc/$sFile $pDir/
+#fi
+
+#cat $pFile

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+RECON=/export/data/software/recon_pfile
+
+# Set up the LD_LIBRARY_PATH
+. $RECON/environment
+
+# Link the necessary files
+ln -s $RECON/recon_pfile.ctf
+ln -s $RECON/recon_pfile
+
+# Go
+./recon_pfile
+
+# Clean up
+rm -rf recon_pfile recon_pfile.ctf recon_pfile_mcr
+

@@ -1,0 +1,10 @@
+#!/bin/bash
+for i in $@; do
+if [ "$1" != "$i" ]; then
+dt=`date +%y%m%d%H%M%S`
+pdftops $i temp-print${dt}.ps
+lpr -P $1 temp-print${dt}.ps
+rm temp-print${dt}.ps
+fi
+done
+ 

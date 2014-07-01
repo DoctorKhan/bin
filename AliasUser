@@ -1,0 +1,24 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Feb 7 22:33:38 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: AliasUser <old> <new>
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+original=$1
+new=$2
+
+## Functions
+
+## Main
+grep $original /etc/passwd | sed "s/$original/$new/g" | sudo tee -a /etc/passwd
+grep $original /etc/shadow | sed "s/$original/$new/g" | sudo tee -a /etc/shadow
+
+sudo ln -s /home/$original /home/$new

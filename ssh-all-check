@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon Apr 18 21:52:21 CDT 2011 ##
+#####################################################
+
+. ssh-agent-check
+. ssh-key-check
+. ssh-add-check
+. ssh-host-check ${@:-sandstone}
+

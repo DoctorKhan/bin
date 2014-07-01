@@ -1,0 +1,16 @@
+#!/bin/bash
+if [ `windowClosed WToolsMgd` == "1" ]; then
+	startwt $@
+fi
+
+if [ `windowViewable EvalToolMgd` == "0" ]; then
+	wmctrl -a "WToolsMgd"; drag 248 72 241 117
+
+	waitUntilWindowViewable dialog_popup EvalToolMgd
+	if [ `windowViewable dialog_popup` == 1 ]; then
+		pressReturn
+		waitUntilWindowViewable EvalToolMgd
+	fi
+	moveWindowRight
+fi
+wmctrl -a EvalToolMgd

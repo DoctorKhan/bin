@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+## Created by khan on Fri May 20 08:57:34 CDT 2011 ##
+#
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+host `whatsmyip` | sed 's/.* \([^ ]*\)./\1/g'
+

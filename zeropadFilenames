@@ -1,0 +1,38 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+	echo ""
+	echo "Usage:   zeropad <digits to be padded to>"
+	echo ""
+	echo "Example: zeropad 2"
+	echo "Result:  mv c10-05-2-3.pdf c10-05-02-03.pdf"
+	echo ""
+fi
+if [ $# == 1 ]; then
+	for file in `ls`
+	do
+		newFilename=""
+		iDigits=0
+		iPaddedLength=$1
+		for ((i=${#file}-1;i>=0;i-=1)); do
+			cChar=${file:i:1}
+			if [[ ("$cChar" == "0") || ("$cChar" == "1") || ("$cChar" == "2") || ("$cChar" == "3") || ("$cChar" == "4") || ("$cChar" == "5") || ("$cChar" == "6") || ("$cChar" == "7") || ("$cChar" == "8") || ("$cChar" == "9")]]; then	
+			iDigits=$(( $iDigits + 1 ))			
+			else
+				if [ "$iDigits" -gt "0" ]; then
+					while [ "$iDigits" -lt "$iPaddedLength" ]
+					do
+						newFilename="0${newFilename}"
+						iDigits=$(( $iDigits + 1 ))
+					done
+					iDigits=0
+				fi
+			fi
+			newFilename="${cChar}${newFilename}"
+		done
+		if [ "$file" != "$newFilename" ]; then
+			echo "mv $file $newFilename"
+			mv $file $newFilename
+		fi
+	done
+fi
+

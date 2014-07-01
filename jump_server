@@ -1,0 +1,3 @@
+#!/bin/bash
+ssh khan@amygdala.irc.utexas.edu ssh $*
+

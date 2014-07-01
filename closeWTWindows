@@ -1,0 +1,21 @@
+#!/bin/bash
+#if [ `windowViewable "/ESE_12M5A/psd/bin/PlotPulseMgd"` == "1" ]; then
+#	closeWindowAt 100 35
+#fi
+#waitUntilWindowHidden "/ESE_12M5A/psd/bin/PlotPulseMgd"
+
+#click 100 35
+
+closeWin WToolsMgd
+
+waitUntilWindowCloses "WToolsMgd"
+
+goRight
+closeWindowAt 0 0 .5 .2
+closeWin "brterm tr"
+closeWin "blterm tr"
+
+goLeft
+closeWin "brterm tc"
+closeWin "blterm tc"
+

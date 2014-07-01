@@ -1,0 +1,7 @@
+#!/bin/bash
+reboots=`cat /home/khan/.reboots`
+if [ $reboots -lt 2 ]; then 
+ echo "$reboots + 1" | /usr/bin/bc > /home/khan/.reboots
+ sudo /sbin/reboot
+fi
+

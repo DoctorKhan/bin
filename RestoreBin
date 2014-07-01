@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 23 15:41:29 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: RestoreBin
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+tsh transfer RestoreArchive
+scp -r transfer:Ress/researchbin/* /usr/g/research/bin/s

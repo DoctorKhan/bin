@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Jul 27 01:22:52 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: TigerSettings
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+sFile=$1
+
+sPref=`zenity --list --radiolist --column "Select" --column Setting TRUE Quality FALSE Host FALSE Display port --text="Edit settings."`
+
+if [[ $sPref == Quality ]]; then
+	Quality=`ReadConf $sFile Quality`
+	Quality=${Quality:-8}
+	Quality=`zenity --scale --text=Quality --value=$Quality --max-value=9`
+	SetConf $sFile Quality=$Quality
+fi
+

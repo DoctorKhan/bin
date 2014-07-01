@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 30 15:48:35 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: RemoveIsolatedPieces
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+MeshlabMenuItem l 3 3
+
+xId=`WaitForNewWindow`
+echo $xId
+xdotool windowfocus $xId; sleep 0.1
+xdotool key tab; sleep 0.1

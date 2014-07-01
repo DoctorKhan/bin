@@ -1,0 +1,3 @@
+#!/bin/bash
+rsync -rvtW --delay-updates --modify-window=1 --progress --include='*.pdf' --include='*.PDF' --include='*.ps' --exclude='*.*' --exclude '*Evolve*' --exclude '*Execute*' khan@faraday.ph.utexas.edu:/home/khan/SpEC_RUNS/ .
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jun 26 23:13:46 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: cda
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+sSub=${1##o}; shift
+sSub=`titleCase ${sSub%%HR}`
+cd "/export/data/mri/Anatomy/${sSub}HR/Cortex"
+while (($#>0)); do
+	cd $1; shift
+done

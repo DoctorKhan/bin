@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jul 18 20:51:38 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: AddHost <ip> <hostname>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+cd ~
+cat /etc/hosts > hosts
+
+if (( $# == 1 )); then
+	line=`gethostip $1 | sed 's/\.[^ ]*//' | awk '{print $2"\t"$1}'`
+else
+	line="$@"
+fi
+
+echo -e "$line\t# set by sethosts script" >> hosts
+sudo cp hosts /etc/
+rm hosts

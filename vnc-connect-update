@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 15 11:32:10 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-connect-update
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pLast="$HOME/.vnc/last"
+pConf="$HOME/.vnc/tiger.conf"
+
+## Functions
+
+## Main
+echo '#!/bin/bash' > "$pLast"
+
+(sed -e 's/#.*//g' -e 's/^\(.\)/-\1/' "$pConf" |\
+	sed -e 's/-Host=/ /' -e 's/-Port=/:/' \
+	-e 's/PasswordFile/passwd/' -e 's/AutoQualityLevel/AutoSelect/' \
+-e 's/-Viewer=//' | sed 's/^-/ -/' | tr -d '\n'; echo ' "$@"') >> "$pLast"

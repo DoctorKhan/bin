@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Jun 9 20:36:10 CDT 2011  ##
+#####################################################
+
+#################### Help Text ######################
+## SetHelp <File>
+#####################################################
+
+# delete all leading blank lines at top of file
+# sed '/./,$!d'
+# delete all trailing blank lines at end of file
+# sed -e :a -e '/^\n*$/N;/\n$/ba'
+
+## Initialize
+pFile="$@"
+
+## Main
+sUserLine=`grep -oE "Created by [^#]*" "$pFile" 2>/dev/null | head -n 1 | StrTrim`
+sUserLine=${sUserLine:-`echo Created by $USER on $(date)`}
+
+sCreate="### $sUserLine ###"
+nLength=${#sCreate}
+sBorder=`RepStr $nLength "#"`
+
+echo '#!/bin/bash'
+echo
+echo $sBorder
+echo $sCreate
+echo $sBorder
+echo
+Centered $nLength "Help Text"
+echo -n "# Usage: "
+StripPath "$pFile" | sed 's/~$//g' | tr '\n' ' '
+
+if [ -e "$pFile" ]; then
+	# Print everything between usage and block end,
+	# but remove actual usage line
+	sed -n '/^# Usage/,/^####*$/p' "$pFile" \
+	| grep '^# ' \
+	| sed 's/^# Usage: [^ ]*//g'
+fi
+echo
+
+echo $sBorder
+echo 'if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi'
+echo $sBorder
+echo

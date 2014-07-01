@@ -1,0 +1,17 @@
+#!/bin/bash
+
+opfile=`grep -l pass $HOME/.google/gadgets/options/* | head -n 1`
+
+if [ -f "${opfile}.good" ]; then
+	cp "${opfile}.good" $opfile
+fi
+
+if ($HOME/bin/isHost albert) && (( $# == 0 )); then
+	echo Google gadgets waiting for internet connection...
+	sleep 45
+fi
+
+if $HOME/bin/isHost gauss via nx; then
+	/usr/bin/ggl-gtk
+fi
+

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed May  4 14:11:35 CDT 2011 ##
+#####################################################
+
+function KeyBindings() {
+	echo 'paste = <Shift>Insert
+	copy = <Control>Insert
+	close_term = <Control>Up
+	split_vert = <Control>Right
+	split_horiz = <Control>Down
+	reset_clear = <Control>Left
+	new_window = <Control>N
+	new_terminator = <Control><Shift>N' \
+	| tr -d '\t'
+}
+
+# Remaps new terminator key binding to close sub-terminal as well.
+terminalpy=/usr/share/terminator/terminatorlib/terminal.py
+
+if [ ! -f $terminalpy ]; then
+	terminalpy=$(grep -l key_reset_clear `locate -ir /usr/share/.*terminatorlib/term.*.py$`)
+fi
+
+echo $terminalpy
+sudo sed -i 's/self.*vte.reset.*True.*True.*/self.close()/g' $terminalpy
+
+# config file
+configdir=$HOME/.config/terminator
+configfile=$configdir/config
+
+if [ ! -d $configdir ]; then mkdir -p $configdir ; fi
+cd $configdir
+
+terminalpyln=$configdir/`basename $terminalpy`
+if [ ! -L $terminalpy ]; then ln -s $terminalpy ; fi
+
+if ! grep -q "[keybindings]" $configfile; then
+	echo "[keybindings]" >> $configfile
+fi
+
+KeyBindings | while read line; do
+	lhs=`echo $line | cut -d '<' -f 1`
+	# Remove existing keybinding
+	sed -i "/\[keybindings\]/,/\[.*\]/s/.*$lhs.*//g" $configfile
+	# Add new keybinding
+	sed -i "/\[keybindings\]/a\  $line" $configfile
+done
+
+sed -i '/^$/d' $configfile
+

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Sep 17 02:30:30 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FixBrokenSources
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+sudo apt-get update
+
+#to update your package list.
+#Then
+#Code:
+
+sudo apt-get autoclean
+
+#to clean up any partial packages.
+#Then
+#Code:
+
+sudo apt-get clean
+
+#to clean up the apt cache.
+#Code:
+
+sudo apt-get autoremove
+
+#will clean up any unneeded dependencies.
+#If while doing this you can identify the broken package this code will very forcefully remove it.
+#Code:
+
+sudo dpkg --remove -force --force-remove-reinstreq package name
+
+

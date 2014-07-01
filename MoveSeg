@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Aug 27 16:28:59 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MoveSeg
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pTop="/export/data/mri/Anatomy/${1}HR"
+pBase="$pTop/Cortex/FreeSurfer"
+
+## Functions
+
+## Main
+cd $pTop
+mkdir $pBase
+mv ${1}1mm $pBase/LoRes
+mv ${1}HR_FS $pBase/HiRes
+for file in ${1}HR_FS_WC.*; do
+	mv $file $pBase/${file/_FS_WC/}
+done

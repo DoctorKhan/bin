@@ -1,0 +1,7 @@
+#!/bin/bash
+echo "KeyStrPress Control_L" | xmacroplay -d 0:0 &> /dev/null
+echo "KeyStrPress Alt_L" | xmacroplay -d 0:0 &> /dev/null
+echo "KeyStrPress $@" | xmacroplay -d 0:0 &> /dev/null
+echo "KeyStrRelease $@" | xmacroplay -d 0:0 &> /dev/null
+echo "KeyStrRelease Alt_L" | xmacroplay -d 0:0 &> /dev/null
+echo "KeyStrRelease Control_L" | xmacroplay -d 0:0 &> /dev/null

@@ -1,0 +1,4 @@
+#!/bin/bash
+easytether connect &
+sudo dhclient easytether0
+

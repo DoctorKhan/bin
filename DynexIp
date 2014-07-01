@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Nov 20 02:30:30 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: DynexIp
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+Ip=`ifconfig wlan0 | grep 'inet addr' | sed -e 's/ *Bcast.*//g' -e 's/.*\.//g'`
+viDynex=192.168.2.1
+
+## Functions
+function FormName()
+{
+	sed -n 's/<form.*name=.\([^ ]*\). .*/\1/p' | grep -v '!'
+}
+
+function SetLoad()
+{
+	sed -e '/<head>/ a\
+	<base href='"$viDynex"'>' \
+	-e 's,\(<body.*\)>,\1 onLoad="'"$@"'.submit()">,g'
+}
+
+function Submit()
+{
+	pFile=`TempFile File`
+	pSubmit=`TempFile Submit`
+	pFinal=final.html
+	wget "$@" -o "$pFile"
+	sFormName=`cat "$pFile" | FormName`
+	cat "$pFile" | SetLoad $sFormName > "$pSubmit"
+	curl file://"$pSubmit" | tee "$pFinal"
+}
+
+## Main
+pTry=try.html; pSet=set.html
+
+Submit "$viDynex/fw_dmz.cgi?private_ip_1=$Ip&enable_1=enable_dmz"
+wget file://final.html -o last.html
+
+#curl "$viDynex/login.cgi?pws=" | sed -e '/<head>/ a\
+#curl file://login.html
+

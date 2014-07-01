@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jun 12 12:17:09 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: pipe $0
+# Piped input to argument input. Also return true or
+# false on whether there is piped input.
+#######################################################
+
+if ! test -p /dev/stdin >/dev/null; then
+	exit 1
+fi
+

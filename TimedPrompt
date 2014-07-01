@@ -1,0 +1,53 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue May 10 13:57:54 CDT 2011 ##
+#####################################################
+
+function updateTitle(){
+	for (( ii=timer; ii > 0; ii-- )); do
+		wmctrl -r "Begin in" -N "Begin in $ii..."
+		sleep 1
+	done
+}
+
+minargs=1; usage="Usage: $0"
+if string "^[\-]*h[^ ]*$" is in "$1" || [ "$#" -lt "$minargs" ]
+then echo "Usage: `basename $0` <timeout> <text>"; exit 0; fi
+
+timer=$1; shift
+argtext="$@"
+ptext="Are you sure you want to proceed?"
+
+if [ -e prompt.txt ] && [ $# -gt 0 ]; then
+	argtext="\n\n$argtext\n\n"
+	promptfile="`cat prompt.txt`"
+elif [ -e prompt.txt ] || [ $# -gt 0 ]; then
+	ptext="\n\n$ptext"
+fi
+
+if [ `which zenity` ]; then
+	updateTitle &
+	zenity --width=800 --question --timeout=$timer --title "Begin in $timer..." --text "$promptfile""$argtext""$ptext"
+	if [ $? == 1 ]; then exit 1; else exit 0; fi
+	
+else
+	cat prompt.txt
+	echo -n "$argtext""$ptext"
+	echo "Press any key to abort or 'y' to continue..."
+	
+	for (( ii=timer; ii > 0; ii-- )); do
+		echo -n $ii...
+		read -t 1 -n 1 resp
+		if [ ! -z $resp ]; then
+			if [ "$resp" == "y" ] || [ "$resp" == "Y" ]; then
+				break
+			else
+				echo; exit 1
+			fi
+		fi
+	done
+	
+	echo; exit 0
+fi
+

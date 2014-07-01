@@ -1,0 +1,64 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Aug 29 08:51:31 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Decimate [-r] <string>
+# Yields one letter per line.
+# -r: raw mode - preserves blank lines.
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+while [[ $1 == -* ]]; do
+	if [[ $1 == -*r* ]]; then bRaw=true; fi
+	if [[ $1 == -*v* ]]; then bVerbose=true; fi
+	shift
+done
+
+function Destroy()
+{
+	sPre=`echo $@ | sed 's/\(^[^A-Za-z]*\).*/\1/g'`
+	sVar=`echo $1 | sed 's/^[^A-Za-z]*\([^=]*\).*/\1/g'`
+	
+	if echo $1 | grep -q '='; then
+		sVal=`echo $1 | sed 's/.*=//g'`
+		shift 1
+	else
+		sVal="$2"
+		shift 2
+	fi
+	
+	sPost="$@"
+	
+	sOut=$(echo "$sVar" | grep -o . | StrTrim)
+	
+	if ! is $bRaw; then
+		sOut=$(echo "$sOut" | grep -v ^$ | StrTrim; echo)
+	fi
+	
+	if is $bVerbose; then
+		echo "$sPre$sVar=$sVal $sPost"
+	fi
+
+	for sOpt in `echo "$sOut"`; do
+		echo "$sPre$sOpt=$sVal $sPost"
+	done
+	
+}
+
+if (( $# > 0 )); then
+	Destroy $@ | Unique
+fi
+
+if pipe; then
+	while read -t 1 line; do
+		Destroy $line | Unique
+	done
+fi
+

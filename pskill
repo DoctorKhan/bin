@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed May 25 11:56:59 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+while read line; do
+	kill -9 `echo $line | awk '{print $2}'`
+done
+

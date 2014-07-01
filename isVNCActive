@@ -1,0 +1,16 @@
+#!/bin/bash
+iUid=`id -u`
+iActivePort=`echo "5900 + $iUid" | bc`
+
+isActive=`lsof -i -n -P | grep Xvnc | cut -d ':' -f 2 | cut -d ' ' -f 1 | grep -ic $iActivePort`
+
+if [ $isActive -gt 0 ]; then
+	isActive=1
+fi
+
+if [ $# == 0 ]; then
+	echo $isActive
+elif [ "$isActive" == "1" ]; then
+	echo $iUid
+fi
+

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu May 26 14:11:38 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+echo 'tell application "Extra Suites"
+	ES move mouse{460, 515}
+end tell' | osascript
+

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Wed Oct 5 18:27:41 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: isMacResource
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+######################################################
+
+pPath=`fileparts 1 $@`
+sFile=`fileparts 6 $@`
+pPathname=`fileparts 7 $@`
+
+if echo $pPathname | tr '/' '\n' | grep -q '^__MACOSX$'; then
+	exit 0
+elif echo $sFile | grep -q "^\\._"; then
+	sReal=`echo $sFile | sed 's/^\._//g'`
+	pReal=`FullFile "$pPath" "$sReal"`
+	
+	if [ -e "$@" ] && [ -e "$pReal" ]; then
+		exit 0
+	fi
+fi
+
+exit 1

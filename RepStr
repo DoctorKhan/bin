@@ -1,0 +1,16 @@
+#!/bin/bash
+
+### Created by khan on Tue Jun 14 12:07:10 CDT 2011 ###
+
+# Usage: RepStr
+
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+n=$1; shift
+
+until [ $(( n-- )) -eq 0 ]; do
+	echo -n $@
+done
+
+echo
+

@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "( `windowViewable $@` - 1 )^2" | bc
+

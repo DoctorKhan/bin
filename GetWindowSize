@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 23 22:35:31 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+windowsize `ActiveWindowID`
+

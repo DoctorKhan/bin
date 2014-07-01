@@ -1,0 +1,39 @@
+#!/bin/bash
+if [ `windowViewable "EvalToolMgd"` == "0" ]; then
+	startevaltool $@
+fi
+echo "Loading CVs..."
+click 1033 193
+waitUntilWindowViewable "Load CV's"
+wmctrl -a "Load CV's"
+pressTab
+pressBackspace 20
+#xtype cvbase
+xtype cv
+pressReturn
+waitUntilWindowHidden "Load CV's"
+
+# set opxress exist
+click 1043 348
+sleep 0.3
+# change opxres to 60
+click 932 348
+pressBackspace 3
+xtype 100; pressReturn 12
+"Finished loading CVs."
+#sleep 1
+
+#click 1033 193
+#waitUntilWindowViewable "Load CV's"
+#pressTab
+#pressBackspace 20
+#xtype cv
+#pressReturn
+#waitUntilWindowHidden "Load CV's"
+
+#click 890 344
+#click 932 348
+#sleep 2
+#pressReturn 3 .5
+
+wmctrl -a "blterm tc"

@@ -1,0 +1,6 @@
+#!/bin/bash
+#wmctrl -c Terminal
+#wmctrl -c Terminal
+#closeterms all
+ps aux | egrep 'terminator|gnome-terminal' | grep -v egrep | awk '{print $2}' | xargs kill
+

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Mon Dec 5 11:41:57 CST 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: SetDMZ
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+
+## Initialize
+if ! whatsmyip addy | grep -q 'rr.com$'; then
+	exit 0
+fi
+
+ddns=reswanul.dyndns.org
+
+if (($#==0)) && isAlive $ddns; then
+	exit 0
+else
+	localip=${1:-`whatsmyip wlan0 | grep -o '[0-9]*$'`}
+fi
+
+pFile="$HOME/.iMacros/Macros/DMZ.iim"
+macro="http://run.imacros.net/?m=DMZ.iim"
+
+## Main
+# insert proper ip in macro file.
+sed -i "s/CONTENT=[0-9]*$/CONTENT=$localip/" "$pFile"
+
+if WindowIsOpen firefox; then
+	firefox "$macro"
+else
+	WaitForWindow -p "firefox &" -w firefox
+	
+	if (($# == 0)); then
+		firefox "$macro" &
+		until isAlive reswanul.dyndns.org; do
+			sleep 1
+		done
+		
+		killall firefox
+	else
+		firefox "$macro"
+	fi
+fi
+
+exit `tester -n isAlive reswanul.dyndns.org`

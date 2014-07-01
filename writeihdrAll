@@ -1,0 +1,4 @@
+#!/bin/bash
+for file in `ls P*.7`; do
+	writeihdr $file
+done

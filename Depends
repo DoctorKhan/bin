@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 18 21:34:01 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Depends
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+dn=-1
+list=/tmp/list
+
+file="$@"
+
+function FindDep()
+{
+	echo -n "$sDepends "
+	ls -l ~/bin | sed -nE 's/^-..x.*:[0-9]{2} //p' | \
+	while read command; do
+		if grep -q "$command" "$file"; then
+			echo -n "$command, "
+		fi
+	done
+	echo
+}
+
+FindDep | sed 's/, $//g' >> $file
+

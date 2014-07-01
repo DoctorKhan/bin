@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon May 23 22:34:41 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: MaximizeWindow
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+if isMac; then
+	cat ~/bin/RestoreWindow.scpt | osascript
+else
+	if [ $# == 0 ]; then
+		win=":ACTIVE:"
+	else
+		win="$@"
+	fi
+	
+	wmctrl -r "$win" -b remove,maximized_vert,maximized_horz
+	
+fi

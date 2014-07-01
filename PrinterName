@@ -1,0 +1,35 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Mon Nov 7 14:34:51 CST 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: PrinterName <regexp>
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Functions
+function DefaultPrinter() { lpstat -d | sed 's/.*: //g'; }
+
+## Main
+if (($# == 0)); then
+	nPrinters=0
+else
+	nPrinters=`lpstat -a | sed 's/ accept.*//g' | grep "$@" | wc -l`
+fi
+
+case $nPrinters in
+	0) 
+	DefaultPrinter 
+	;;
+	1) 
+		lpstat -a | sed 's/ accept.*//g' | grep "$@" 
+		;;
+	2) 
+	lpstat -a | sed 's/ accept.*//g' | grep "$@" | tail -n 1
+		echo Warning: Multiple printers matched. Restrict regexp filter. >/dev/stderr
+	;;
+esac

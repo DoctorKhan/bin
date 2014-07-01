@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sun Apr 17 14:56:21 EDT 2011 ##
+#####################################################
+
+cd
+
+startfiles=`ls .profile .bashrc .cshrc .zshrc .bash_login 2>/dev/null`
+
+# add proper umask setting, if necessary
+for file in $startfiles; do
+	sed -i 's/^[#]umask */umask "u=rwx,g=rx,o-rwx"/g' $file
+done
+
+if ! grep '^umask ' $file ; then 
+	exit 0
+else
+	echo 'umask "u=rwx,g=rx,o-rwx"' >> .profile
+fi
+

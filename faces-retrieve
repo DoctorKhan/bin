@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Oct 25 01:16:08 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces-retrieve
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+## Initialize
+pDir="$HOME/.faces"
+pPass=`create $pDir/pk`
+pConf=`create $pDir/faces.conf`
+. $pConf
+. $pPass
+## Functions
+
+## Main
+
+echo Retrieving schedule... >/dev/stderr
+sAddy="http://faces.ccrc.uga.edu/ccrcfaces/data.php"
+wget -q "$sAddy?user=$user&rndm=1868075267&account=TEXAS_IRC&pk=$pk&rindex=5" -O /dev/stdout

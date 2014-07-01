@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 16 22:14:49 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SetWinPos
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+x1=$1 ; y1=$2
+sFile=$HOME/.xdotool/calibration
+
+if [ ! -e $sFile ]; then xdotool-calibrate; fi
+
+dx=`cat $sFile | awk '{print $1}'`
+dy=`cat $sFile | awk '{print $2}'`
+
+xdotool windowmove `ActiveWindowID` $((x1+dx)) $((y1+dy))

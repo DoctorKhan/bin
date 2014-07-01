@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jun 20 17:39:53 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: cdh
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+xdotool key F4 
+sWin=`WaitForNewWindow`
+xdotool windowunmap $sWin
+xdotool type --window $sWin 'pwd | xclip
+exit
+'
+cd "`xclip -o`"

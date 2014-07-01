@@ -1,0 +1,27 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Fri Mar 2 16:38:59 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: FixKeyShorts
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+for sDir in /apps /desktop /schemas; do
+	sKey=$(gconftool $sDir --all-dirs --dump | grep -B 30 '>F10<' | grep '<key>' | tail -n 1 \
+	| sed -e 's,.*<key>,'$sDir'/,' -e 's,</key>.*,,')
+	if [ ! -z $sKey ]; then
+		echo $sKey
+		gconftool -t string -s "$sKey" ""
+	fi
+done

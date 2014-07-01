@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ ! -f $1 ]; then
+	if [ `which $1 | grep -ic $1` == 1 ]; then
+		which $1 | xargs gedit
+	else
+		locate $1 | head -n1 | xargs gedit
+	fi
+else
+	gedit $1
+fi
+

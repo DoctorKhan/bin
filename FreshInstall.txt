@@ -1,0 +1,84 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+	echo "Usage: freshInstall common home hardy"
+	cat ~/bin/freshInstall | more
+fi
+
+# repos
+if [ `find /etc/apt -name '*.list' | xargs grep -ihc freenx | colsum` != 0 ]; then
+	sudo add-apt-repository ppa:freenx-team/ppa
+fi
+if [ `find /etc/apt -name '*.list' | xargs grep -ihc compiz | colsum` != 0 ]; then
+	sudo add-apt-repository ppa:compiz/ppa
+fi
+
+if [ `find /etc/apt -name '*.list' | xargs grep -ihc freenx | colsum` != 0 ]; then
+	sudo add-apt-repository ppa:freenx-team
+fi
+
+sudo apt-get -y --force-yes update
+
+until [ $# == 0 ]; do
+if [ "$1" == "upgrade" ]; then
+	sudo apt-get -y --force-yes upgrade
+fi
+if [ "$1" == "common" ]; then
+	# Appearance
+# emerald 
+	sudo apt-get -y --force-yes install unclutter emerald gnome-color-chooser
+	sudo apt-get -y --force-yes install compizconfig-settings-manager startupmanager compiz-fusion-plugins-unsupported
+	sudo apt-get -y --force-yes install rss-glx
+	# Internet 
+	sudo apt-get -y --force-yes install firefox dnsmasq openssh-server
+	# Interface
+	sudo apt-get -y --force-yes install nautilus-open-terminal gnome-do terminator
+	# Office
+	# gnuplot-x11 
+	sudo apt-get -y --force-yes install  vim jabref abiword
+	sudo apt-get -y --force-yes install  lyx texlive texlive-latex-recommended pdfedit scantailor libtiff-tools
+	# screenlets avant-window-navigator
+# Compatibility
+	sudo apt-get -y --force-yes install wine
+	# Utilities
+	sudo apt-get -y --force-yes install ssh sshfs fslint fdupes bootchart catfish gnome-schedule htop
+# ntp unison-gtk
+	# checkgmail 
+	# Automation 
+	sudo apt-get -y --force-yes install xmacro wmctrl xdotool
+	# Convenience Apps
+	# sudo apt-get -y --force-yes install prism-google-docs prism-google-mail prism-google-calendar
+	sudo apt-get -y --force-yes google-gadgets-gtk
+	# Security
+	sudo apt-get -y --force-yes install fail2ban guarddog
+
+	# DDNS
+#	sudo apt-get -y --force-yes install ez-ipupdate
+	# Multimedia
+	sudo apt-get -y --force-yes install vlc
+	sudo apt-get -y --force-yes install ubuntu-restricted-extras
+fi
+
+if [ "$1" == "home" ]; then
+	sudo apt-get -y --force-yes install ktorrent amule gtk-gnutella
+fi
+if [ "$1" == "hardy" ]; then
+	sudo apt-get -y --force-yes install linux-backports-hardy 
+fi
+#if [ "$1" == "proposed" ]; then
+# DDNS
+#	sudo apt-get -y --force-yes install ez-ipupdate
+# if ez-ipupdate doesn't work use ddclient
+#	sudo apt-get -y --force-yes install ddclient
+#	sudo apt-get -y --force-yes install resolvconf
+#Suggested packages:
+#  konqueror-nsplugins msttcorefonts ttf-xfree86-nonfree xfs transfig equivs
+#  auctex nas libfftw3-dev jackd liblrdf0-dev libqt4-dev rcs dvipost tex4ht
+#  hevea tth latex2html groff libtiff-tools gnuhtml2latex wv chktex noweb menu
+#  sgmltools-lite linuxdoc-tools writer2latex latex2rtf sun-java6-fonts
+#  rhino-doc sun-java6-plugin ia32-sun-java6-plugin debhelper perl-tk dvi2tty
+#  dvidvi texpower libmyodbc odbc-postgresql libct1 mozilla-plugin-vlc
+#  videolan-doc
+
+#fi
+shift
+done

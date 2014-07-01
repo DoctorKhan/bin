@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Nov 15 14:08:10 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: xmod-sendmap
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sHostname="$@"
+
+## Functions
+function xmodgetmap()
+{
+	xmodmap -pke | grep -v =$
+	echo 'clear shift
+clear lock
+clear control
+clear mod1
+clear mod2
+clear mod3
+clear mod4
+	clear mod5'
+	xmodmap -pm | grep -A 99 shift | grep x | sed 's/ (0x[^)]*)//g' | tr -s ', ' ' ' | sed 's/^[^ ]*/add & =/g'
+}
+
+## Main
+sFilename=".xmodmaprc-`hostname`"
+pMap="$HOME/$sFilename"
+
+xmodgetmap > "$pMap"
+
+scp "$pMap" "$sHostname":
+ssh "$sHostname" "rm -f .xmodmaprc; ln -sF $sFilename .xmodmaprc"

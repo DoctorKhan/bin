@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Oct 29 22:53:13 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: PrintToPDF <File> <Printer Options>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+sPrinter=cups-pdf
+
+pFile="$1"; shift
+pDir=`fileparts 1 $pFile`
+
+for sOpt in "$@"; do
+	sOpts="-o $sOpt "
+done
+
+lpr "$pFile" $sOpts -P $sPrinter
+
+pTarg=`ls -1dt $HOME/PDF/* | head -n 1`
+pFinal=`fileparts 9 "$pFile" "$pTarg"`
+mv "$pTarg" "$pFinal"
+#evince "$pFinal"
+
+# -o landscape

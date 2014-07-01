@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ ! -f $1 ]; then
+	nIters=$1
+	shift
+else
+	nIters=0
+fi
+
+while [ $# != 0 ]; do
+	mrcfile=$1
+	rawfile=`echo $mrcfile | sed 's/.mrc/.raw/g'`
+	Mesher mesh $mrcfile $rawfile --isovalue 0.99  --extraction_method=fastcontouring --iterations $nIters \
+	| tee $rawfile.meta
+	#raw2obj $rawfile
+	shift
+done
+
+
+
+# Dependencies: c, ec, es, raw2obj

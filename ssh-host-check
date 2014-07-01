@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon Apr 18 21:31:10 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then
+	exit 0
+else
+	host=$1
+fi
+
+if ! /usr/bin/ssh -o BatchMode=yes -o StrictHostKeyChecking=yes $host echo -n ; then
+	ssh-send-key $host
+	exit 1
+fi
+

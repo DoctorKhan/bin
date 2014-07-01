@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 14 10:50:29 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-check-passwd
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pLocal="$HOME/.vnc/passwd"
+
+## Main
+if [ ! -f $pLocal ]; then
+	echo "Password file $pLocal not found. Set VNC password."
+	vncpasswd
+fi

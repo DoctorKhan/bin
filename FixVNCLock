@@ -1,0 +1,14 @@
+#!/bin/bash
+
+errfile=$HOME/.vnc/runvnc.log
+host=`sed 's/.*\-via//g' $HOME/.vnc/last | awk '{print $1}'`
+
+if [ `grep -q "Remove this file" $errfile` ] ; then
+	badfile=`grep Warning $errfile | head -n 1 | sed 's/.*because of \(.*\)/\1/g'`
+	echo "ssh $host rm -f $badfile"
+	ssh $host rm -f $badfile
+	exit 0
+else
+	exit 1
+fi
+

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Dec 18 18:46:38 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: AutoConnect
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+key="${@:-batman}"
+
+while [ "3" -lt "4" ]
+do
+	if wmctrl -l | grep -q Opening; then
+		wmctrl -a Opening
+		pressAlt o
+		pressAlt Tab
+	fi
+	
+	if [ `wmctrl -l | grep -ic Error` != 0 ]; then
+		wmctrl -a Error
+		pressAlt o
+		pressAlt Tab
+	fi
+	if [ `wmctrl -l | grep -ic 'Remove Download'` != 0 ]; then
+		wmctrl -a Remove
+		pressAlt d
+	fi
+	if wmctrl -l | grep -iq "$key"; then
+		wmctrl -a "$key"
+		pressTab; press Space
+		pressAlt o
+	fi
+	sleep 0.2
+done
+

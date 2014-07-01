@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ $# == 1 ]; then
+   if [ `windowOpen "$@"` == "1" ]; then
+	wmctrl -R "$@"
+	if [ "$@" == "WToolsMgd" ]; then
+		pressCtrl q
+	else
+		pressAlt F4
+	fi
+	waitUntilWindowHidden "$@"
+   fi
+elif [ "$1" == "matching" ]; then
+		shift
+		for id in `xget otherwindows | grep "$1" | awk '{print $1}'`; do
+			echo "wmctrl -ic $id"
+			wmctrl -ic $id &> /dev/null
+			#wmctrl -iR $id
+			#pressAlt F4
+		done
+fi
+

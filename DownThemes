@@ -1,0 +1,68 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Nov 10 09:56:35 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetTheme -q <query> -t <type>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sQuery=`ParseOpt q "$@"`
+sQuery=${sQuery:-`echo $@ | sed 's/ -.*//g'`}
+sQuery=`echo $sQuery | tr ' ' '+'`
+
+sType=`ParseOpt t "$@"`
+nPages=`ParseOpt n $@`
+nPages=${nPages:-1}
+
+pSelect=`TempFile Select`
+pOptions=`TempFile Options`
+pValues=`TempFile Values`
+pMenu=`TempFile Menu`
+pDialog=`create /tmp/DownThemes/Dialog`
+pThemeLinks=`TempFile ThemeLinks`
+
+sSite="http://gnome-look.org"
+sBase="$sSite/content/search.php?xsortmode=new&search=1&sort=0&scorefilter=0&license=99&user="
+sBaseArgs="type=0&user=&text=beryl+osx&page=0"
+
+## Main
+if isEmpty $pSelect; then
+	curl "$sBase&$sBaseArgs" | sed 's/></>\n</g' | grep -A 9999 'name="type"' |\
+	tail -n +2 | grep -B 9999 -m 1 '</select>' | head -n -1 > $pSelect
+fi
+
+cat $pSelect | word 3 '<>' > $pOptions
+cat $pSelect | word 2 '"'  > $pValues
+
+(cat $pOptions | dquote | tr '\n' ' '; echo) | StrTrim >> $pMenu
+
+echo 'zenity --list --text="Search:" --column Type ' `cat $pMenu` > $pDialog
+
+sType=${sType:-`source $pDialog`}
+iType=`paste -d : $pOptions $pValues | grep "^$sType": | word 2 :`
+sQuery="${sQuery:-windows}"
+
+sURL="$sBase&type=$iType&text=$sQuery&page="
+
+for ((iPage=0; iPage<nPages; iPage++)); do
+	sUrl="$sURL$iPage"
+	AllLinks "$sUrl" | grep 'content/show.php' | Unique > $pThemeLinks
+	
+	cat $pThemeLinks | tee | while read sTheme; do
+		sDown1=`curl "$sTheme" | htmlformat | grep -o '/content/download[^"]*'`
+		sDown2=$(gotoweb "$sBase$sDown1")
+		if echo $sDown2 | grep -q devian; then
+			curl -s "$sDown2" | htmlformat | grep -o '"http://.*download[^"]*"' | xargs wget
+			#		echo "$sSite/$sDown2"
+		fi
+		exit 0
+	done
+done
+
+

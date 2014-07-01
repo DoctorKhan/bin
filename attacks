@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ `uname -a | grep -ic Ubuntu` == 1 ]; then
+	( cat /var/log/auth.log* ; zcat /var/log/auth.log*z ) | grep -i fail | awk '{printf "%s %02d\n", $1,$2}' | sort -M | uniq -c
+else
+	( cat /var/log/secure.log* ; bzcat /var/log/secure.log*bz2 ) | grep -i fail | awk '{printf "%s %02d\n", $1,$2}' | sort -M | uniq -c
+
+fi
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sat May 5 21:14:47 CDT 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: CombineCsv
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+for pre in Cg Rk Dr Dt Cb; do
+	paste -d , ${pre}*.csv > Comb${pre}.csv
+done
+mkdir -p ~/Comb
+mv Comb*.csv ~/Comb/
+cd ~
+Csv2Xls Comb ,

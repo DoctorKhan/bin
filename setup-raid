@@ -1,0 +1,81 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          setup-raid
+# Required-Start:    mdadm
+# Required-Stop:     umountroot
+# Should-Start:      module-init-tools
+# Default-Start:     5
+# Default-Stop:      0 1 6
+# Short-Description: Starts raid-array via mdadm
+# Description:       hack
+### END INIT INFO
+
+function Unmount()
+{
+	echo -n "Unmounting... "
+	if mount | grep -q /mnt/backup; then
+		umount /mnt/backup
+		
+		if mount | grep -q /mnt/backup; then
+			echo failed.
+		else
+			echo done.
+		fi
+	else
+		echo /mnt/backup already mounted.
+	fi
+}
+
+function Stop()
+{
+	for sDev in `mdadm --query /dev/md* 2>/dev/null | grep '^/dev/md[^:]' | cut -d : -f 1`; do
+		mdadm --stop $sDev
+	done
+}
+
+
+function Mount()
+{
+	echo -n "Mounting... "
+	if mount | grep -q /mnt/backup; then
+		echo /mnt/backup already mounted.
+	else
+		mount /dev/md0 /mnt/backup
+		
+		if mount | grep -q /mnt/backup; then
+			echo done.
+		else
+			echo failed.
+		fi
+	fi
+}
+
+function Start()
+{
+	sDevices=`ls -1 /dev/sd[a-z] | head -n 4`
+	if ! mdadm -A /dev/md0 $sDevices; then
+		return 1
+	fi
+}
+
+function Permissions()
+{
+	echo -n "Setting permissions... "
+	chgrp -R ircusers /mnt/backup
+	chmod g+rwx /mnt/backup
+	echo done.
+}
+
+## Main
+if (( $# > 0 )); then
+	for sCommand in $@; do
+		eval `titleCase $sCommand`
+	done
+else
+	Unmount
+	Stop
+	Start
+	Mount
+	Permissions
+fi

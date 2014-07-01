@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jul 14 21:57:44 CtimeBetweenChecks 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WaitForWindow -t <timeout> -w <window> -x <commands>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+## Arguments
+iTimOut=`ParseOpt t $@`
+sWindow=`ParseOpt w $@`
+sExecute=`ParseOpt x $@`
+sPreExec=`ParseOpt p $@`
+
+timeBetweenChecks=`ParseOpt d $@`
+
+
+## Defaults
+iTimOut=${iTimOut:-86400} # Defaults to 24 hour timeout
+timeBetweenChecks=${timeBetweenChecks:-0.2}
+
+## Initialize
+t0=$(( $(Round `Seconds`) + $iTimOut ))
+
+## Functions
+function TimedOut()
+{
+	t1=$(Round `Seconds`)
+	if ((t1 > t0)); then
+		exit 1
+	else
+		return 1
+	fi
+}
+
+## Main
+if ! WindowIsOpen "$sWindow"; then
+	eval "$sPreExec"
+fi
+
+# Wait until the window opens or times out
+until WindowIsOpen "$sWindow" || TimedOut; do
+	sleep $timeBetweenChecks
+done
+
+# Then execute command given
+xId=`WindowID "$sWindow"`
+if [ ! -z "$sExecute" ]; then
+	echo "$sExecute"
+	eval "$sExecute"
+fi

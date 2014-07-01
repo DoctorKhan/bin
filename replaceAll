@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [ $1 == "--help" ]; then
+	echo recursively find and replace text
+	echo "Usage: replaceAll <text> <replacement> <other flags for find command>"
+	exit 0
+fi
+
+if [ $# == 0 ]; then
+	while read line; do
+		replaceAll $line
+	done
+fi
+
+if [[ "$1" == "+r" ]]; then
+	shift
+else
+	sRec="-r"
+fi
+
+## Main
+text="$1"
+replacement="$2"
+shift 2
+
+str="s,$text,$replacement,g"
+
+grep -Ils $sRec "$text" . | \
+while read file; do
+	sid -e "$str" "$file"
+	echo -n "$((i++)) files processed.\r"
+done; echo

@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jan 30 14:00:50 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: filt
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+g="grep -i"
+## function
+
+## Main
+# Initial $g
+if pipe; then
+	s1="$g ${1/#-/-v }"
+else
+	s1="$g -Ir $1 ."
+fi
+
+# filter out annoying processes
+sLine="$s1 | $g -v filt | $g -v $g"
+
+# Iterate over arguments
+while (($#>1)); do
+	shift
+	sLine="$sLine | $g ${1/#-/-v }"
+done
+
+eval "$sLine"

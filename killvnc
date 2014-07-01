@@ -1,0 +1,19 @@
+#!/bin/bash
+
+server=sandstone
+
+if which vncserver; then
+	command=vncserver
+else
+	command="ssh $server vncserver"
+fi
+
+sTarg=`echo $@ | sed 's/://g'`
+
+if isInt $sTarg; then
+	$command -kill :$sTarg
+else
+	HOME=/home/`id -un $1`
+	vncserver -kill :`id -u $1`
+fi
+

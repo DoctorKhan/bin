@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri May 13 17:22:44 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+function SetKey() {
+	key=$1; type=$2; value="$3"
+	sudo gconftool-2 --direct --config-source xml:readwrite:\
+	/etc/gconf/gconf.xml.mandatory --type $type --set $key $value
+}
+
+SetKey /apps/gnome-screensaver/lock_enabled bool false
+

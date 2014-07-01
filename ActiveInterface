@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu May 12 10:19:55 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if string "^[\-]*h[^ ]*$" is in "$1" || [ "$#" -lt "$minargs" ]
+then echo "Usage: $0"; exit 0; fi
+
+arp | tr -s ' ' '\n' | tail -n 1
+

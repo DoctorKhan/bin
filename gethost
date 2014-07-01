@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Nov 11 18:18:40 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: gethost
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sHostname=${@:-`hostname`}
+
+## Main
+if ! echo "$sHostname" | grep -q '^[0-9]'; then
+	hostip=`gethostip $sHostname | word 2`
+else
+	hostip="$sHostname"
+fi
+
+host $hostip | awk '{print $NF}' | sed 's/\.$//g'

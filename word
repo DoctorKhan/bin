@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue May 31 13:58:48 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: word <number> <delimter>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+viRange=${1:-"1-"};
+viRange=${viRange%end}
+
+sDelims="$2"
+sDelims=${sDelims:-" "}
+sFirstDelim="${sDelims:0:1}"
+
+pTemp=`TempFile word`
+
+## Main
+sed -e "s/^[$sDelims]*//g" -e "s/[$sDelims]*$//g" > $pTemp
+
+# Number of columns
+nWords=`head -n 1 $pTemp  | tr "$sDelims" '\n' | wc -l`
+
+# Complete beginning of partial ranges
+viAwk=`echo $viRange      | sed 's/\([^0-9]\)-/\11-/g'` # e.g. '-5' -> '1-5'
+
+# Complete end of partial ranges
+viAwk=`echo $viAwk 	      | sed -e 's/-\([^0-9]\)/-'"$nWords"'\1/g'` # e.g. '3-' -> '3-5'
+
+# Change to multiline mode: comma -> line-feed and hyphen -> space
+# Expand hyphen: 1-5 -> 1,2,3,4,5
+viAwk=`echo $viAwk        | tr ',-' '\n ' | awk '{for (i=$1; i<$2; i++) printf "%s,", i; print i}'`
+
+# Return to single line mode
+viAwk=`echo $viAwk		  | tr -s '\n ' ',,' | sed 's/, *$//g'`
+
+# Prepend $ on all numbers
+viAwk=`echo $viAwk        | sed -e 's|\([0-9][0-9]*\)|$\1|g' `
+
+# Print columns
+awk -F"[$sDelims]+" '{print '$viAwk'}' $pTemp

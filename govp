@@ -1,0 +1,54 @@
+#!/bin/bash
+if isHost via nx; then
+	sleepAfter=0
+else
+	xMax=`xMax`
+	yMax=`yMax`
+	xvpResMax=`wmctrl -d | awk '{print $4}' | tr 'x' ' ' | awk '{print $1}'`
+	yvpResMax=`wmctrl -d | awk '{print $4}' | tr 'x' ' ' | awk '{print $2}'`
+
+	xvpMax=`echo "$xvpResMax / $xMax" | bc`
+	yvpMax=`echo "$yvpResMax / $yMax" | bc`
+
+	curxvpRes=`wmctrl -d | awk '{print $6}' | tr ',' ' ' | awk '{print $1}'`
+	curyvpRes=`wmctrl -d | awk '{print $6}' | tr ',' ' ' | awk '{print $2}'`
+	curxvp=`echo "$curxvpRes / $xMax" | bc`
+	curyvp=`echo "$curyvpRes / $yMax" | bc`
+
+	if [ "$curxvp" != "$xvp" ]; then
+		sleepAfter=0.2
+	elif [ "$curyvp" != "$yvp" ]; then
+		sleepAfter=0.2
+	else
+		sleepAfter=0
+	fi
+fi
+
+if [ $# == 1 ]; then
+	if [ "$1" == "tl" ]; then
+		xvp=0; yvp=0; desk=0
+	elif [ "$1" == "tc" ]; then
+		xvp=1; yvp=0; desk=1
+	elif [ "$1" == "tr" ]; then
+		xvp=2; yvp=0; desk=2
+	elif [ "$1" == "bl" ]; then
+		xvp=0; yvp=1; desk=3
+	elif [ "$1" == "bc" ]; then
+		xvp=1; yvp=1; desk=4
+	elif [ "$1" == "br" ]; then
+		xvp=2; yvp=1; desk=5
+	fi
+else
+	xvp=$1; yvp=$2
+fi
+
+if isHost via nx; then
+	wmctrl -s $desk
+else
+	x=`echo "$xvp * $xMax" | bc`
+	y=`echo "$yvp * $yMax" | bc`
+	wmctrl -o $x,$y
+fi
+
+sleep $sleepAfter
+

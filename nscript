@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Aug 20 20:30:10 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: nscript
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pIn=${1:-/dev/stdin}
+pOut=${2:-`TempFile`}
+
+## Functions
+
+## Main
+cat "$pIn" | while read line; do 
+	if ! echo $line | grep -q '{'; then 
+		echo "echo $((i++))"
+	fi
+	echo $line
+done > "$pOut"
+echo $pOut

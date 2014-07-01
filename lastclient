@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Nov 11 18:23:45 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: lastclient
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Arguments
+
+## Defaults
+
+## Initialize
+
+## Validation
+
+## Functions
+
+## Main
+if last -1 | grep -q ttys; then
+	hostname
+else
+	last -1 | word 3
+fi

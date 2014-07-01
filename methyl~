@@ -1,0 +1,71 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Dec 8 22:20:10 CST 2013 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: methyl
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+function snps() {
+echo "4680
+4633
+769224
+1544410
+731236
+6323
+3741049
+1801133
+2066470
+1801131
+1805087
+1801394
+10380
+162036
+2287780
+1802059
+567754
+617219
+651852
+819147
+819134
+819171
+234706
+1801181
+2298758
+1979277"
+}
+
+## Main
+rm -f f1
+touch f1
+for file; do
+	fbase="${file%%.*}"
+	fzt=`TempFile "$fbase".gz`
+	cp "$file" "$fzt"
+	gunzip -f "$fzt"
+	fbt="${fzt%%.*}"
+	
+	fout="${fbase}.tsv"
+	snps | while read snp; do 
+		grep "rs$snp[^0-9]" "$fbt"
+	done > "$fout"
+	dos2unix "$fout"
+	echo "$fout" | sed 's/.*genome_\(.*\)_Full.*/\1/g' > f2
+	cat "$fout" | awk '{print $4}' >> f2
+	paste f1 f2 > f3
+	mv f3 f1
+done
+
+echo "SNP Chromosome Position" > f0
+cat "$fout" | awk '{print $1,$2,$3}' >> f0
+paste f0 f1 > genome_Comparison.tsv
+rm f0 f1 f2

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Apr 5 22:14:05 CRefresh 2011 ###
+######################################################
+
+##################### Help Text ######################
+# Usage: tiger <user>@<Host>
+# -s [Width x Height | Full] (Screen Size)
+# -q [0-29] Quality
+# -p [integer] Port
+# -h Host
+# -u User
+# -e (to edit config)
+######################################################
+if (( $# < 0 )) || [[ "$1" == *--h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+######################################################
+
+## Initialize
+# Edit conf flag
+if ParseOpt e $sArgs; then
+	nano $HOME/.vnc/tiger.conf
+	exit 0
+fi
+
+. ssh-all-check				# Check Authentications
+Wait4Con $Hostname			# Wait for internet
+vnc-check-passwd $Hostname	# Download vnc password if necessary
+
+vnc-connect $@

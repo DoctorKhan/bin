@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May  2 20:28:10 CDT 2011 ##
+#####################################################
+
+cd $SUBJECTS_DIR
+
+for file in `ls -d *HR`
+do
+	mv -v `echo $file | sed 's/HR/1mm*/'` $file/ 2>&1 | grep -v 'No such'
+	mv -v ${file}_FS* $file/ 2>&1 | grep -v 'No such'
+done
+

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sat Oct 8 14:08:35 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: static-ip-setup <hostname>
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+######################################################
+
+sAddy=$@
+
+viIP=`gethostip $sAddy | word 2`
+
+if echo $viIP | grep -q '^146'; then
+	viGateway=`echo $viIP | sed 's/[0-9]*$/1/g'`
+else
+	viGateway=128.83.89.250
+fi
+
+echo "Address: $viIP
+Mask:    255.255.255.0
+Gateway: $viGateway
+DNS:     128.83.185.40, 128.83.185.41
+Search:  irc.utexas.edu, biosci.utexas.edu, ccbb.utexas.edu, utexas.edu"

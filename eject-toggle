@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sat Apr 30 21:48:59 CDT 2011 ##
+#####################################################
+
+minargs=0
+if [ "$1" == "--help" ] || [ "$1" == "-h" ] || [ "$#" -lt "$minargs" ]; then echo "Usage: $0"; exit 0; fi
+
+status=/tmp/eject-state.tmp
+icodir=$HOME/.icons/WinBuntu/actions
+icoUnlock=$icodir/unlock-eject.png
+icoLock=$icodir/lock-eject.png
+icoStatus=$icodir/status-eject.png
+
+if grep -q NOT $status ; then
+	# Unlock
+	eject -i off | tee $status
+	rm $icoStatus ; ln -s $icoUnlock $icoStatus
+else
+	# Lock
+	eject -i on | tee $status
+	rm $icoStatus ; ln -s $icoLock $icoStatus
+fi
+

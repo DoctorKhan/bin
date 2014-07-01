@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ "$1" == "all" ]; then
+	closeWin matching Terminal
+	closeWin matching @
+fi
+closeWin matching "brterm"
+closeWin matching "blterm"
+closeWin matching "urterm"
+closeWin matching "ulterm"
+if [ "wmctrl -l | grep `xget id` | grep -c Terminal" == "1" ]; then
+	wmctrl -ic `xget id`
+fi
+
+	closeWin matching Terminal
+	closeWin matching @

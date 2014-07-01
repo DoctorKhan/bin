@@ -1,0 +1,6 @@
+#!/bin/bash
+if isMac; then
+	date "+%Y%m%d%H%M%S"
+else
+date --rfc-3339=ns | sed 's/[^0-9]//g'
+fi

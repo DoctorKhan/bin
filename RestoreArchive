@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Fri May 27 09:27:36 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+archive=`uniqueName`.tgz
+
+if isHost sandstone; then
+	original=`Archive`
+	cp $original ./$archive
+else
+	original=`tssh sandstone Archive`
+	tscp sandstone:$original ./$archive
+fi
+
+rm -rf Ress
+
+if tar -xzvf $archive; then
+	echo Restored `StripPath $original`.
+fi
+
+rm $archive
+

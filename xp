@@ -1,0 +1,23 @@
+#!/bin/bash
+
+### Arg handling
+
+sFileDefault=/tmp/action.mac
+iDelayDefault=10
+
+if isInt $1; then
+	iDelay=$1
+	sFile=$sFileDefault
+else
+	sFile=${1:-$sFileDefault}
+	iDelay=${2:-$iDelayDefault}
+fi
+
+### Main
+
+if ! pFile=`~/bin/TryPaths {,$(pwd)/,~/wtscripts/,~/bin/wtscripts/}"$sFile"{,.mac,.macro}`; then
+	exit 1
+fi
+
+cat "$pFile" | xmacroplay -d $iDelay:0 >/dev/null
+

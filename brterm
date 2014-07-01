@@ -1,0 +1,62 @@
+#!/bin/bash
+
+if [ $# != 0 ]; then
+	title="brterm $1"
+	if [ "$1" == "tc" ]; then
+		govp tc
+	elif [ "$1" == "tr" ]; then
+		govp tr
+	fi
+	shift
+else
+	title="brterm"
+fi
+
+if [ `windowClosed "$title"` == "1" ]; then
+	if [ `xMax` == 1920 ]; then
+		geometry=117x24
+	else
+		geometry=77x15
+	fi
+	gnome-terminal --geometry=$geometry-0-0 --title="$title"&
+	waitUntilWindowOpens "$title"
+	if [ $# != 0 ]; then
+		if isHost albert; then
+			if [ `isvpn` == 1 ]; then
+				xtype sandstone; pressReturn
+			else
+				xtype gauss; pressReturn
+			fi
+			sleep 1.5
+#			xtype "ssh-agent bash"; pressReturn
+#			xtype ssh-add; pressReturn
+#			sleep 2
+#			sleep 1
+		fi	
+		waitUntilPingBack ircepic.irc.utexas.edu
+#		waitUntilWindowViewable "$title"
+		wmctrl -a "$title"
+		xtype epic; pressReturn
+		sleep 1
+	fi
+else
+	wmctrl -a "$title"
+fi
+
+if [ $# != 0 ]; then
+		xtype "cd ~/khan/$1"; pressReturn
+		shift
+fi
+
+if [ $# != 0 ]; then
+	if [ "$1" == "downsize" ]; then
+		if isHost albert; then
+			wmctrl -r "$title" -e 0,649,524,635,290
+		elif isHost via nx; then
+			wmctrl -r "$title" -e 0,649,524,645,251
+		fi
+		shift
+	fi
+	xtype "$1"; pressReturn	
+fi
+

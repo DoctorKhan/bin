@@ -1,0 +1,238 @@
+#!/bin/bash
+
+credfile="$HOME/.smbpasswd"
+mstartup="$HOME/matlab/startup.m"
+fhost="sandstone"
+sshp="$HOME/.sshp"
+SSH_ENV="$HOME/.ssh/environment"
+
+# Make required directories for mounting, if necessary.
+if [ ! -e "$HOME/export" ]; then mkdir "$HOME/export"; fi
+if [ ! -e "$HOME/export/mri" ]; then mkdir "$HOME/export/mri"; fi
+if [ ! -e "$HOME/export/software" ]; then mkdir "$HOME/export/software"; fi
+
+# Unmount SSHFS export dir, if it is mounted.
+if [ `mount -l -t fuse.sshfs | grep -ic ~/export` == 1 ]; then fusermount -u ~/export; fi
+
+# If no SAMBA mount credentials file, create one.
+if [ ! -e $credfile ]; then
+	echo -n "Creating SAMBA mount credentials file ${credfile}... "
+	
+	username=`zenity --entry --text "Please enter your username on $fhost."` 2> /dev/null
+	pw2=blank
+	
+	#	until [ `SSH_ASKPASS="$sshp" ssh-add < /dev/null 2>&1 | grep -ic added` != 0 ]; do
+	until [ "$password" == "$pw2" ]; do
+		password=`zenity --entry --hide-text --text "Please enter your password for user $username on $fhost."` 2> /dev/null
+		pw2=`zenity --entry --hide-text --text "Please confirm your password."` 2> /dev/null
+	done
+	
+	echo "username=$username" > $credfile
+	echo "password=$password" >> $credfile
+	chmod go-rwx $credfile
+	
+	echo "done."
+else
+	username=`cat $credfile | tr '=' ' '| awk '{print $2}' | head -n 1`
+	password=`cat $credfile | tr '=' ' '| awk '{print $2}' | tail -n 1`
+fi
+
+# Create startup.m, if necessary
+if [ ! -e "$HOME/matlab" ]; then mkdir "$HOME/matlab"; fi
+if [ ! -e "$mstartup" ]; then echo " " >> $mstartup; fi
+
+# Set up default software to load in matlab, if necessary.
+if [ `cat $mstartup | grep -ic software` == "0" ]; then
+	echo "addpath ~/export/software/Paths" >> $mstartup
+	echo "AddDirectoryPaths('~/export/software/VISTASOFT');" >> $mstartup
+fi
+
+# Add automatic mounting of SSHFS file system overriding SAMBA in the
+# matlab startup file, if necessary.
+# This increases speed during m-file execution.
+if [ `cat $mstartup | grep -ic eid` == "0" ]; then
+	echo " " >> $mstartup
+	#	echo "MountSSHFS('$username'); % sshfs mount sandstone export" >> $mstartup
+fi
+
+# SAMBA mount mri dir, if necessary
+if [ `mount -l -t cifs | grep -ic ~/export/mri` == 0 ]; then
+	if [ `smbmount //$fhost/mri ~/export/mri -o credentials=$credfile | grep -ic error` != 0 ]; then
+		rm $credfile
+		echo "Samba mount for user $username on $fhost failed. Reset samba password:"
+		ssh $username@$fhost "smbpasswd"
+		echo "Please try mfast again. If that does not work, check username and password on $fhost."
+		exit 1
+	fi
+fi
+
+# SAMBA mount software dir, if necessary
+if [ `mount -l -t cifs | grep -ic ~/export/software` == 0 ]; then
+	smbmount //$fhost/software ~/export/software -o credentials=$credfile
+fi
+
+# add proper umask setting, if necessary
+if [ `grep -ic 'umask' $HOME/.profile` == 0 ]; then
+	echo 'umask 0002' >> $HOME/.profile
+else
+	if [ `grep -ic '#umask' $HOME/.profile` == 1 ]; then
+		sed -i 's/#umask.*/umask 0002/g' $HOME/.profile
+	fi
+fi
+
+if [ ! -e $sshp ]; then
+	if [ -e $HOME/.ssh/id_rsa.pub ]; then
+		pw2=blank
+		until [ "$pw" == "$pw2" ]; do
+			#		until [ `SSH_ASKPASS="$sshp" ssh-add < /dev/null 2>&1 | grep -ic added` != 0 ]; do
+			#			echo prior
+			pw=`zenity --entry --hide-text --text "Enter passphrase for $HOME/.ssh/id__rsa:  "` 2> /dev/null
+			pw2=`zenity --entry --hide-text --text "Please confirm your passphrase for $HOME/.ssh/id__rsa:  "` 2> /dev/null
+			echo "#!/bin/bash" > $sshp
+			echo "echo '$pw'" >> $sshp
+			chmod u+rwx,go-rwx $sshp
+			#			echo post
+		done
+		zenity --info --text "It is no longer necessary to add your ssh identity before starting matlab." 2> /dev/null
+	else
+		echo "#!/bin/bash" > $sshp
+		echo "echo '$password'" >> $sshp
+		chmod u+rwx,go-rwx $sshp
+	fi
+fi
+
+# Create ssh identity, if necessary
+if [ ! -e "$HOME/.ssh" ]; then mkdir "$HOME/.ssh"; fi
+
+if [ ! -e "$HOME/.ssh/id_rsa.pub" ]; then
+	cd $HOME/.ssh
+	ssh-keygen -t rsa -f $HOME/.ssh/id_rsa -P $password
+	ssh-copy-id $username@$fhost
+	/usr/bin/ssh-agent | sed "s/^echo/#echo/" > "${SSH_ENV}"
+	chmod 600 "${SSH_ENV}"
+	. "${SSH_ENV}" > /dev/null
+fi
+
+if [ `ssh-add -l | grep -ic $HOME/.ssh/id_rsa` == 0 ]; then
+	SSH_ASKPASS="$sshp" ssh-add < /dev/null
+fi
+
+# Create user's bin directory, if necessary.
+if [ ! -e "$HOME/bin" ]; then mkdir "$HOME/bin"; fi
+
+# Add user's bin directory to path, if necessary
+if [ `grep -ic 'if [ -d "$HOME/bin" ]' $HOME/.profile` == 0 ]; then
+	echo 'if [ -d "$HOME/bin" ] ; then' >> $HOME/.profile
+	echo '    PATH="$HOME/bin:$PATH"' >> $HOME/.profile
+	echo 'fi' >> $HOME/.profile
+else
+	if [ `grep -ic '#if [ -d "$HOME/bin" ]' $HOME/.profile` == 1 ]; then
+		sed -i '/#if \[ \-d \"\$HOME\/bin/,/#fi/ s/#//' $HOME/.profile
+	fi
+fi
+
+# Create link in user's bin directory to mfast
+#if [ ! -e "$HOME/bin/matlab" ]; then
+#	echo "Creating symbolic link to mfast."
+#	ln -s /usr/local/bin/mfast $HOME/bin/matlab
+#fi
+
+# Enable all aliases
+if [ `grep -ic '#alias' $HOME/.bashrc` != 0 ]; then
+	echo -n "Enabling all aliases... "
+	sed -i 's/#alias/alias/g' $HOME/.bashrc
+	echo "done."
+fi
+
+### SETUP .BASH_ALIASES FILE
+
+# Enable .bash_aliases file
+if [ `grep -ic 'if \[ \-f ~\/.bash_aliases' $HOME/.bashrc` == 0 ]; then
+	echo 'if [ -f "$HOME/.bash_aliases" ] ; then' >> $HOME/.bashrc
+	echo '    . $HOME/.bash_aliases' >> $HOME/.bashrc
+	echo 'fi' >> $HOME/.bashrc
+else
+	if [ `grep -ic '#if \[ \-f ~\/.bash_aliases' $HOME/.bashrc` != 0 ]; then
+		echo -n "Enabling ~/.bash_aliases... "
+		sed -i '/#if \[ \-f ~\/.bash_aliases/,/#fi/ s/#//' $HOME/.bashrc
+		echo "done."
+	fi
+fi
+
+if [ ! -e $HOME/.bash_aliases ]; then
+	echo '#!/bin/bash' > $HOME/.bash_aliases
+	chmod u+x,go-rwx $HOME/.bash_aliases
+fi
+
+if [ `grep -ic sandstone $HOME/.bash_aliases` == 0 ]; then
+	echo "EID=$username" >> $HOME/.bash_aliases
+	echo '
+alias amygdala="ssh -X $LOGNAME@amygdala.irc.utexas.edu"
+alias mamygdala="sshfs $LOGNAME@amygdala.irc.utexas.edu:$HOME $HOME/amygdala"
+
+alias quartzite="ssh -X $LOGNAME@quartzite.irc.utexas.edu"
+alias mquartzite="sshfs $LOGNAME@gauss.irc.utexas.edu:$HOME $HOME/quartzite"
+
+alias sandstone="ssh -X $EID@sandstone.irc.utexas.edu"
+alias msandstone="sshfs $EID@files.irc.utexas.edu:/ $HOME/sandstone"
+
+alias mexp="sshfs $EID@sandstone.irc.utexas.edu:/export $HOME/export -o nonempty"
+
+alias gauss="ssh -X $LOGNAME@gauss.irc.utexas.edu"
+alias mgauss="sshfs $LOGNAME@gauss.irc.utexas.edu:$HOME $HOME/gauss"
+
+alias epic="ssh -X sdc@ircepic.irc.utexas.edu"
+alias mepic="sshfs sdc@ircepic.irc.utexas.edu:/export/home/epic $HOME/epic"
+
+	' >> $HOME/.bash_aliases
+fi
+
+### SETUP .BASH_LOGIN FILE
+if [ ! -e $HOME/.bash_login ]; then
+	echo '#!/bin/bash' > $HOME/.bash_login
+	chmod u+x,go-rwx $HOME/.bash_login
+fi
+
+if [ `grep -ic start_agent $HOME/.bash_login` == 0 ]; then
+	echo '
+SSH_ENV="$HOME/.ssh/environment"
+
+function start_agent {
+	echo -n "Initialising new SSH agent... "
+   	/usr/bin/ssh-agent | sed "s/^echo/#echo/" > "${SSH_ENV}"
+   	echo "succeeded."
+   	chmod 600 "${SSH_ENV}"
+   	. "${SSH_ENV}" > /dev/null
+}
+
+# Source SSH settings, if applicable
+
+if [ -f "${SSH_ENV}" ]; then
+	. "${SSH_ENV}" > /dev/null
+	#ps ${SSH_AGENT_PID} doesn’t work under cywgin
+	ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+		start_agent;
+	}
+else
+	start_agent;
+fi
+
+	if [ `/usr/bin/ssh-add -l | grep -ic $HOME/.ssh/id_rsa` == 0 ]; then'  >> $HOME/.bash_login
+	echo "	SSH_ASKPASS=\"${sshp}\" /usr/bin/ssh-add < /dev/null"  >> $HOME/.bash_login
+	echo 'fi
+	' >> $HOME/.bash_login
+fi
+
+# Unmount on logout, even if matlab still open.
+UnmountOnLogout&
+
+# run matlab
+if [ "$1" != "nomatlab" ]; then
+	echo -n "Starting matlab..."
+	/usr/local/bin/matlab
+	echo "Matlab exited."
+fi
+
+# sshfs unmount export dir, if necessary
+if [ `mount -l -t fuse.sshfs | grep -ic ~/export` == 1 ]; then fusermount -u ~/export; fi
+

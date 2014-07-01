@@ -1,0 +1,9 @@
+#!/bin/bash
+./goLeft
+sleep .3
+./startwt
+waitUntilWindowOpens WToolsMgd
+./startevaltool
+./savecv
+sleep 0.2
+./plotpulse $@

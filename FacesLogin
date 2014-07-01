@@ -1,0 +1,24 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sat Mar 3 14:24:13 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: FacesLogin
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+wget http://faces.ccrc.uga.edu/ -O /dev/stdout \
+| sed 's/\(NAME=[^ ]*user[^ ]* value=.\)\(.\)/\1khan_dev\2/g' \
+| sed 's/\(NAME=[^ ]*pwd[^ ]*\)[^ ]*/\1 value="calcar1ne"/g' \
+| sed 's/\(NAME=[^ ]*account[^ ]* value=.\)\(.\)/\1TEXAS_IRC\2/p' > a.html
+

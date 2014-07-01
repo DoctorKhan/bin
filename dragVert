@@ -1,0 +1,20 @@
+#!/bin/bash
+steps=
+dt=0.1
+dy=`echo "scale=10; ( $4 - $2 ) / 20" | bc`
+if [ $4 -gt $2 ]; then 
+	dy=10
+else 
+	dy=-10
+fi
+moveMouse $1 $2
+xdotool mousedown 1
+for y in `seq $2 $dy $4`;
+do
+#	sleep $dt
+	moveMouse $1 $2
+done  
+
+moveMouse $3 $4
+xdotool mouseup 1
+

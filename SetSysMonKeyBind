@@ -1,0 +1,19 @@
+#!/bin/bash
+
+key=/apps/gnome_settings_daemon/keybindings/power
+keyValue=`gconftool -g $key`
+binding="<Control><Alt>Delete"
+
+if [ "$keyValue" != "$binding" ]; then
+	keyNameAndValue=`gconftool -R / | grep "$binding" | awk '{print $1}'`
+	keyName=`echo $keyNameAndValue | awk '{print $1}'`
+	key=`gconftool -S $keyName | grep $binding | awk '{print $1}'`
+fi
+
+# Clear existing keybinding
+gconftool -t String -s $key "" 
+
+# Set new keybinding
+gconftool -t String -s /apps/metacity/global_keybindings/run_command_4 $binding
+gconftool -t String -s /apps/metacity/keybinding_commands/command_4 "gnome-system-monitor"
+

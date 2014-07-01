@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Converts a freesurfer mesh file into a .raw file of the kind used by the bajaj lab.
+
+sFileIn=$1
+pAsc=`mktemp -u`.asc
+ln -s /dev/stdout $pAsc
+
+echo -ne "Converting freesurfer $sFileIn to RAW format... " > /dev/stderr
+mris_convert $sFileIn $pAsc | grep -v ^# | awk '{$4=""; print}'
+echo "complete" > /dev/stderr

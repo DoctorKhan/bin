@@ -1,0 +1,38 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Nov 4 20:45:48 CST 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: vnc-auth
+
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+
+# Download vnc password if necessary
+echo "Verifying password file..."
+for sHost in `vnc-hosts`; do
+ssh $sHost vnc-check-passwd
+pDir=$HOME/.vnc/$sHost
+pPass=$HOME/.vnc/$sHost/passwd
+if [ ! -f $pPass ]; then
+	echo -en "Password file $pPass not found. Generating... "
+	if [ ! -d $pDir ]; then mkdir -p $pDir; fi
+	if ! scp $sHost:.vnc/passwd $pPass &>/dev/null; then
+		echo "Create VNC password file:"
+		ssh $sHost vncpasswd
+		echo "Download password file..."
+		scp $sHost:.vnc/passwd $pPass
+	fi
+	echo "complete."
+fi
+done

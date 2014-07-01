@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 17 22:44:49 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SaveGeo
+#######################################################
+#if isHelp 0 $0 "$@"; then exit 0; fi
+
+if [ $# == 0 ]; then
+	sWin=`ActiveWindowID`
+else
+	sWin=`WindowID "$@"`
+fi
+
+xdotool behave $sWin mouse-leave exec SaveGeo $sWin 2>/dev/null &
+xdotool behave $sWin mouse-enter exec LoadGeo $sWin 2>/dev/null &
+

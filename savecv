@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ `windowViewable EvalToolMgd` == 0 ]; then
+	loadcv
+fi
+
+wmctrl -a EvalToolMgd
+sleep 0.3
+click 968 246
+waitUntilWindowViewable "Save CV's"; pressReturn
+waitUntilWindowHidden "Save CV's"
+
+click 0 0 .2 .9

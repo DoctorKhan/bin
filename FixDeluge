@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Feb 26 21:06:22 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FixDeluge
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pTemp=`TempFile AutoAdd`
+pConf=$HOME/.config/deluge/core.conf
+
+## Functions
+
+## Main
+if grep -q autoadd_enable $pConf; then
+	sed 's/.*autoadd_enable.*/  "autoadd_enable": true,/g' $pConf > $pTemp
+else
+	head -n -2 $pConf > $pTemp
+	echo '  "autoadd_enable": true,' >> $pTemp
+	tail -n 2 $pConf >> $pTemp
+fi
+
+mv $pTemp $pConf
+

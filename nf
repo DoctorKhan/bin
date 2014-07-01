@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jun 10 16:16:08 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+script=`basename $0`
+Usage="Usage: $script <file1> <file2> ..."
+if isHelp 1 $0 "$@"; then echo $Usage; exit 0; fi
+#######################################################
+
+for pFile; do
+	if [ -e "$pFile" ]; then
+		rm -rf "$pFile"
+	fi
+	
+	touch .DeleteMe
+	echo "$pFile" >> .DeleteMe
+	
+done

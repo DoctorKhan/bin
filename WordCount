@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Nov 15 11:49:58 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: pipe | WordCount [delimiter]
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+bNum=false
+
+while [[ ${1:0:1} == - ]]; do
+	case $1 in
+		-n) bNum=true; shift;;
+		-d) sDelim="$2"; shift 2;;
+	esac
+done
+
+pFile=${@:-/dev/stdin}; shift
+sDelim=`dquote ${sDelim:-" "}`
+ 
+## Main
+
+if $bNum; then
+	awk '{FS='"$sDelim"'; print NF}' $pFile
+else
+	awk '{FS='"$sDelim"'; print NF,$0}' $pFile
+fi

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Aug 28 10:20:23 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetMouseSpeed <device # from xinput>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+xinput | grep Touchpad
+iDev=`xinput | grep Touchpad | cut -d= -f2 | awk '{print $1}'`
+
+## Main
+# Show settings
+s=$(xinput list-props $iDev | grep "Velocity Scaling" | word 2 :)
+a=$(xinput list-props $iDev | grep "Constant Deceleration" | word 2 :)
+j=$(xinput list-props $iDev | grep "Adaptive Deceleration" | word 2 :)
+
+echo "\
+speed			$s
+deceleration		$a
+dejerk			$j"
+
+
+# | column -s ':()' -t)

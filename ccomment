@@ -1,0 +1,4 @@
+#!/bin/bash
+xtype "/* "
+press End
+xtype " */"

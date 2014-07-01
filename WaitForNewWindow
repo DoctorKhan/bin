@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jun 20 18:25:09 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WaitForNewWindow <commands>
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+if [ "$1" == "-t" ]; then
+	timeout=$2
+	shift 2
+else
+	timeout=300
+fi
+
+# Work in temp dir
+cd /tmp
+
+# Store current window list
+wmctrl -l | sort > WinList.Before
+
+# Number of current windows
+nWinsBefore=`cat WinList.Before | wc -l`
+nWinsNow=$nWinsBefore
+
+# Wait until the number of windows increases
+t0=`Seconds`
+t1=`echo $t0 + $timeout | bc -l`
+
+until (( $nWinsNow > $nWinsBefore )) || (( `Round $(Seconds)` > `Round $t1` )); do
+	nWinsNow=`wmctrl -l | wc -l`
+	sleep .1
+done
+
+# Store new window list
+wmctrl -l | sort > WinList.After
+
+# Set difference yields new window id
+xId=`comm -13 WinList.Before WinList.After | awk '{print $1}' | sed 's/x0*/x/g'`
+
+if [ $# -gt 0 ]; then
+	eval $@
+else
+	echo $xId
+fi

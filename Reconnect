@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Dec 17 19:36:07 CST 2013 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Reconnect
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+sudo ifconfig wlan0 down
+sudo ifconfig wlan0 up
+sudo iwconfig wlan0 key "${2:-ilovepiggies}"
+sudo iwconfig wlan0 essid "${1:-The Better Netgear}"
+sleep 1
+sudo dhclient -1 -nw wlan0
+sleep 3
+exit 0

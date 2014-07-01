@@ -1,0 +1,15 @@
+#!/bin/bash
+
+function FindFile() {
+	if [ -x "$1" ]; then
+		echo `fileparts 7 "$1"`
+	elif which "$1"; then
+		return
+	else
+		locate -eir "/$1$" | xargs ls -1t | head -n 1
+	fi
+}
+
+for query in "$@"; do
+	FindFile "$query"
+done

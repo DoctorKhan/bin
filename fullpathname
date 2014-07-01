@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ "$1" == "-w" ]; then
+	sSpace="%20"
+	shift
+else
+	sSpace='\\ '
+fi
+
+function FullPathnameOne()
+{
+	if [ ! -e "$1" ] && [ -e `which "$1"` ]; then
+		# if it's a command file
+		file=`which "$1"`
+	else
+		file="$1"
+	fi
+	
+	if [ -d "$file" ]; then
+		cd "$file"; pwd -P
+	else
+		pDir=`dirname "$file"`; cd "$pDir"
+		echo `pwd -P`/`basename "$file"`
+	fi |\
+	sed 's,\* ,'"$sSpace"',g'
+}
+
+function main()
+{
+	
+	while [ $# -gt 0 ]; do
+		FullPathnameOne "$@"
+		shift
+		#		if [ $# -gt 0 ]; then echo -ne " "; fi
+	done
+	#	echo
+	
+	if pipe; then
+		while read -t 1 sFile; do
+			if isEmpty $sFile; then continue; fi
+			FullPathnameOne "$sFile"
+		done
+	fi
+}
+
+main "$@" | grep -v '^$'
+

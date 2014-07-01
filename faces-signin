@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 24 22:09:58 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: faces-signin
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sAddy=http://faces.ccrc.uga.edu/ccrcfaces/login.php
+. $HOME/.faces/faces.conf
+
+## Main
+echo "Signing in... " >/dev/stderr
+
+wget -q $sAddy --post-data 'account=TEXAS_IRC&user='$user'&pass='$pass'&passwd='$pass'&savepwd=1&saveusr=1&savegrp=1&end=0' -O /dev/stdout |\
+sed -n "s/.*NAME='pk' VALUE='\([^']*\).*/pk=\1/p"

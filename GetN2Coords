@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jun 22 18:36:08 CDT 2014 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetN2Coords
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+while read line; do
+	n1="`echo $line | cut -f1`"
+	n2="`echo $line | cut -f2`"
+	grep "^$n2" "$@" | while read coord; do
+		echo "$n1 $n2 $coord"
+	done
+done

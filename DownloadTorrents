@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Oct 10 13:32:33 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: DownloadTorrents <query>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+torrentclient=deluge
+pClientPickup="/tmp"
+pDir="$pClientPickup/torrents"
+pFind=$pDir/find.txt
+pTorrents=`create $pDir/torrents.txt`
+
+## Main
+sQuery=${@:-`cat $pFind`}
+find_query=`echo "*$sQuery*.torrent" | tr ' ' '*' | tr -d "'"`
+find_query=${find_query:-'*.torrent'}
+
+clear
+echo "Finding downloaded torrent files $find_query in $pDir... "
+
+find $pDir -type f -iname $find_query | tee | sort | uniq > $pTorrents
+#Unique $pTorrents
+
+nTorrents=`cat $pTorrents | wc -l`
+
+# If no torrents found, exit
+if ((nTorrents>0)); then
+	echo "Found $nTorrents. Sending to $torrentclient."
+	# Start client if necessary
+	if ! isProcess $torrentclient; then	
+		echo "Starting $torrentclient..."
+		$torrentclient & 
+	fi
+
+	cat $pTorrents | while read torrent; do
+		if [ -e "$torrent" ]; then
+			mv -v "$torrent" "$pClientPickup/"
+		fi
+	done
+	echo "$nTorrents valid torrent files retreived in total."
+else
+	echo "No valid torrents yet."
+fi

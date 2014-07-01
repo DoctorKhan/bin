@@ -1,0 +1,14 @@
+#!/bin/bash
+pRaw="$1"
+pFile="${1%.*}"
+pTri="$pFile.tri"
+pHead="$pFile.nfo"
+pVert="$pFile.vrt"
+
+head -n 1 "$pRaw" | sed 's/^\([0-9]*\) \(.*\)/nVerts=\1 nTris=\2/g' | tr ' ' '\n' > "$pHead"
+
+. "$pHead"
+#tail -n +2 $1 | head -n $nVerts | awk '{print $1,$2,$3,1,1,1,1,1,1}' >> $1.tri
+
+tail -n +2 "$pRaw" | head -n $nVerts > "$pVert"
+tail -n $nTris "$pRaw" > "$pTri"

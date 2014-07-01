@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 23 22:26:00 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+##
+
+xprop -root | grep "_NET_ACTIVE_WINDOW(WINDOW)" | awk '{print $NF}' 2>/dev/null
+
+#dec2hex $(xdotool getactivewindow) x
+

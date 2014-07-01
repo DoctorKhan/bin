@@ -1,0 +1,40 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sat Sep 1 00:16:51 CDT 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: vnc-open <port> <user> <host> <width> <height> <other> <choice>
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then ech$
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+iPort=$1; sUser=$2; sHost=$3; iWidth=$4; iHeight=$5; iChoice=$7
+pConf=$pSessions/$sHost:$iPort
+
+mv $pConf ${pConf}~
+grep -v ^Width ${pConf}~ | grep -v ^Height > $pConf
+(echo "Width=$iWidth"; echo "Height=$iHeight") >> $pConf
+
+#	. WriteConf Height $iHeight
+# Save user input
+
+DesktopSize=${iWidth}x${iHeight}
+sHostName=$sUser@$sHost:$iPort
+pPass=$pSessions/$sHost.passwd
+
+case $iChoice in
+	0) . "$pConf"
+		AutoSelect=$((Color>2?1:0))
+		vncviewer -PasswordFile $pPass FullscreenSystemKeys=0 -MenuKey $Menu -AutoSelect $AutoSelect -LowColorLevel \
+		$Color -QualityLevel $Quality -FullScreen $FullScreen -Shared $Shared -DesktopSize $DesktopSize +kb $sHost:$iPort
+		
+		
+		

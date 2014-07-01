@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Jul 6 17:09:09 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: AnatScript
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+echo {Khan,Ress,Tucker,Katyal,Greene}HR{Left.Class,Right.Class} | tr ' ' '\n' | sed 's,\(.*\)HR\(.*\).Class,/export/data/mri/Anatomy/\1HR/Cortex/\2/\1\2.Class,g' | sed '/Greene/s/Cortex/CortexNew/'
+

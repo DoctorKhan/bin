@@ -1,0 +1,12 @@
+#!/bin/bash
+res=`screensize`
+if [ "$1" == "term" ]; then
+	if isHost albert; then
+		echo "157"
+	else
+		echo "157"
+	fi
+else
+	echo "${res%x*}"
+fi
+

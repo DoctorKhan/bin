@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon Apr 18 16:43:00 EDT 2011 ##
+#####################################################
+
+## Initialize
+n=/dev/null
+
+# Output possibilities
+t[0]=0; t[1]=1; t[2]=-n; t[3]=true
+f[0]=1; f[1]=0; f[2]=-n; f[3]=false
+
+# Default output choice
+iOutput=3
+
+## Functions
+function ReadOptions()
+{
+	case "$1" in
+		# true=0; false=1;
+		-n) 	iOutput=0;;
+		# true=1; false=0;
+		-nn) 	iOutput=1;;
+		-q) 	iOutput=2;;
+	esac
+	return $iOutput
+}
+
+# Output
+function yup()
+{
+	echo ${t[$iOutput]}
+	exit ${t[0]}
+}
+
+function nope()
+{
+	echo ${f[$iOutput]}
+	exit ${f[0]}
+}
+
+# Process options
+while [ "${1::1}" == "-" ]; do
+	ReadOptions $@
+	shift
+done
+
+## Main
+case "$1" in
+	0) nope	;;
+	1) yup	;;
+	*) if ( eval "$@" ); then
+			yup
+		else
+			nope
+		fi
+	;;
+esac
+

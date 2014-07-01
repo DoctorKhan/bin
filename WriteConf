@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jul 12 08:56:21 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WriteConf  <File> <Param> <Value>
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sFile=`create $pConf`
+
+## Functions
+function Write2File()
+{
+	for param; do
+		### Parse param and value
+		eval value=\$$param
+		#		echo "Setting $param=$value in $sFile..."
+		### Set value
+		if grep -q "^[0-9) ]*$param *[ =]" "$sFile"; then
+			sid 's|^\([0-9) ]*'"$param"' *[= ]*\).*|\1'"$value"'|' "$sFile"
+		else
+			echo "$param"="$value" >> "$sFile"
+		fi
+		
+		#		else
+		#			param="$1"
+		#			value="$2"
+		#			shift 2
+		#		fi
+	done
+}
+
+## Main
+if (($# > 0)); then
+	Write2File "$@"
+elif pipe; then
+	while read line; do
+		Write2File "$line"
+	done
+fi

@@ -1,0 +1,58 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Tue Sep 4 18:26:37 CDT 2012 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: Rest
+######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+## Initialize
+pTemp=`TempFile rest`
+pFile="$HOME/Restaurants.txt"
+
+## Functions
+function RestList()
+{
+	echo "4 Mall
+	3 Panda
+	3 Pei Wei
+	3 IM Thai
+	3 Chipotle
+	3 Texadelphia
+	2 Rudy's
+	2 Cici's
+	2 Khan's
+	2 Chili's
+	2 Hunan Lion
+	2 Cracker Barrel
+	2 Austin's Pizza
+	1 Polvos
+	1 Abuelos
+	1 Sao Paulo's
+	1 Whataburger
+	1 Fuddrucker's"
+	
+}
+
+function RepText()
+{
+	nReps=$1; shift
+	for ((iRep=0; iRep<nReps; iRep++)); do
+		echo $@
+	done
+}
+
+## Main
+RestList |\
+(while read line; do
+	RepText $line
+done) | (tee > $pTemp)
+
+nLines=`cat $pTemp | wc -l`
+iLine=`Rand $nLines`
+sed -n "${iLine}p" $pTemp

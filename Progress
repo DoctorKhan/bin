@@ -1,0 +1,79 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jul 7 20:46:27 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Progress [compl] [total] <name of bar> <bar text>
+#######################################################
+
+## Initialization
+if (($#==0)); then exit 0; fi
+
+if isInt $1; then
+	nCom=${1:0}; shift
+	if isInt $1; then
+		nTot=$1
+		shift
+	else
+		nTot=1
+	fi
+	
+	if ((nCom > nTot)); then nCom=$nTot; fi
+	if ((nTot==0)); then exit 0; fi
+fi
+
+sBar=${1:-ProgressBar}; shift
+sText=${@:-Progress}
+
+pBar=`create /tmp/$sBar`
+nPoints=`cat "$pBar" | wc -l`
+
+##
+nComFile=`tail -n 1 $pBar | awk '{print $3}'`
+nComNext=$((nComFile+1))
+
+nCom=${nCom:-$nComNext}
+if ((nCom==0)); then
+	rm -f "$pBar"; touch "$pBar"
+fi
+
+nTot=${nTot:-`tail -n 1 $pBar | awk '{print $4}'`}
+
+# Progress fracComplete
+fracComplete=`echo $nCom $nTot | awk '{print $1/$2}'`
+iPercent=$((nCom*100/nTot))
+
+t=`Seconds`
+sData="$t $fracComplete $nCom $nTot"
+
+if (( nCom <= 1 )); then
+	# Set initial time
+	echo $sData > $pBar
+else
+	# Update with new time
+	echo $sData >> $pBar
+fi
+
+if (( $nPoints >= 2 )); then
+	meanRate=`tail $pBar | awk '{print $1,$3}' | Derivative | Mean`
+	if echo $meanRate | grep -q '[1-9]'; then
+		
+		nRem=$((nTot-nCom))
+		nSecsTot=`echo $nRem $meanRate | awk '{print int($1/$2)}'`
+		nHour=$((nSecsTot / 3600))
+		nMins=$((nSecsTot % 3600 / 60))
+		nSecs=$((nSecsTot % 60))
+	else
+		nHour=00; nMins=00; nSecs=00
+	fi
+	printf " (%d/%d) - %d%% - %02d:%02d:%02d - " $nCom $nTot $iPercent $nHour $nMins $nSecs
+	echo -en "$sText                    \r"
+	if ((nCom == nTot)); then
+		rm -f "$pBar"
+		echo
+		exit 0
+	fi
+fi
+

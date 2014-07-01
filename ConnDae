@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Dec 17 19:54:10 CST 2013 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ConnDae
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+while true; do
+	if ! isConn; then #if ping exits nonzero...
+		sudo /home/khan/bin/Reconnect
+		sleep 7
+	fi
+done
+

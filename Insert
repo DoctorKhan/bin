@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue Apr 12 23:18:16 EDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then
+	echo "Usage: Insert <Text> in <File> at <Text>"
+	echo "	      Insert <Text> in <File> at line <Line No.>"
+	exit 0
+fi
+
+insertion=$1; shift
+while [ "$1" != "in" ]; do
+	insertion="$insertion $1"; shift
+done; shift
+
+file=$1; shift
+while [ "$1" != "at" ]; do
+	file="$file $1"; shift
+done; shift
+
+if [ "$1" == "line" ]; then
+	sid "${2}i\\n$insertion" $file
+else
+	sid "s/\(.*$1\).*/\1\n$insertion/" $file
+fi
+

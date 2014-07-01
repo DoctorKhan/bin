@@ -1,0 +1,20 @@
+#!/bin/bash
+# This script eliminates files from the KDE Trash can older than
+# $Expiration days. Change this value to meet your needs.
+# Rez Khan - Oct. 14, 2006
+
+Expiration=14
+fDir=`locate -n 1 /Trash/files`
+iDir=`locate -n 1 /Trash/info`
+if [ `dirname $fDir` = `dirname $iDir` ] ; then 
+	Trash=`dirname $fDir`
+	for i in `find ${Trash}/info/*.trashinfo -mtime +$Expiration` ;
+		do 
+			echo  `basename $i .trashinfo`
+			rm -rf $i
+			rm -rf ${Trash}/files/`basename $i .trashinfo` ;
+	done
+else
+	echo "Could not find Trash directory."
+fi
+

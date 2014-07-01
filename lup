@@ -1,0 +1,8 @@
+#!/bin/bash
+dir="/home/khan/Personal"
+flags="-avzHu $@ --exclude '*~' -e ssh"
+host="khan@linux4.ph.utexas.edu"
+echo Uploading from $dir to $host...
+#echo rsync $flags $dir $host:`dirname $dir`
+rsync $flags $dir $host:~
+

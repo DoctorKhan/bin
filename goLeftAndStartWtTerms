@@ -1,0 +1,11 @@
+#!/bin/bash
+brterm tc $1 downsize
+blterm tc wtscripts downsize
+
+sleep 0.5
+if [ "$2" == "sim" ]; then
+	psdremake
+	startwtSim "$1"
+else
+	startwtPlot "$@"
+fi

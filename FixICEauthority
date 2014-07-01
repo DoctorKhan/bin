@@ -1,0 +1,11 @@
+#!/bin/bash
+
+for dir in `ls /home`
+do
+	if [ -f /home/$dir/.ICEauthority ]; then
+		if [ `grep -ic $dir /etc/passwd` != 0 ]; then
+			chown -f $dir:root /home/$dir/.ICEauthority 
+		fi
+	fi
+done
+

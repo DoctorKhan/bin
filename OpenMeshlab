@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jun 12 12:01:30 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: tt
+#######################################################
+
+if [ $# -gt 0 ]; then
+	cd "$2"
+	file=`fullpathname "$1"`
+fi
+
+if isHost sandstone; then
+	command="vglrun meshlab"
+else
+	command="meshlab"
+fi
+
+xdotool key alt+F2
+sId=`WaitForNewWindow`
+xdotool windowfocus $sId
+xdotool type "$command"
+
+if [ $# -gt 0 ]; then
+	xdotool key space
+	xdotool type "$file"
+fi
+xdotool key alt+r
+

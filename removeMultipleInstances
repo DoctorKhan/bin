@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# == 1 ]; then
+	pt=0
+else
+	pt=$2
+fi
+
+sleep $pt
+while [ `pgrep $1 | wc -l` != 1 ]
+do
+	kill `pgrep $1 | tail -n 1`
+	sleep 0.3
+done
+

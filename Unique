@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jul 29 01:06:15 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: cat <file> | Unique
+# Preserves element order
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+pTemp=`TempFile u`
+
+if [ $# -gt 0 ]; then
+	pSource="$1"
+else
+	pSource="/dev/stdin"
+fi
+
+cat "$pSource" | while read line; do
+	if ! grep -q "^$line$" "$pTemp"; then
+		echo "$line" >> "$pTemp"
+	fi
+done
+
+if [ $# -gt 0 ]; then
+	mv "$pTemp" "$pSource"
+else
+	cat "$pTemp"
+fi

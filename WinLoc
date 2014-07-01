@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Jun 16 21:31:49 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: WinLoc
+#######################################################
+
+if [[ $1 == + ]]; then
+	shift
+	echo +`$0 $@ | tr ' ' '+'`
+	exit 0
+fi
+
+if [ $# == 0 ]; then
+	xId=`ActiveWindowID`
+fi
+
+if (( $# > 0 )); then
+	viLoc=`xwininfo -root -tree | grep "$@" | head -n 1 | sed 's/.* +\(.*\)+\(.*\)$/\1 \2/g'`
+else
+	if isMac; then
+		viLoc=${viLoc:-`WindowBounds | awk '{print $1,$2}'`}
+	else
+		viLoc="0 0"
+	fi
+fi
+
+echo $viLoc

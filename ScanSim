@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Thu Feb 16 23:57:49 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: cd <target dir>; ScanSim [source dir]
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pDir=${1:-"/export/data/mri/SSFP/120708oc/Raw/Pfiles"}
+
+## Functions
+
+## Main
+#BuildFile 2 $pDir/E*P*.7 &
+#BuildFile 5 $pDir/P*.7 &
+BuildFile 20 $pDir/P*.mag &

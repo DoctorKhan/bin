@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Oct 26 12:37:57 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: FixNetCon
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+while ((3 < 4)); do
+	if wget --timeout=4 google.com 2>/dev/stdout | grep -q failed; then
+		gksu /etc/init.d/networking restart
+		sleep 20
+	fi
+	sleep 6
+done

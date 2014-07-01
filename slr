@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Sat Jun  4 13:23:54 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+#PS3='Choose your favorite vegetable: ' # Sets the prompt string.
+# Otherwise it defaults to #? .
+
+echo
+
+#select vegetable in "beans" "carrots" "potatoes" "onions" "rutabagas"
+#echo  "beans" "carrots" "potatoes" "onions" "rutabagas"
+select vegetable in `while read line; do echo $line; done`
+	do
+		echo
+		echo "Your favorite veggie is $vegetable."
+		echo "Yuck!"
+		echo
+		break  # What happens if there is no 'break' here?
+	done
+	
+	exit
+	
+	# Exercise:
+	# --------
+	#  Fix this script to accept user input not specified in
+	#+ the "select" statement.
+	#  For example, if the user inputs "peas,"
+	#+ the script would respond "Sorry. That is not on the menu."
+	
+# Dependencies:	 c, def, ec, es, li, regmatch, string, ted

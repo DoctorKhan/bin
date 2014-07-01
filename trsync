@@ -1,0 +1,43 @@
+#!/bin/bash
+
+iArg=1
+Arg="$1"
+
+while [ `echo $Arg | grep -ic ^-` -gt 0 ]; do
+	eval Arg='"$'$(( ++iArg ))'"'
+	if [ `echo $Arg | grep -ic ^-.*[cFiloePS].*` -gt 0 ]; then (( iArg++ )); fi
+done
+
+until [ `echo $Arg | grep -ic :` -gt 0 ]; do
+	eval Arg='"$'$((++iArg))'"'
+done
+
+iPre=$((iArg - 1))
+
+if [ $# -gt $iArg ]; then
+	iPost=$((iArg + 1))
+fi
+
+host=`echo $Arg | cut -d : -f 1`
+rest=`echo $Arg | cut -d : -f 2`
+
+host=`ssh-host-trans $host`
+hostargs=`echo $host | grep -oe '-[op] [^ ]*' | tr '\n' ' ' | sed 's/-p /-P /g'`
+host=`echo $host | awk '{print $NF}'`
+errs=/tmp/errs
+
+iPCount=`echo "$# - $iArg" | bc`
+
+function command() {
+	/usr/bin/rsync $hostargs "${@:1:iPre}" $host:$rest "${@:iPost:iPCount}" 2>$errs
+	return $?
+}
+
+if ! command "$@"; then
+	ssh-fix-hosts $host
+	if [ `grep -ic "${HOME}.*No such file or directory" $errs` -gt 0 ]; then
+		rest=`echo $rest | sed "s,^$HOME[/]*,,"`
+	fi
+	if ! command "$@"; then exit 1; fi
+fi
+

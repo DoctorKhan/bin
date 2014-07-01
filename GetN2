@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun Jun 22 18:34:27 CDT 2014 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: GetN2
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+cut -f1 | while read line; do
+	grep -w "$line" "$@" | grep -v "^$line" | cut -f 1 | while read line2; do
+		echo "$line	$line2"
+	done
+done

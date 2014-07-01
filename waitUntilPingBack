@@ -1,0 +1,18 @@
+#!/bin/bash
+echo "Waiting for host $1..."
+if isHost albert; then
+	if [ `isvpn` == 1 ]; then
+		fhost=sandstone.irc.utexas.edu
+	else
+		fhost=gauss
+	fi
+	until [ `ssh $fhost "ping -c 1 -w 1 $1" | grep received | awk '{print $4}'` == 1 ]; do
+		sleep 0.5
+	done
+else
+	until [ `ping -c 1 -w 1 $1 | grep received | awk '{print $4}'` == 1 ]; 		do
+		sleep 0.5
+	done
+fi
+echo "Host $1 is active."
+

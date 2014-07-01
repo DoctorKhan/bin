@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 23 18:07:30 CDT 2011 ##
+#####################################################
+
+find /Applications -maxdepth 3 -name '*.app' -exec app2cmd {} \;
+

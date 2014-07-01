@@ -1,0 +1,213 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Aug 7 13:33:26 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: Selector  -f <opts file> -p <prompt>
+# -s <type> -t <title> -n <nCols>
+# input | Selector -p <prompt> -s <type> -t <title>
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+######################################################
+
+sInit="$@"
+pDisp=`TempFile Menu`
+eval `echo $@ | sed -e 's/ *-\([^ ]*\) *\([^\-]*[^ \-]\)/\1=\"\2\"; /g'`
+
+function SetParams()
+{
+	# Initialize
+	pItems=$f
+	#	if [ -z $pItems ]; then
+	#		pItems=`TempFile MenuItems.cfg`
+	#		cat /dev/stdin > $pItems
+	#	fi
+	
+	nCols=${n:-2}
+	
+	sPrompt=${p:-"\n  Press enter to continue\n  or choose number to edit: "}
+	
+	sTitle=${t:-"Make a selection:"}
+}
+
+function SetSelection()
+{
+	sSel=`echo "$@" | sed 's/.*=~~[0-9]*++//g'`
+	sSel=${sSel:-`echo "$@" | sed 's/=.*//g'`}
+	
+	# output if not quiet mode
+	
+	# Reorder
+	if isOpt r "$sInit"; then
+		sed -i -e 's/~~1//g' "$pItems" # Remove selection
+		sed -i -e "$iSelItem s/~~.*//g" "$pItems" # Remove existing value
+		sed -i -e "$iSelItem s/$/~~1/g" "$pItems" # Add selection
+	fi
+	
+	pScript=`TempFile Execute`
+	echo '#!/bin/bash' > $pScript
+	grep -v '~~' "$pItems" >> $pScript
+	echo $sSel | tr ' ' '_' >> $pScript
+	chmod a+x $pScript
+	echo $pScript
+}
+
+function MenuItems()
+{
+	echo "_______________________________________________"
+	echo -e "  $sTitle\n"
+	
+	cat "$pItems" | tr '=_' ' ' | \
+	Number ')' '  ' | columnate $((nCols+1)) |\
+	sed -e 's/~~[0-9]*//g'
+	echo -en "\\n  $sPrompt "
+	frow=`cat $pDisp | wc -l`
+	fcol=`tail -n 1 $pDisp | wc -c`
+}
+
+function DisplayOptions()
+{
+	if isEmpty $pDisp; then
+		MenuItems > $pDisp
+		cat $pDisp
+	fi
+	
+	HighlightLine $iSelItem
+	
+	#	tput cup $frow $fcol
+	#	echo "    "
+	#	tput cup $frow $fcol
+}
+
+function RefreshLine()
+{
+	iRef=$iSelItem
+	norm=`sed -n "$((iRef+3))p" $pDisp`
+	#	tput cup $((iRef+2)) 0
+	#	echo -en "\033[0m${norm}    \033[0m"
+}
+
+function HighlightLine()
+{
+	iHi=$1
+	line=`sed -n "$((iHi+3))p" $pDisp`
+	#	tput cup $((iHi+2)) 0
+	echo -en "\033[1;7m${line}\033[0m"
+}
+
+function UpdateOption()
+{
+	# Update options
+	if ((iSelItem > 0)); then
+		sVar=$1; sNew=$2
+		sDisp=${3:-$sNew}
+		# Replace value in file with entered value
+		WriteConf $pItems $sVar $sNew
+		WriteConf $pDisp $sVar $sNew
+	fi
+}
+
+function MoveHighlight()
+{
+	case $1 in
+		[0-9]*) iSelItem=$1 ;;
+		*up*)
+			if ((--iSelItem < 1)); then iSelItem=$nItems; fi
+		;;
+		*down*)
+			if ((++iSelItem > nItems)); then iSelItem=1; fi
+		;;
+	esac
+	
+	echo $iSelItem
+}
+
+function EditValue()
+{
+	sVal=`sed -n "$iSelItem s/.*=//p" $pItems`
+	nLen=`grep "$iSelItem)" $pDisp | wc -c`
+	nRow=$((iSelItem+2))
+	sLHS=`grep "$iSelItem)" $pDisp | sed "s/$sVal//g"`
+	sVar=`echo $sLHS | word 2 ')' | StrTrim`
+	
+	# Clear existing value
+	#	tput cup $nRow 0
+	RepStr $nLen " "
+	#	tput cup $nRow 0
+	
+	# Read in new value
+	read -p "$sLHS" sNew
+	
+	# Blank entries revert to original value
+	sNew=${sNew:-$sVal}
+}
+
+function ProcessSelection()
+{
+	# Process selection
+	sSelLin=`cat "$pItems" | Line $iSelItem`
+	sVar=`echo $sSelLin | word 1 =`
+	
+	case "$sSelLin" in
+		*=*on) 	UpdateOption $sVar off ;; 		# Toggle on to off
+		*=*off)	UpdateOption $sVar on ;; 		# Toggle off to on
+		*~~*)	SetSelection "$sSelLin" ;;
+		*=*) 	EditValue ;;
+		*)		SetSelection "$sSelLin" ;;
+	esac
+}
+
+function Main()
+{
+	# Enforce uniquness
+	#Unique "$pItems"
+	
+	# Treat special cases of 0,1,2+ menu items
+	nItems=$(cat "$pItems" | wc -l | StrTrim)
+	
+	case $nItems in
+		0)	echo "No options in file $pItems"
+			exit 0
+		;;
+		1)	if grep -q ~~ $pItems; then SetSelection `cat $pItems`; fi
+		;;
+		*)	sed -i -e 's,.*/\([^/]*@[^/]*\)/.*,\1,g' "$pItems"
+		;;	# Retain only user@domain strings
+	esac
+	
+	# Initialize
+	#	clear
+	
+	# Default selection
+	iSelItem=`grep -n '~~1' "$pItems" | head -n 1 | word 1 :`
+	iSelItem=${iSelItem:-1}
+	
+	# Main selection loop. Loop until user enters non-integer
+	while isInt $iSelItem; do
+		# Display options
+		DisplayOptions > /dev/stderr
+		
+		# User selection
+		sKeyPress=`ReadKey -n=${#nItems}`
+		
+		# User pressed enter to accept highlighted
+		if [[ -z $sKeyPress ]]; then
+			echo -n $iSelItem > /dev/stderr
+			ProcessSelection
+		elif isInt $sKeyPress; then
+			RefreshLine $iSelItem
+			iSelItem=`MoveHighlight $sKeyPress`
+			ProcessSelection
+		fi
+		
+		RefreshLine $iSelItem
+		iSelItem=`MoveHighlight $sKeyPress`
+		echo > /dev/stderr
+	done
+}
+
+SetParams
+Main

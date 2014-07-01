@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Jun 30 20:36:44 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc-resizer
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+cd $HOME/.vnc
+sRes=`ls -1t *.log | head -n 1`
+pRes="$HOME/.vnc/${sRes/%log/res}"
+if [ ! -e "$pRes" ]; then mkfifo "$pRes"; fi
+
+## Functions
+
+## Main
+
+while ((3<4)); do
+	if [ -e "$pRes" ]; do
+		viRes=`cat "$pRes"`
+		if ! xrandr -s "$viRes"; then
+			XResize $viRes
+		fi
+	done
+	sleep 2
+done

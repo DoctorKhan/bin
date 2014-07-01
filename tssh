@@ -1,0 +1,29 @@
+#!/bin/bash
+
+while (($#>0)); do
+while [[ "$1" == -* ]]; do
+	arg="$1"
+	args="$args $arg"
+	shift
+
+	if [[ "$arg" != *=* ]]; then
+		args="$args $1"
+		shift
+	fi
+done
+host="`ssh-host-trans $1`"; shift
+if isAlive $host; then
+	args="$args $@"
+	break
+else
+	args="$args $host"
+fi
+done
+
+args="${args/ +/ }"
+
+ssh-fix-hosts $host /usr/bin/ssh $args 2> /tmp/errs
+
+		#	if echo $1 | grep -iq ^-.*[bcDeFIiLlmOopRSWw].*; then
+		#	elif [ `echo $1 | grep -ic ^-.*[1246AaCfgKkMNnqsTtVvXxYy].*` -gt 0 ]; then
+

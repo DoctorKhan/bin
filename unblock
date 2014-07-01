@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#
+## Created by khan on Fri May 20 10:38:53 CDT 2011 ##
+#
+
+minargs=0; usage="Usage: $0"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+findblock $@ | \
+while read block; do
+	echo Unblocking $block...
+	sudo iptables -D $block
+done
+
+rm /tmp/rules.txt
+
+echo Complete.
+

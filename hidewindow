@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# == 0 ]; then
+   window=GnoMenu
+else
+   window=$@
+fi
+
+waituntilwindowopen "$window"
+xdotool search --name "$window" windowunmap
+

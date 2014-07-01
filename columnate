@@ -1,0 +1,27 @@
+#!/bin/bash
+
+######################################################
+### Created by khan on Sun Aug 7 15:06:18 CDT 2011 ###
+######################################################
+
+##################### Help Text #####################
+# Usage: columnate <nCols> <file>
+######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+######################################################
+
+
+## Arg handling
+nCols=`echo "$1" | grep -o '[0-9]*'`
+sStyle=`echo "$1" | grep -o '[^0-9]*'`
+
+## Defaults
+nCols=${nCols:-2}
+pFile="${2:-/dev/stdin}"
+
+## Main
+cat "$pFile" | sed -e 's/  */SPACE/'"$nCols" |\
+column -t    | sed -e 's/SPACE/ /g'

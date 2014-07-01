@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sun May 22 12:21:50 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: ZeroPos
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"; echo; exit 0
+fi
+#######################################################
+
+if isMac; then
+	screensize available
+else
+	# Initialize
+	iScr=${@:-`WhichScreen`}
+	pZero="$HOME/.vnc/zeropos.$iScr"
+	
+	if isEmpty $pZero; then
+		SetMaxGeo $iScr
+	fi
+	
+	cat $pZero
+fi

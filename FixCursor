@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ctheme=`gconftool -g /desktop/gnome/peripherals/mouse/cursor_theme`
+cfile=`create $HOME/.icons/default/index.theme`
+
+echo "[Icon Theme]" > $cfile
+echo "Name=$ctheme" >> $cfile
+echo "Comment=blah" >> $cfile
+echo "Example=blah" >> $cfile
+echo "Inherits=$ctheme" >> $cfile
+

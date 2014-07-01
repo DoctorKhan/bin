@@ -1,0 +1,6 @@
+#!/bin/bash
+filename1=`latest $HOME/PDF`
+source="$@"
+target="`fileparts 3 $source`.pdf"
+mv "$HOME/PDF/$filename1" "$target"
+

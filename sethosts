@@ -1,0 +1,33 @@
+#!/bin/bash
+cd ~
+cp /etc/hosts .
+
+if [ $# == 0 ]; then
+	sourcehost=sandstone.irc.utexas.edu
+else
+	sourcehost=$@
+fi
+
+ssh $sourcehost "grep sethosts /etc/hosts" |\
+while read line; do
+	host=`echo $line | awk {'print $2'}`
+	
+	echo -ne "Checking for host $host... "
+	
+	if grep -Eq "[[:space:]]$host[[:space:]]" hosts; then
+		echo "found."
+	else
+		echo "not found. Adding entry."
+		echo "$line" >> hosts
+	fi
+done
+
+nAdded=$((`cat hosts | wc -l` - `cat /etc/hosts | wc -l`))
+echo Added $nAdded entries.
+
+if (( nAdded > 0 )); then
+	sudo cp hosts /etc/
+fi
+
+rm hosts
+

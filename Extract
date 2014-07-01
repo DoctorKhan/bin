@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jul 11 22:56:53 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Extract <query> <file filter>
+#######################################################
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+sFileQuery=${1:-setupParameters.m}
+sFileQuery=/$sFileQuery$
+
+sArchive=${2:-'(\.zip|\.tgz)'}
+
+find `pwd` | grep -E $sArchive | \
+while read pArchive; do
+	file-roller --force -e /tmp/d $pArchive
+	if find /tmp/d | grep -q $sFileQuery; then
+		sFile=`find /tmp/d | grep $sFileQuery | head -n 1`
+		
+		cp $sFile .
+		echo `pwd`/`fileparts 6 $sFile`
+		
+		rm -rf /tmp/d
+		break
+	fi
+	
+	#	rm -rf /tmp/d
+done
+

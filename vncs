@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Mar 20 23:50:31 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vncs <command>
+# Runs vncport on server
+#######################################################
+
+## Defaults
+sCommand=${@:-'--help'}
+
+## Initialize
+server=sandstone
+
+## Functions
+
+## Main
+ssh $server vncport $sCommand

@@ -1,0 +1,70 @@
+#!/bin/bash
+
+function Execute()
+{
+	sLogin=$1; shift
+	sHost=`echo $sLogin | sed -e 's/.*@//g' -e 's/\..*//g'`
+	
+	if uname -a | grep -q $sHost; then
+		eval $@
+	else
+		ssh $sLogin "$@"
+	fi
+}
+
+function GetPort()
+{
+	pPort=`create $HOME/.vnc/$sServerLogin/port`
+	
+	if [ -f "$pPort" ]; then
+		echo $((`cat $pPort`+1))
+	else
+		# Display no. is user id on Server
+		Execute $sServerLogin "id -u";
+	fi
+	sPort=Dynamic
+}
+
+case $# in
+	0)
+		sServerLogin=$USER@sandstone
+		iPort=`GetPort`
+	;;
+	1)
+		if isInt $1; then
+			sServerLogin=$USER@sandstone
+			iPort=$1
+			sPort=Static
+		else
+			sServerLogin=$1
+			iPort=`GetPort`;
+		fi
+		shift
+	;;
+	*)
+		sServerLogin=$1
+		iPort=$2;
+		sPort=Static
+		shift 2
+	;;
+	
+esac
+
+pPort=`create $HOME/.vnc/$sServerLogin/port`
+
+## Start the VNC server
+sServer=`echo $sServerLogin | sed 's/.*@//g'`
+echo Initializing session on display port $iPort on host $sServer...
+pStartVncLog=$HOME/.vnc/startvnc.log
+Execute $sServerLogin "vncserver $@ :$iPort" &> $pStartVncLog
+Execute $sServerLogin "echo $iPort" > .vnc/current
+
+while grep -q "already running" $pStartVncLog && [[ "$sPort" == "Dynamic" ]]; do
+	echo "Session exists on port $iPort."
+	echo "Trying port $((++iPort))..."
+	Execute $sServerLogin "vncserver $@ :$iPort" &> $pStartVncLog
+done
+
+pPort=`create $HOME/.vnc/$sServerLogin/port`
+echo $iPort > $pPort
+echo Session is ready on $sServer:$iPort.

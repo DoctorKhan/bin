@@ -1,0 +1,123 @@
+#!/bin/bash
+#######################################################
+### Created by khan on Fri Mar 30 08:42:30 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: vnc [command]
+# COMMAND	RESULT
+# <none>	connect
+# gui		open gui
+# list		open sessions
+# new		new session
+# kill [n]	kill session n. Defaults to current.
+# current 	current session id
+# Advanced: local, pid, shared, prev, next
+#
+# Usage: tiger <user>@<Host>
+# -s [Width x Height | Full] (Screen Size)
+# -q [0-29] Quality
+# -p [integer] Port
+# -h Host
+# -u User
+# -e (to edit config)
+#######################################################
+if [[ "$1" == *help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+
+## Initialize
+pDir="$HOME/.vnc"
+pLastPort="$pDir/iLastPort"
+sHead="Session User Host Width Height Status Quality Color FullScreen"
+
+. vnc-ssh
+. vnc-auth
+
+## Main
+for sHost in ${@:-`vnc-hosts`}; do
+	ssh $sHost vnc-list >> $pList;
+done
+
+# Show list
+function UpdateSessions()
+{
+	rm $pList
+	for sHost in `vnc-hosts`; do
+		ssh $sHost vnc-list >> $pList;
+	done
+}
+
+function ListSessions()
+{
+	(echo $sHead
+	cat -n $pList | awk '{$2=""; print}') | column -t;
+}
+
+function EditSession()
+{
+	pConfTemp=`mktemp abc.XXXXXX`
+	sConf="$3:$1.cfg"
+	
+	(echo $sHead; echo $@) | column -t > $pConfTemp
+	nano $pConf
+	tail -n 1 $pConf | tr -s '\t ' ' ' > /tmp/$sConf
+	ssh $server "touch .vnc/$sConf"
+	scp /tmp/$sConf $server:.vnc/$sConf
+}
+
+function Execute()
+{
+	sCom=`ssh $server vnc-command $@ | tail -n 1`
+	echo; echo $sCom
+	eval $sCom
+}
+
+function NewSession()
+{
+	($sLogin vncserver 2>&1) | grep ^New | awk '{print $NF}' | sed 's/\(.*\):\(.*\)/\2 '"$USER"' \1 1024 768 Running 8 Auto/' >> $pList
+}
+
+function SelectPort()
+{
+	# Select port
+	ListSessions 1>&2;
+	read -n 1 -t 8 -p "Select Session: " iSession
+	if [ ! -z $iSession ]; then
+		sed "${iSession}p" $pList | awk '{print $1}'
+	fi > $pLastPort
+	cat $pLastPort
+}
+
+### Main
+case `cat $pList | wc -l` in
+	0) NewSession;;
+	1) iPort=${1:-`tail -n 1 $pList | awk '{print $1}'`};;
+	*) iPort=${1:-`SelectPort`};;
+esac
+
+sAction="
+C)onnect	R)estore	S)uspend	T)erminate
+N)ew		E)dit		D)elete		Q)uit
+"
+
+while grep -q "^$iPort " $pList; do
+	sLine=`grep "^$iPort " $pList`
+	echo $sLine
+	
+	# Select action
+	read -n 1 -p "$sAction" iAction
+	
+	case ${iAction:-c} in
+		e) EditSession $sLine ;;
+		t) $sLogin "vnc-kill $iPort" ;;
+		d) $sLogin "vnc-delete $iPort" ;;
+		p) $sLogin "vnc-stop $iPort" ;;
+		u) $sLogin "vnc-cont $iPort"
+		Execute $iPort ; break;;
+		c) Execute $iPort; break ;;
+		q) exit 0 ;;
+	esac
+done
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Sat Oct 20 10:30:35 CDT 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage:  vnc-hosts [command]
+#######################################################
+if (( $# < 0 )) || [[ "$1" == -*h* ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+if (($#==0)); then
+	echo sandstone.irc.utexas.edu
+	echo onyx.irc.utexas.edu
+else
+	for sHost in sandstone.irc.utexas.edu onyx.irc.utexas.edu; do
+		ssh -X $sHost "$@"
+	done
+fi

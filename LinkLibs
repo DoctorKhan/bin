@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Feb 27 15:17:05 CST 2012 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: LinkLibs
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+
+## Functions
+
+## Main
+while ! raw2mat InterThick2.pcd; do 
+	s=`raw2mat InterThick2.pcd 2>&1 | word 3 :`
+	echo $s
+	if [ -e /opt/matlab-2010b/bin/glnxa64/$s ]; then 
+		sudo ln -vs /opt/matlab-2010b/bin/glnxa64/$s /usr/lib/
+	else 
+		break
+	fi
+done
+

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May  9 22:03:04 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: $0"
+if string "^[\-]*h[^ ]*$" is in "$1" || [ "$#" -lt "$minargs" ]
+then echo "Usage: $0"; exit 0; fi
+
+grep -o '"http.*"' *.xhtml | tr -d '"' | while read line
+do
+	wget $line
+done
+

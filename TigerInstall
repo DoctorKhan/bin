@@ -1,0 +1,128 @@
+#!/bin/bash
+
+###################### Help Text ######################
+# Usage: TigerInstall [reinstall
+# <user>@sandstone.irc.utexas.edu
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+if echo $@ | grep -q @; then
+	sHostname=$1
+else
+	sUser=`echo $@ | cut -sd @ -f 1`
+	sHost=`echo $@ | cut  -d @ -f 2`
+	
+	sUser=${sUser:-$USER}
+	sHost=${sHost:-sandstone.irc.utexas.edu}
+	sHostname=$sUser@$sHost
+	
+	sPrompt="If $sHostname is not correct, please type the correct"
+	sHost=${1:-`read -p $sPrompt rout; echo $rout`};
+	sHost=${sHost:-$USER}
+	
+	if ! echo $sHost | grep -q @; then
+		sHost="${sHost}@sandstone.irc.utexas.edu"
+	fi
+fi
+
+export PATH="$HOME/.vnc/support:$PATH"
+hash -r
+
+executable=tiger
+
+if [ ! `which $executable` ]; then ctext="\nInstall complete.\nType: $executable\n"; fi
+if [ ! -d $HOME/.vnc ]; then mkdir $HOME/.vnc; fi
+
+echo "Downloading TigerVNC. May require password for $sHost."
+rsync -uLvrz ${sHost}:/export/data/software/TigerVNC/support $HOME/.vnc/ 2>&1 | tee tiger.log
+
+if egrep -q "Permission denied.*password.*" tiger.log; then exit 1; fi
+
+. ssh-key-setup $sHost
+if [ ! -L /usr/bin/$executable ]; then
+	sudo ln -s $HOME/.vnc/support/$executable /usr/bin/$executable
+fi
+
+function InstallIt()
+{
+	case `uname` in
+		Linux)
+			if $bReinstall || egrep -q tigervnc-viewer.*.deb tiger.log; then
+				debfile=$HOME/.vnc/support/tigervnc-viewer*.deb
+				if ! which gdebi; then
+					sudo apt-get -y install gdebi
+				fi
+				sudo gdebi -n $debfile
+				rm -f tiger.log
+			fi
+		;;
+		Darwin)
+			## Initialize
+			cd ~/Desktop
+			
+			sHost=${1:-`id -un`@sandstone.irc.utexas.edu}
+			sLoc=${2:-/export/data/software/MacDMGs}
+			
+			echo "Downloading TigerVNC. May require password for $sHost."
+			scp ${sHost}:$sLoc/TigerVNC*.dmg .
+			
+			dmgname=`ls -1t TigerVNC*.dmg | head -n 1`
+			# Strip extension
+			base=`echo $dmgname | sed 's/.dmg//g'`
+			
+			# Mount dmg
+			hdiutil attach $dmgname
+			
+			# Install
+			echo Installing TigerVNC, may require user password:
+			
+			cd /Volumes/$base/
+			sudo installer -pkg TigerVNC.pkg -target "/"
+			
+			# Unmount
+			echo Cleaning up...
+			hdiutil detach /Volumes/$base -force
+			
+			# Remove dmg
+			rm -f ~/Desktop/$dmgname
+			
+			# Get support scripts
+			sudo mkdir -p /opt/TigerVNC
+			sudo scp -r ${sHost}:/export/data/software/TigerVNC/support /opt/TigerVNC/
+			sudo chmod a+r,ug+w /opt/TigerVNC/support
+			sudo rm /opt/TigerVNC/support/*~
+			
+			if ! grep -q /opt/TigerVNC/support /etc/bashrc; then
+				echo 'export PATH="/opt/TigerVNC/support:$PATH"' | sudo tee -a /etc/bashrc
+			fi
+			
+			if ! grep -q /opt/TigerVNC/support /etc/csh.cshrc; then
+				echo 'set path=(/opt/TigerVNC/support $path)' | sudo tee -a /etc/csh.cshrc
+			fi
+			
+			sudo ln -s /opt/TigerVNC/bin/vncviewer /usr/bin/vncviewer
+			
+			touch $HOME/.vnc/update
+			
+			echo "Type: tiger <user>@<sHost>"
+		;;
+		*) exit 1 ;;
+	esac
+}
+
+if id | grep -q "(admin)"; then
+	InstallIt
+fi
+
+#cp $0 $HOME/.vnc/support/TigerInstall
+if [ ! -L /usr/local/bin/TigerInstall ]; then
+	sudo ln -s $HOME/.vnc/support/TigerInstall /usr/bin/TigerInstall
+fi
+
+echo "via $sHost" > $HOME/.vnc/last
+touch $HOME/.vnc/update
+
+echo -e $ctext
+

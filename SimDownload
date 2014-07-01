@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Mon May 30 15:23:33 CDT 2011 ##
+#####################################################
+
+minargs=0; usage="Usage: `basename $0`"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+file="$1"
+
+for ii in {1..10000000}; do
+	echo $ii
+	echo 0 >> $file
+done
+

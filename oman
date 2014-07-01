@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Wed Apr 27 21:32:03 CDT 2011 ##
+#####################################################
+
+if [ $# == 0 ]; then echo "Usage: $0 <query> <lynx args>"; exit 0; fi
+
+query=$1; shift
+args=$@
+
+IndexFile=$HOME/.OmanIndex.txt
+if [ ! -f $IndexFile ]; then UpdateOmanIndex $IndexFile; fi
+
+if grep -q ^$query$ $IndexFile; then
+	lynx -notitle $args "http://www.linuxmanpages.com/search.php?term=$query&submitted=1"
+else
+	echo "No man pages found."
+	exit 1
+fi
+

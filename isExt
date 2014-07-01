@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Tue May 31 13:02:06 CDT 2011 ##
+#####################################################
+
+minargs=2; usage="Usage: `basename $0` <extension> <filename>"
+if regmatch "$1" "^[\-]*h[^ ]*$" || [ "$#" -lt "$minargs" ]
+then echo $usage; exit 0; fi
+
+if [[ ${1##*.} != ${2##*.} ]]; then exit 1; fi
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "$2" == "s" ]; then
+	t0=`Seconds`
+	timeout=$1
+	shift 2
+fi
+
+until windowopen "$@"; do
+	sleep .2;
+	t=`Seconds`
+	if [ ! -z $timeout ] && [ `echo "( $t - $t0 ) > $timeout" | bc` == 1 ]; then
+		exit 1
+	fi
+done
+

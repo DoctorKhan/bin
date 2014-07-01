@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Nov 15 21:45:07 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: xmod-save
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+sUser=`id -un`
+sHost=`gethost`
+pFile="/usr/local/bin/xmod-sendmap"
+sSite="http://$sHost:8080"
+
+## Main
+echo "
+1. To download the file `dquote xmod-send`, go to the web site
+
+        $sSite
+   or
+        scp $sUser@$sHost:$pFile .
+
+   in your local terminal.
+
+2. Then open a terminal and run:
+
+        xmod-sendmap $sHost
+"
+echo -n "3. "
+woof -i "$sHost" "$pFile"
+

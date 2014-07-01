@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Jul 19 22:29:39 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: rover
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+vglrun VolumeRover &
+#WaitForWindow -t 1 -w Choose the location of the cache directory -x 'xdotool windowactivate $xId'
+#xdotool type /tmp
+#xdotool key Return
+
+WaitForWindow -w "Volume Rover" -x 'xdotool windowactivate $xId'
+
+for file; do
+	case "`Ext $file`" in
+		.rawiv)
+			xdotool key ctrl+o
+			WaitForWindow -w Open -x 'xdotool windowactivate $xId'
+			xdotool type "$file"
+			xdotool key Return
+		;;
+		.raw)
+			wmctrl -a 'Volume Rover'; xdotool keydown Alt; xdotool keyup Alt; xdotool type gl
+			WaitForWindow -w Select -x 'xdotool windowactivate $xId'
+			xdotool type "$file"
+			xdotool key Return
+		;;
+	esac
+done
+

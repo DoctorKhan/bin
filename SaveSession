@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Jul 25 23:43:29 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: SaveSession
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+sSession=`cat $HOME/.vnc/session`
+sConf="$HOME/.vnc/$sSession.conf"
+SetConf $sConf Width `xSize $1`
+SetConf $sConf Height `ySize $1`
+SetConf $sConf X `xLoc $1`
+SetConf $sConf Y `yLoc $1`

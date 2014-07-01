@@ -1,0 +1,10 @@
+#!/bin/bash
+
+n=`Round $1`; shift
+
+sText=" $@ "
+nText=${#sText}
+nHalf=$(( (n - nText)/2 ))
+sHalf=`RepStr $nHalf \#`
+echo "${sHalf}${sText}${sHalf}"
+

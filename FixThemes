@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#####################################################
+## Created by khan on Thu Apr  7 23:17:00 CDT 2011 ##
+#####################################################
+
+sudo find /usr/share/themes -name gtkrc -exec sed -i 's/panel\-handle/handlebox/g' {} \;
+find $HOME/.themes -name gtkrc -exec sed -i 's/panel\-handle/handlebox/g' {} \;
+

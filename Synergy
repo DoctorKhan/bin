@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Wed Jul 6 12:03:32 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: Synergy
+#######################################################
+#zenity --error
+
+if isHelp 0 $0 "$@"; then exit 0; fi
+
+if At IRC; then synergyc gauss; fi
+if At campus; then synergyc obsidian; fi

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Fri Jul 29 22:25:52 CDT 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: RemoveDupeOpts
+#######################################################
+if (( $# < 0 )) || [[ "$1" == *-h* ]]; then echo
+	grep -A 99999 "# Help.*#*" $0 |\
+	grep -E -m 2 -B 99999 "#{10,}"
+echo; exit 0; fi
+#######################################################
+
+	while read line; do
+		echo $line
+	done >> /tmp/t
+	
+	cat /tmp/t | sort | uniq |\
+	while read item; do
+		grep -n $item /tmp/t | head -n 1
+	done | sort -n | cut -d : -f 2

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $# -lt 1 ] ; then
+	# Open trash can for viewing/restoring
+	kfmclient openURL trash:/ &
+else
+	# Move files to trash:/
+	kfmclient move "$@" trash:/
+fi
+

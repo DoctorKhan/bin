@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while (( 3 < 4 )); do
+	ResetBadApplet "indicator applet " 50
+	ResetBadApplet "nm-applet" 50
+	sleep 300
+done
+

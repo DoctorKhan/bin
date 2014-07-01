@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Tue Nov 22 14:14:01 CST 2011 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: LatestBackup
+
+#######################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+#######################################################
+
+## Initialize
+pCur=`pwd -P`
+
+## Functions
+
+## Main
+cd /export/backup
+cd `latest`
+#cd `ls | grep -v lost | sed 's/20//g' | xargs -I dd date -d dd +%s | sort | tail -n 1 | date -u | word 2,6 | tr -d ' '`
+#cd `ls | sort -n | tail -n 1`
+cd `ls | sort -n | tail -n 1`
+pwd -P
+# e.g. /export/backup/Jan2012/01
