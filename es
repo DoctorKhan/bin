@@ -11,7 +11,7 @@
 ## Initialize
 pFile=
 sPrefix=
-bVi=false
+bVi=true
 sArgs=`echo $@ | sed 's/\<-[^ ]*\>//g'`
 
 if ParseOpt vi $@ >/dev/null; then
