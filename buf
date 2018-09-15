@@ -11,7 +11,7 @@ if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
 sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
 #######################################################
 
-file=f3145.tmp
+file=temporary-file-buf.tmp
 tee $file
 less -r +G $file
 rm $file
