@@ -1,0 +1,20 @@
+#!/bin/bash
+
+##########################################################
+### Created by khan on Fri 09 Apr 2021 03:58:05 PM UTC ###
+##########################################################
+
+####################### Help Text #######################
+# Usage: post_json  
+
+##########################################################
+if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
+sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+##########################################################
+
+## Initialize
+
+## Functions
+
+## Main
+time curl -X PUT --header "Content-Type: application/json" --data '{"private_keys": [{"username": "Cat", "private_rsa": "43asfd"}, {"username": "Dog", "private_rsa": "34234"}]}'
