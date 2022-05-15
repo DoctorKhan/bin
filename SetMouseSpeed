@@ -17,7 +17,7 @@ sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
 
 ## Initialize
 #iDev=${4:-`xinput | sed -n 's/.*TouchPad.*id=\([0-9][0-9]*\).*/\1/p'`}
-iDev=`xinput | grep Touchpad | cut -d= -f2 | awk '{print $1}'`
+iDev=`xinput | grep -i touchpad | cut -d= -f2 | awk '{print $1}'`
 
 ## Main
 SetMouseProp "Velocity Scaling"      $iDev ${1:-35}		# Velocity scaling
