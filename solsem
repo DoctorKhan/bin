@@ -1,0 +1,3 @@
+#!/bin/bash
+SEM_HOME="$HOME/Projects/solana-semgrep"
+semgrep --config "$SEM_HOME/rust" "`pwd`/$@"
