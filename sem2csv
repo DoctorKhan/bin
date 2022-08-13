@@ -1,0 +1,11 @@
+#!/bin/bash
+if (( $# == 1 )); then
+	solana-semgrep --vim > "$1.csv"
+	vim "$1.csv"
+else
+	ls -l | grep ^d | awk '{print $9}' | while read dir; do
+		echo "Scanning $dir..."
+		solana-semgrep --vim "$dir" > "$dir.csv"
+		echo "Wrote $dir.csv"; echo
+	done
+fi 

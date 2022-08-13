@@ -1,4 +1,0 @@
-#!/bin/bash
-SEM_HOME="$HOME/Projects/solana-semgrep"
-semgrep --config "$SEM_HOME/rust" "`pwd`/$@" --vim > "$1.csv"
-vim "$1.csv"
