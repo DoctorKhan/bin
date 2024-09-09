@@ -8,8 +8,11 @@
 # Usage: BeautifyBash <file>
 
 #######################################################
-if (( $# < 0 )) || [[ "$1" == --help ]]; then echo
-sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
+if (($# < 0)) || [[ "$1" == --help ]]; then
+  echo
+  sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"
+  exit 0
+fi
 #######################################################
 
 ## Initialize
@@ -17,6 +20,6 @@ sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"; exit 0; fi
 ## Functions
 
 ## Main
-if head -n 1 "$@" | grep -Eiq '#!/bin/.{0,2}sh\>'; then
-	bbash "$@"
-fi
+#if head -n 1 "$@" | grep -Eiq '#!/bin/.{0,2}sh\>'; then
+#	bbash "$@"
+#fi
