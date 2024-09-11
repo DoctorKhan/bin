@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#######################################################
+### Created by khan on Mon Aug 19 09:40:32 PDT 2024 ###
+#######################################################
+
+###################### Help Text ######################
+# Usage: merge
+
+#######################################################
+if (($# < 0)) || [[ "$1" == --help ]]; then
+  echo
+  sed -n "/^# Usa/,/^##*$/p" $0 | tr -d "#"
+  exit 0
+fi
+#######################################################
+
+## Initialize
+CURRENT=$(git branch --show-current)
+NEXT=${1:-feature}
+
+## Main
+git checkout "$NEXT" && git pull && git merge "$CURRENT" && git push
+git checkout "$CURRENT" && git merge "$NEXT" && git push
