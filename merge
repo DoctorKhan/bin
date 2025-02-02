@@ -5,7 +5,17 @@
 #######################################################
 
 ###################### Help Text ######################
-# Usage: merge
+# Usage: merge [up|down] [branch]
+
+# Example: merge up [feature]
+# This will merge the current branch into the specified branch
+
+# Example: merge down [feature]
+# This will merge the specified branch into the current branch
+
+# Example: merge [feature]
+# This will merge the current branch into the specified branch
+# and then merge the specified branch into the current branch
 
 #######################################################
 if (($# < 0)) || [[ "$1" == --help ]]; then
@@ -16,9 +26,40 @@ fi
 #######################################################
 
 ## Initialize
-CURRENT=$(git branch --show-current)
-NEXT=${1:-feature}
+
+## Functions
+merge_down() {
+  git switch "$2" && git pull && \
+  git switch "$1" && git merge "$2"
+}
+
+merge_up() {
+  git switch "$2" && git pull && \
+  git merge "$1" && git push && \
+  git switch "$1"
+}
 
 ## Main
-git checkout "$NEXT" && git pull && git merge "$CURRENT" && git push
-git checkout "$CURRENT" && git merge "$NEXT" && git push
+
+pull_merge() {
+  CURRENT=$(git branch --show-current)
+  NEXT=${2:-feature}
+  # If the first argument is up or down, then use that as the direction
+  if [[ "$1" == "down" ]]; then
+    merge_down $CURRENT $NEXT
+  elif [[ "$1" == "up" ]]; then
+    merge_up $CURRENT $NEXT
+  else # Otherwise, use both as the direction
+    NEXT=${1:-feature}
+    merge_down $CURRENT $NEXT && \
+    merge_up $CURRENT $NEXT
+  fi
+}
+
+# Fix: Added space before closing bracket in if condition
+if [[ "$1" == "all" ]] || [[ "$1" == "both" ]]; then
+  pull_merge feature
+  pull_merge main
+else
+  pull_merge "$@"
+fi

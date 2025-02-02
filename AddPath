@@ -1,17 +1,90 @@
 #!/bin/bash
 
-bAfter=`tester [ "$1" == "after" ] || [ "$2" == "after" ] `
+# Colors for better output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
 
-# Set current dir as path to add
-if [ $# == 0 ]; then set `pwd`; fi
+# Function to print error messages
+error() {
+    echo -e "${RED}ERROR: $1${NC}" >&2
+    exit 1
+}
 
-path2add="$1"
+# Function to print success messages
+success() {
+    echo -e "${GREEN}SUCCESS: $1${NC}"
+}
 
-if ! echo $PATH | egrep -q "(^|:)$path2add($|:)" ; then
-	if [ "$2" = "after" ] ; then
-		export PATH=$PATH:$path2add
-	else
-		export PATH=$path2add:$PATH
-	fi
+# Function to show usage
+show_usage() {
+    echo -e "${YELLOW}Usage:${NC}"
+    echo "  source AddPath [path] [after] [--help]"
+    echo
+    echo "Arguments:"
+    echo "  path        Directory or path to add to PATH"
+    echo "  after       Add to end of PATH instead of beginning"
+    echo "  --help      Show this help message"
+    echo
+    echo "Examples:"
+    echo "  source AddPath                     # Add current directory to PATH"
+    echo "  source AddPath /some/dir           # Add full path of /some/dir to PATH"
+    echo "  source AddPath /some/dir after     # Add full path of /some/dir to end of PATH"
+    echo "  source AddPath /raw/path           # Add /raw/path directly to PATH"
+    echo
+    echo "Note: Must use 'source' command to modify current shell's PATH"
+}
+
+# Show help if requested
+for arg in "$@"; do
+    if [ "$arg" = "--help" ] || [ "$arg" = "-h" ]; then
+        show_usage
+        return 0 2>/dev/null || exit 0
+    fi
+done
+
+# Check if script is being sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    error "This script must be sourced. Use: source AddPath [path] [after]"
 fi
 
+# Check if "after" flag is present in arguments
+bAfter=false
+for arg in "$@"; do
+    if [ "$arg" = "after" ]; then
+        bAfter=true
+        break
+    fi
+done
+
+# Get the path to add
+if [ $# -eq 0 ]; then
+    # If no arguments, use current directory
+    path2add=$(pwd)
+else
+    # If argument provided, resolve to full path
+    if [ -d "$1" ]; then
+        # If directory exists, get its full path
+        path2add=$(cd "$1" 2>/dev/null && pwd) || error "Cannot resolve path: $1"
+    elif [ "$1" != "after" ]; then
+        # If not "after" flag and not a directory, treat as raw path
+        path2add="$1"
+    fi
+fi
+
+# Validate path2add is not empty
+[ -z "$path2add" ] && error "No valid path specified"
+
+# Check if path already exists in PATH
+if ! echo "$PATH" | grep -E "(^|:)$path2add($|:)" >/dev/null; then
+    if $bAfter; then
+        export PATH="$PATH:$path2add"
+        success "Added '$path2add' to end of PATH"
+    else
+        export PATH="$path2add:$PATH"
+        success "Added '$path2add' to beginning of PATH"
+    fi
+else
+    echo "Path '$path2add' is already in PATH"
+fi
